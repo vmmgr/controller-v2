@@ -1,0 +1,290 @@
+syntax = "proto3";
+
+//import "google/protobuf/timestamp.proto-go";
+//import "google/api/annotations.proto";
+
+service grpc {
+    rpc CreateVM (VMData) returns (Result) {
+    }
+    rpc DeleteVM (VMID) returns (Result) {
+    }
+    rpc StartVM (VMID) returns (Result) {
+    }
+    rpc StopVM (VMID) returns (Result) {
+    }
+    rpc ShutdownVM (VMID) returns (Result) {
+    }
+    rpc ResetVM (VMID) returns (Result) {
+    }
+    rpc PauseVM (VMID) returns (Result) {
+    }
+    rpc ResumeVM (VMID) returns (Result) {
+    }
+    rpc GetSnapshotVM (VMID) returns (stream SnapshotData) {
+    }
+    rpc SnapshotOperationVM (SnapshotOperationData) returns (Result) {
+    }
+    rpc GetVM (VMID) returns (VMData) {
+    }
+    rpc GetVMName (VMName) returns (VMData) {
+    }
+    rpc GetUserVM (Base) returns (stream VMData) {
+    }
+    rpc GetGroupVM (Base) returns (stream VMData) {
+    }
+    rpc GetAllVM (Base) returns (stream VMData) {
+    }
+    rpc AddNode (NodeData) returns (Result) {
+    }
+    rpc GetNode (Base) returns (stream NodeData) {
+    }
+    rpc RemoveNode (NodeID) returns (Result) {
+    }
+    rpc StartNode (NodeID) returns (Result) {
+    }
+    rpc StopNode (NodeID) returns (Result) {
+    }
+    rpc AddImacon (ImaconData) returns (Result) {
+    }
+    rpc GetImacon (Base) returns (stream NodeData) {
+    }
+    rpc RemoveImacon (ImaconData) returns (Result) {
+    }
+    rpc AddUser (UserData) returns (Result) {
+    }
+    rpc RemoveUser (UserData) returns (Result) {
+    }
+    rpc GetUser (UserData) returns (stream UserData) {
+    }
+    rpc TestUserPass (UserData) returns (Result) {
+    }
+    rpc ChangeUserPass (UserData) returns (Result) {
+    }
+    rpc ChangeUserName (UserData) returns (Result) {
+    }
+    rpc AddGroup (GroupData) returns (Result) {
+    }
+    rpc RemoveGroup (GroupData) returns (Result) {
+    }
+    rpc GetGroup (GroupData) returns (stream GroupData) {
+    }
+    rpc UserAddGroup (GroupData) returns (Result) {
+    }
+    rpc UserRemoveGroup (GroupData) returns (Result) {
+    }
+    rpc GenerateToken (Base) returns (AuthResult) {
+    }
+    rpc DeleteToken (Base) returns (Result) {
+    }
+    rpc GetAllToken (Base) returns (stream TokenData) {
+    }
+    rpc GetToken (Base) returns (TokenData) {
+    }
+    rpc CheckToken (Base) returns (Result) {
+    }
+    rpc GetAllImage (Base) returns (stream ImageData) {
+    }
+    rpc UploadImage (ImageTransferData) returns (ImageResult) {
+    }
+    rpc DownloadImage (ImageTransferData) returns (ImageResult) {
+    }
+    rpc ExistImage (ImageData) returns (ImageResult) {
+    }
+    rpc ProgressImage (ImageData) returns (ImageResult) {
+    }
+    rpc GetAllProgressImage (Base) returns (stream ImageResult) {
+    }
+    rpc AddImage (ImageData) returns (ImageResult) {
+    }
+    rpc DeleteImage (ImageData) returns (ImageResult) {
+    }
+    rpc ChangeNameImage (ImageData) returns (ImageResult) {
+    }
+    rpc ChangeTagImage (ImageData) returns (ImageResult) {
+    }
+}
+
+message Null {
+}
+
+message Base {
+    string user = 1;
+    string pass = 2;
+    string group = 3;
+    string token = 4;
+    bool result = 5;
+    int32 userid = 6;
+    int32 groupid = 7;
+    bool isadmin = 8;
+}
+
+message AuthResult {
+    string token = 1;
+    string name = 2;
+    int32 id = 3;
+    bool result = 4;
+}
+
+message ImageResult {
+    int32 percent = 1;
+    bool result = 2;
+    string info = 3;
+    string uuid = 4;
+    string path = 5;
+}
+
+message ImageTransferData {
+    string ip = 1;
+    string port = 2;
+    string path = 3; //remote path
+    ImageData image = 4;
+}
+
+message ImageData {
+    int32 id = 1;
+    string path = 2;
+    string name = 3;
+    string tag = 4;
+    int32 type = 5;
+    int64 capacity = 6;
+    int64 addtime = 7;
+    int32 minmem = 8;
+    int32 authority = 9;
+    string filename = 10;
+    string uuid = 11;
+    Base base = 12;
+    int32 imaconid = 13;
+    string raddr = 14;
+}
+
+message TokenData {
+    int64 id = 1;
+    string token = 2;
+    int32 userid = 3;
+    string groupid = 4;
+    int64 begintime = 5;
+    int64 endtime = 6;
+}
+
+message VMData {
+    Base base = 1;
+    int32 node = 2;
+    string vmname = 3;
+    int64 vcpu = 4;
+    int64 vmem = 5;
+    int32 type = 6; //0: custom 1: Normal Disk 2: SSD 3: NVMe 4: iSCSI
+    string storage = 7;
+    string cdrom = 8;
+    string vnet = 9;
+    Option option = 10;
+    Image image = 11;
+}
+
+message Option {
+    string storage_path = 1;
+    string cdrom_path = 2;
+    int32 image = 3;
+    int32 vnc = 4;
+    string vncurl = 5;
+    int64 id = 6;
+    bool autostart = 7;
+    int32 status = 8;
+}
+
+message Image {
+    string name = 1;
+    string tag = 2;
+    string path = 3;
+}
+
+message SnapshotOperationData {
+    Base base = 1;
+    int64 vmid = 2;
+    int32 operation = 3; //0: Create ,1: Load ,2: Delete
+    string tag = 4;
+}
+
+message SnapshotData {
+    int64 id = 1;
+    string tag = 2;
+    string size = 3;
+    string date = 4;
+    string vmclock = 5;
+}
+
+message VMName {
+    Base base = 1;
+    string vmname = 2;
+}
+
+message VMDataResponse {
+    repeated VMData VMDatas = 1;
+}
+
+message VMID {
+    Base base = 1;
+    int64 id = 2;
+}
+
+
+message Result {
+    bool status = 1;
+    string info = 2;
+    int32 id = 3;
+}
+
+message NodeID {
+    Base base = 1;
+    int32 NodeID = 2;
+}
+
+message NodeData {
+    Base base = 1;
+    int32 NodeID = 2;
+    string hostname = 3;
+    string IP = 4;
+    string path = 5;
+    bool onlyAdmin = 6;
+    int32 status = 7;
+    bool enable = 8;
+    SpecData sepc = 9;
+}
+
+message ImaconData {
+    Base base = 1;
+    int32 id = 2;
+    string hostname = 3;
+    string IP = 4;
+    int32 status = 5;
+}
+
+message UserData {
+    Base base = 1;
+    int64 id = 2;
+    string user = 3;
+    string pass = 4;
+    int32 mode = 5;
+    string token = 6;
+    SpecData sepc = 7;
+}
+
+//Get : mode0 <-All mode1 <- Select mode2 <- MyGroup
+//Join: mode0 <- Admin mode1 <- User
+message GroupData {
+    Base base = 1;
+    int32 id = 2;
+    string name = 3;
+    string admin = 4;
+    string user = 5;
+    int32 mode = 6;
+    bool team = 7;
+    SpecData sepc = 8;
+}
+
+message SpecData {
+    int32 maxvm = 1;
+    int32 maxcpu = 2;
+    int32 maxmem = 3;
+    int32 maxstorage = 4;
+    string net = 5;
+}
