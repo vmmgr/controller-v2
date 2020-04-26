@@ -1,164 +1,47 @@
 package db
 
-import (
-	"database/sql"
-	"fmt"
-	"github.com/vmmgr/controller/etc"
-)
+import "log"
 
-//groupdata
 func AddDBGroup(data Group) bool {
-	db := connectdb()
+	db := InitDB()
 	defer db.Close()
-
-	addDb, err := db.Prepare(`INSERT INTO "groupdata" ("name","admin","user","uuid","maxvm","maxcpu","maxmem","maxstorage","net") VALUES (?,?,?,?,?,?,?,?,?)`)
-	if err != nil {
-		fmt.Println(err)
+	db.Create(&data)
+	log.Println(db.Create(&data))
+	if err := db.Error; err != nil {
+		db.Rollback()
 		return false
+	} else {
+		return true
 	}
+}
 
-	if _, err := addDb.Exec(data.Name, data.Admin, data.User, etc.GenerateToken(), data.MaxVM, data.MaxCPU, data.MaxMem, data.MaxStorage, data.Net); err != nil {
-		fmt.Println(err)
+func DeleteDBGroup(data Group) bool {
+	db := InitDB()
+	defer db.Close()
+	db.Delete(&data)
+	if err := db.Error; err != nil {
+		db.Rollback()
 		return false
-	}
-
-	return true
-}
-
-func RemoveDBGroup(id int) bool {
-	db := connectdb()
-	defer db.Close()
-
-	deletedb := "DELETE FROM groupdata WHERE id = ?"
-	_, err := db.Exec(deletedb, id)
-	if err != nil {
-		fmt.Println(err)
-		return false
-	}
-	return true
-}
-
-func GetDBAllGroup() []Group {
-	db := *connectdb()
-	defer db.Close()
-
-	rows, err := db.Query("SELECT * FROM groupdata")
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer rows.Close()
-
-	var bg []Group
-	for rows.Next() {
-		var b Group
-		err := rows.Scan(&b.ID, &b.Name, &b.Admin, &b.User, &b.UUID, &b.MaxVM, &b.MaxCPU, &b.MaxMem, &b.MaxStorage, &b.Net)
-		if err != nil {
-			fmt.Println(err)
-		}
-		bg = append(bg, b)
-	}
-	return bg
-}
-
-func GetDBGroupToken(uuid string) (Group, bool) {
-	db := connectdb()
-	defer db.Close()
-
-	rows := db.QueryRow("SELECT * FROM groupdata WHERE uuid = ?", uuid)
-
-	var b Group
-	err := rows.Scan(&b.ID, &b.Name, &b.Admin, &b.User, &b.UUID, &b.MaxVM, &b.MaxCPU, &b.MaxMem, &b.MaxStorage, &b.Net)
-
-	switch {
-	case err == sql.ErrNoRows:
-		fmt.Printf("Not found")
-		return b, false
-	case err != nil:
-		fmt.Println(err)
-		fmt.Println("Error: DBError")
-		return b, false
-	default:
-		return b, true
+	} else {
+		return true
 	}
 }
 
-func GetDBGroup(id int) (Group, bool) {
-	db := connectdb()
+func GetAllDBGroup() []Group {
+	db := InitDB()
 	defer db.Close()
 
-	rows := db.QueryRow("SELECT * FROM groupdata WHERE id = ?", id)
-
-	var b Group
-	err := rows.Scan(&b.ID, &b.Name, &b.Admin, &b.User, &b.UUID, &b.MaxVM, &b.MaxCPU, &b.MaxMem, &b.MaxStorage, &b.Net)
-
-	switch {
-	case err == sql.ErrNoRows:
-		fmt.Printf("Not found")
-		return b, false
-	case err != nil:
-		fmt.Println(err)
-		fmt.Println("Error: DBError")
-		return b, false
-	default:
-		return b, true
-	}
+	var group []Group
+	db.Find(&group)
+	return group
 }
 
-func GetDBGroupID(name string) (int, bool) {
-	db := connectdb()
+func SearchDBGroup(data Group) Group {
+	db := InitDB()
 	defer db.Close()
 
-	var id int
-	if err := db.QueryRow("SELECT id FROM groupdata WHERE name = ?", name).Scan(&id); err != nil {
-		fmt.Println(err)
-		return -1, false
-	}
+	var result Group
+	db.Where("name = ?", data.Name).First(&result)
 
-	return id, true
-
-}
-
-func ChangeDBGroupName(id int, data string) bool {
-	db := connectdb()
-	defer db.Close()
-
-	dbdata := "UPDATE groupdata SET name = ? WHERE id = ?"
-	_, err := db.Exec(dbdata, data, id)
-
-	if err != nil {
-		fmt.Println("Error: DBUpdate Error (Group Name)")
-		return false
-	}
-
-	return true
-}
-
-func ChangeDBGroupAdmin(id int, data string) bool {
-	db := connectdb()
-	defer db.Close()
-
-	dbdata := "UPDATE groupdata SET admin = ? WHERE id = ?"
-	_, err := db.Exec(dbdata, data, id)
-
-	if err != nil {
-		fmt.Println("Error: DBUpdate Error (Group Admin)")
-		return false
-	}
-
-	return true
-}
-
-func ChangeDBGroupUser(id int, data string) bool {
-	db := connectdb()
-	defer db.Close()
-
-	dbdata := "UPDATE groupdata SET user = ? WHERE id = ?"
-	_, err := db.Exec(dbdata, data, id)
-
-	if err != nil {
-		fmt.Println("Error: DBUpdate Error (Group User)")
-		return false
-	}
-
-	return true
+	return result
 }
