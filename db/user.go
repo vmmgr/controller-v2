@@ -2,6 +2,7 @@ package db
 
 import "log"
 
+//Add
 func AddDBUser(data User) bool {
 	db := InitDB()
 	defer db.Close()
@@ -15,6 +16,7 @@ func AddDBUser(data User) bool {
 	}
 }
 
+//Delete
 func DeleteDBUser(data User) bool {
 	db := InitDB()
 	defer db.Close()
@@ -28,6 +30,21 @@ func DeleteDBUser(data User) bool {
 	}
 }
 
+//Update
+func UpdateDBUser(data User) bool {
+	db := InitDB()
+	defer db.Close()
+	db.Model(&data).Updates(User{Name: data.Name, Pass: data.Pass, AdminGroup: data.AdminGroup, UserGroup: data.UserGroup})
+
+	if err := db.Error; err != nil {
+		db.Rollback()
+		return false
+	} else {
+		return true
+	}
+}
+
+//Get
 func GetAllDBUser() []User {
 	db := InitDB()
 	defer db.Close()

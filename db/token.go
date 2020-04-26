@@ -1,5 +1,6 @@
 package db
 
+//Add
 func AddToken(token Token) bool {
 	db := InitDB()
 	defer db.Close()
@@ -13,6 +14,7 @@ func AddToken(token Token) bool {
 	}
 }
 
+//Delete
 func DeleteToken(token Token) bool {
 	db := InitDB()
 	defer db.Close()
@@ -26,6 +28,21 @@ func DeleteToken(token Token) bool {
 	}
 }
 
+//Update
+func UpdateDBToken(data Token) bool {
+	db := InitDB()
+	defer db.Close()
+	db.Model(&data).Updates(Token{Token: data.Token})
+
+	if err := db.Error; err != nil {
+		db.Rollback()
+		return false
+	} else {
+		return true
+	}
+}
+
+//Get
 func GetAllDBToken() []Token {
 	db := InitDB()
 	defer db.Close()

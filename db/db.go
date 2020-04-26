@@ -44,13 +44,13 @@ type User struct {
 }
 
 type Group struct {
-	ID        string `gorm:primary_key`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Name      string
-	AdminUser []User `gorm:"many2many:users_admingroups"`
-	UserUser  []User `gorm:"many2many:users_usergroups"`
-	Private   bool   `gorm:"default":true`
+	ID           string `gorm:primary_key`
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+	Name         string
+	AdminUser    []User `gorm:"many2many:users_admingroups"`
+	StandardUser []User `gorm:"many2many:users_usergroups"`
+	Private      bool   `gorm:"default":true`
 	//MaxVM      int    `gorm:"default":2`
 	//MaxCPU     int    `gorm:"default":4`
 	//MaxMem     int    `gorm:"default":4096`
@@ -89,7 +89,7 @@ func initSQLite3() *gorm.DB {
 	if err != nil {
 		log.Println("SQL open error")
 	}
-	db.LogMode(true)
+	//db.LogMode(true)
 	db.AutoMigrate(&User{}, &Group{}, &Token{})
 
 	return db
@@ -100,7 +100,7 @@ func initMySQL() *gorm.DB {
 	if err != nil {
 		log.Println("SQL open error")
 	}
-	db.LogMode(true)
+	//db.LogMode(true)
 	db.AutoMigrate(&User{}, &Group{}, &Token{})
 
 	return db
