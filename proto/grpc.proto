@@ -26,9 +26,11 @@ service Controller {
   }
   rpc UpdateGroup (GroupData) returns (Result){
   }
+  rpc JoinGroup (GroupData) returns (Result){
+  }
   rpc DeleteGroup (GroupData) returns (Result){
   }
-  rpc GetGroup (GroupData) returns (GroupData){
+  rpc GetGroup (GroupData) returns (stream GroupData){
   }
   rpc GetAllGroup (Null) returns (stream GroupData){
   }
@@ -67,7 +69,7 @@ message TokenData {
 
 //Add : mode0 <- Administrator | mode1 <- User | mode2 <- Team
 //Get : mode0 <-All | mode1 <- Select | mode2 <- MyGroup
-//Join: mode0 <- Admin | mode1 <- User
+//Join: mode0 <- Add | mode1 <- Delete
 message GroupData {
   string id = 1;
   string name = 2;

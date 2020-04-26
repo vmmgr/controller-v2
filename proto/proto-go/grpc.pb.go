@@ -528,7 +528,7 @@ var file_grpc_proto_rawDesc = []byte{
 	0x05, 0x52, 0x03, 0x6d, 0x65, 0x6d, 0x12, 0x18, 0x0a, 0x07, 0x73, 0x74, 0x6f, 0x72, 0x61, 0x67,
 	0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x03, 0x52, 0x07, 0x73, 0x74, 0x6f, 0x72, 0x61, 0x67, 0x65,
 	0x12, 0x10, 0x0a, 0x03, 0x6e, 0x65, 0x74, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6e,
-	0x65, 0x74, 0x32, 0x88, 0x04, 0x0a, 0x0a, 0x43, 0x6f, 0x6e, 0x74, 0x72, 0x6f, 0x6c, 0x6c, 0x65,
+	0x65, 0x74, 0x32, 0xae, 0x04, 0x0a, 0x0a, 0x43, 0x6f, 0x6e, 0x74, 0x72, 0x6f, 0x6c, 0x6c, 0x65,
 	0x72, 0x12, 0x25, 0x0a, 0x0d, 0x47, 0x65, 0x6e, 0x65, 0x72, 0x61, 0x74, 0x65, 0x54, 0x6f, 0x6b,
 	0x65, 0x6e, 0x12, 0x09, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x44, 0x61, 0x74, 0x61, 0x1a, 0x07, 0x2e,
 	0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x22, 0x00, 0x12, 0x1f, 0x0a, 0x0b, 0x44, 0x65, 0x6c, 0x65,
@@ -553,15 +553,17 @@ var file_grpc_proto_rawDesc = []byte{
 	0x2e, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x44, 0x61, 0x74, 0x61, 0x1a, 0x07, 0x2e, 0x52, 0x65, 0x73,
 	0x75, 0x6c, 0x74, 0x22, 0x00, 0x12, 0x24, 0x0a, 0x0b, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x47,
 	0x72, 0x6f, 0x75, 0x70, 0x12, 0x0a, 0x2e, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x44, 0x61, 0x74, 0x61,
-	0x1a, 0x07, 0x2e, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x22, 0x00, 0x12, 0x24, 0x0a, 0x0b, 0x44,
-	0x65, 0x6c, 0x65, 0x74, 0x65, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x12, 0x0a, 0x2e, 0x47, 0x72, 0x6f,
-	0x75, 0x70, 0x44, 0x61, 0x74, 0x61, 0x1a, 0x07, 0x2e, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x22,
-	0x00, 0x12, 0x24, 0x0a, 0x08, 0x47, 0x65, 0x74, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x12, 0x0a, 0x2e,
-	0x47, 0x72, 0x6f, 0x75, 0x70, 0x44, 0x61, 0x74, 0x61, 0x1a, 0x0a, 0x2e, 0x47, 0x72, 0x6f, 0x75,
-	0x70, 0x44, 0x61, 0x74, 0x61, 0x22, 0x00, 0x12, 0x24, 0x0a, 0x0b, 0x47, 0x65, 0x74, 0x41, 0x6c,
-	0x6c, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x12, 0x05, 0x2e, 0x4e, 0x75, 0x6c, 0x6c, 0x1a, 0x0a, 0x2e,
-	0x47, 0x72, 0x6f, 0x75, 0x70, 0x44, 0x61, 0x74, 0x61, 0x22, 0x00, 0x30, 0x01, 0x62, 0x06, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x1a, 0x07, 0x2e, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x22, 0x00, 0x12, 0x22, 0x0a, 0x09, 0x4a,
+	0x6f, 0x69, 0x6e, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x12, 0x0a, 0x2e, 0x47, 0x72, 0x6f, 0x75, 0x70,
+	0x44, 0x61, 0x74, 0x61, 0x1a, 0x07, 0x2e, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x22, 0x00, 0x12,
+	0x24, 0x0a, 0x0b, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x12, 0x0a,
+	0x2e, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x44, 0x61, 0x74, 0x61, 0x1a, 0x07, 0x2e, 0x52, 0x65, 0x73,
+	0x75, 0x6c, 0x74, 0x22, 0x00, 0x12, 0x26, 0x0a, 0x08, 0x47, 0x65, 0x74, 0x47, 0x72, 0x6f, 0x75,
+	0x70, 0x12, 0x0a, 0x2e, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x44, 0x61, 0x74, 0x61, 0x1a, 0x0a, 0x2e,
+	0x47, 0x72, 0x6f, 0x75, 0x70, 0x44, 0x61, 0x74, 0x61, 0x22, 0x00, 0x30, 0x01, 0x12, 0x24, 0x0a,
+	0x0b, 0x47, 0x65, 0x74, 0x41, 0x6c, 0x6c, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x12, 0x05, 0x2e, 0x4e,
+	0x75, 0x6c, 0x6c, 0x1a, 0x0a, 0x2e, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x44, 0x61, 0x74, 0x61, 0x22,
+	0x00, 0x30, 0x01, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -598,25 +600,27 @@ var file_grpc_proto_depIdxs = []int32{
 	0,  // 9: Controller.GetAllUser:input_type -> Null
 	4,  // 10: Controller.AddGroup:input_type -> GroupData
 	4,  // 11: Controller.UpdateGroup:input_type -> GroupData
-	4,  // 12: Controller.DeleteGroup:input_type -> GroupData
-	4,  // 13: Controller.GetGroup:input_type -> GroupData
-	0,  // 14: Controller.GetAllGroup:input_type -> Null
-	2,  // 15: Controller.GenerateToken:output_type -> Result
-	2,  // 16: Controller.DeleteToken:output_type -> Result
-	2,  // 17: Controller.GetToken:output_type -> Result
-	3,  // 18: Controller.GetAllToken:output_type -> TokenData
-	2,  // 19: Controller.AddUser:output_type -> Result
-	2,  // 20: Controller.UpdateUser:output_type -> Result
-	2,  // 21: Controller.DeleteUser:output_type -> Result
-	1,  // 22: Controller.GetUser:output_type -> UserData
-	1,  // 23: Controller.GetAllUser:output_type -> UserData
-	2,  // 24: Controller.AddGroup:output_type -> Result
-	2,  // 25: Controller.UpdateGroup:output_type -> Result
-	2,  // 26: Controller.DeleteGroup:output_type -> Result
-	4,  // 27: Controller.GetGroup:output_type -> GroupData
-	4,  // 28: Controller.GetAllGroup:output_type -> GroupData
-	15, // [15:29] is the sub-list for method output_type
-	1,  // [1:15] is the sub-list for method input_type
+	4,  // 12: Controller.JoinGroup:input_type -> GroupData
+	4,  // 13: Controller.DeleteGroup:input_type -> GroupData
+	4,  // 14: Controller.GetGroup:input_type -> GroupData
+	0,  // 15: Controller.GetAllGroup:input_type -> Null
+	2,  // 16: Controller.GenerateToken:output_type -> Result
+	2,  // 17: Controller.DeleteToken:output_type -> Result
+	2,  // 18: Controller.GetToken:output_type -> Result
+	3,  // 19: Controller.GetAllToken:output_type -> TokenData
+	2,  // 20: Controller.AddUser:output_type -> Result
+	2,  // 21: Controller.UpdateUser:output_type -> Result
+	2,  // 22: Controller.DeleteUser:output_type -> Result
+	1,  // 23: Controller.GetUser:output_type -> UserData
+	1,  // 24: Controller.GetAllUser:output_type -> UserData
+	2,  // 25: Controller.AddGroup:output_type -> Result
+	2,  // 26: Controller.UpdateGroup:output_type -> Result
+	2,  // 27: Controller.JoinGroup:output_type -> Result
+	2,  // 28: Controller.DeleteGroup:output_type -> Result
+	4,  // 29: Controller.GetGroup:output_type -> GroupData
+	4,  // 30: Controller.GetAllGroup:output_type -> GroupData
+	16, // [16:31] is the sub-list for method output_type
+	1,  // [1:16] is the sub-list for method input_type
 	1,  // [1:1] is the sub-list for extension type_name
 	1,  // [1:1] is the sub-list for extension extendee
 	0,  // [0:1] is the sub-list for field type_name
@@ -744,8 +748,9 @@ type ControllerClient interface {
 	GetAllUser(ctx context.Context, in *Null, opts ...grpc.CallOption) (Controller_GetAllUserClient, error)
 	AddGroup(ctx context.Context, in *GroupData, opts ...grpc.CallOption) (*Result, error)
 	UpdateGroup(ctx context.Context, in *GroupData, opts ...grpc.CallOption) (*Result, error)
+	JoinGroup(ctx context.Context, in *GroupData, opts ...grpc.CallOption) (*Result, error)
 	DeleteGroup(ctx context.Context, in *GroupData, opts ...grpc.CallOption) (*Result, error)
-	GetGroup(ctx context.Context, in *GroupData, opts ...grpc.CallOption) (*GroupData, error)
+	GetGroup(ctx context.Context, in *GroupData, opts ...grpc.CallOption) (Controller_GetGroupClient, error)
 	GetAllGroup(ctx context.Context, in *Null, opts ...grpc.CallOption) (Controller_GetAllGroupClient, error)
 }
 
@@ -902,6 +907,15 @@ func (c *controllerClient) UpdateGroup(ctx context.Context, in *GroupData, opts 
 	return out, nil
 }
 
+func (c *controllerClient) JoinGroup(ctx context.Context, in *GroupData, opts ...grpc.CallOption) (*Result, error) {
+	out := new(Result)
+	err := c.cc.Invoke(ctx, "/Controller/JoinGroup", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *controllerClient) DeleteGroup(ctx context.Context, in *GroupData, opts ...grpc.CallOption) (*Result, error) {
 	out := new(Result)
 	err := c.cc.Invoke(ctx, "/Controller/DeleteGroup", in, out, opts...)
@@ -911,17 +925,40 @@ func (c *controllerClient) DeleteGroup(ctx context.Context, in *GroupData, opts 
 	return out, nil
 }
 
-func (c *controllerClient) GetGroup(ctx context.Context, in *GroupData, opts ...grpc.CallOption) (*GroupData, error) {
-	out := new(GroupData)
-	err := c.cc.Invoke(ctx, "/Controller/GetGroup", in, out, opts...)
+func (c *controllerClient) GetGroup(ctx context.Context, in *GroupData, opts ...grpc.CallOption) (Controller_GetGroupClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_Controller_serviceDesc.Streams[2], "/Controller/GetGroup", opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &controllerGetGroupClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Controller_GetGroupClient interface {
+	Recv() (*GroupData, error)
+	grpc.ClientStream
+}
+
+type controllerGetGroupClient struct {
+	grpc.ClientStream
+}
+
+func (x *controllerGetGroupClient) Recv() (*GroupData, error) {
+	m := new(GroupData)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func (c *controllerClient) GetAllGroup(ctx context.Context, in *Null, opts ...grpc.CallOption) (Controller_GetAllGroupClient, error) {
-	stream, err := c.cc.NewStream(ctx, &_Controller_serviceDesc.Streams[2], "/Controller/GetAllGroup", opts...)
+	stream, err := c.cc.NewStream(ctx, &_Controller_serviceDesc.Streams[3], "/Controller/GetAllGroup", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -965,8 +1002,9 @@ type ControllerServer interface {
 	GetAllUser(*Null, Controller_GetAllUserServer) error
 	AddGroup(context.Context, *GroupData) (*Result, error)
 	UpdateGroup(context.Context, *GroupData) (*Result, error)
+	JoinGroup(context.Context, *GroupData) (*Result, error)
 	DeleteGroup(context.Context, *GroupData) (*Result, error)
-	GetGroup(context.Context, *GroupData) (*GroupData, error)
+	GetGroup(*GroupData, Controller_GetGroupServer) error
 	GetAllGroup(*Null, Controller_GetAllGroupServer) error
 }
 
@@ -1007,11 +1045,14 @@ func (*UnimplementedControllerServer) AddGroup(context.Context, *GroupData) (*Re
 func (*UnimplementedControllerServer) UpdateGroup(context.Context, *GroupData) (*Result, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateGroup not implemented")
 }
+func (*UnimplementedControllerServer) JoinGroup(context.Context, *GroupData) (*Result, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method JoinGroup not implemented")
+}
 func (*UnimplementedControllerServer) DeleteGroup(context.Context, *GroupData) (*Result, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteGroup not implemented")
 }
-func (*UnimplementedControllerServer) GetGroup(context.Context, *GroupData) (*GroupData, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetGroup not implemented")
+func (*UnimplementedControllerServer) GetGroup(*GroupData, Controller_GetGroupServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetGroup not implemented")
 }
 func (*UnimplementedControllerServer) GetAllGroup(*Null, Controller_GetAllGroupServer) error {
 	return status.Errorf(codes.Unimplemented, "method GetAllGroup not implemented")
@@ -1225,6 +1266,24 @@ func _Controller_UpdateGroup_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Controller_JoinGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GroupData)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).JoinGroup(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Controller/JoinGroup",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).JoinGroup(ctx, req.(*GroupData))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Controller_DeleteGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GroupData)
 	if err := dec(in); err != nil {
@@ -1243,22 +1302,25 @@ func _Controller_DeleteGroup_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Controller_GetGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GroupData)
-	if err := dec(in); err != nil {
-		return nil, err
+func _Controller_GetGroup_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(GroupData)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
 	}
-	if interceptor == nil {
-		return srv.(ControllerServer).GetGroup(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/Controller/GetGroup",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ControllerServer).GetGroup(ctx, req.(*GroupData))
-	}
-	return interceptor(ctx, in, info, handler)
+	return srv.(ControllerServer).GetGroup(m, &controllerGetGroupServer{stream})
+}
+
+type Controller_GetGroupServer interface {
+	Send(*GroupData) error
+	grpc.ServerStream
+}
+
+type controllerGetGroupServer struct {
+	grpc.ServerStream
+}
+
+func (x *controllerGetGroupServer) Send(m *GroupData) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 func _Controller_GetAllGroup_Handler(srv interface{}, stream grpc.ServerStream) error {
@@ -1323,12 +1385,12 @@ var _Controller_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Controller_UpdateGroup_Handler,
 		},
 		{
-			MethodName: "DeleteGroup",
-			Handler:    _Controller_DeleteGroup_Handler,
+			MethodName: "JoinGroup",
+			Handler:    _Controller_JoinGroup_Handler,
 		},
 		{
-			MethodName: "GetGroup",
-			Handler:    _Controller_GetGroup_Handler,
+			MethodName: "DeleteGroup",
+			Handler:    _Controller_DeleteGroup_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
@@ -1340,6 +1402,11 @@ var _Controller_serviceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "GetAllUser",
 			Handler:       _Controller_GetAllUser_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "GetGroup",
+			Handler:       _Controller_GetGroup_Handler,
 			ServerStreams: true,
 		},
 		{
