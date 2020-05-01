@@ -7,11 +7,6 @@ import (
 	"time"
 )
 
-type Database struct {
-	DB     *gorm.DB
-	TestDB *gorm.DB
-}
-
 const DBPath = "./controller.db"
 
 type Node struct {
@@ -33,42 +28,46 @@ type ImaCon struct {
 }
 
 type User struct {
-	ID         string `gorm:primary_key`
-	CreatedAt  time.Time
-	UpdatedAt  time.Time
-	Name       string
-	Pass       string
-	Auth       int
-	AdminGroup []Group `gorm:"many2many:users_admingroups"`
-	UserGroup  []Group `gorm:"many2many:users_usergroups"`
+	ID        int `gorm:primary_key`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	Name      string
+	Pass      string
+	Auth      int
+	//Admin      string
+	//User       string
+	//AdminGroup []Group `gorm:"foreignkey:ID"`
+	//UserGroup  []Group `gorm:"foreignkey:ID"`
+	AdminGroup []*Group `gorm:"many2many:adminusergroups;"`
+	UserGroup  []*Group `gorm:"many2many:standardusergroups;"`
 }
 
 type Group struct {
-	ID           string `gorm:primary_key`
+	ID           int `gorm:primary_key`
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 	Name         string
-	AdminUser    []User `gorm:"many2many:users_admingroups"`
-	StandardUser []User `gorm:"many2many:users_usergroups"`
-	Private      bool   `gorm:"default":true`
-	//MaxVM      int    `gorm:"default":2`
-	//MaxCPU     int    `gorm:"default":4`
-	//MaxMem     int    `gorm:"default":4096`
-	//MaxStorage int
-	//Net        string
+	Private      bool
+	AdminUser    []*User `gorm:"many2many:adminusergroups;"`
+	StandardUser []*User `gorm:"many2many:standardusergroups;"`
+	MaxVM        int
+	MaxCPU       int
+	MaxMem       int
+	MaxStorage   int
+	//Net          []Net `gorm:"many2many:netgroup"`
 }
 
 type Net struct {
 	gorm.Model
 	Name   string
 	Bridge string
+	VLAN   int
 }
 
 type Token struct {
-	gorm.Model
-	Token     string
-	UserID    string
-	User      int `gorm:"foreignkey:ID;association_foreignkey:UserID"`
+	ID        int    `gorm:primary_key`
+	Token     string `gorm:primary_key`
+	UserID    int
 	Begintime time.Time
 	Endtime   time.Time
 }
@@ -78,6 +77,15 @@ type Progress struct {
 	VMName    string
 	UUID      string
 	StartTime int
+}
+
+func InitCreateDB() {
+	db := InitDB()
+	defer db.Close()
+	//Create db tables
+	//db.CreateTable(&User{})
+	//db.CreateTable(&Group{})
+	//db.CreateTable(&Token{})
 }
 
 func InitDB() *gorm.DB {
@@ -90,7 +98,11 @@ func initSQLite3() *gorm.DB {
 		log.Println("SQL open error")
 	}
 	//db.LogMode(true)
-	db.AutoMigrate(&User{}, &Group{}, &Token{})
+	db.SingularTable(true)
+
+	db.AutoMigrate(&User{})
+	db.AutoMigrate(&Group{})
+	db.AutoMigrate(&Token{})
 
 	return db
 }

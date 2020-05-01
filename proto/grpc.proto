@@ -40,7 +40,7 @@ message Null {
 }
 
 message UserData {
-  string id = 1;
+  int64 id = 1;
   string name = 2;
   string pass = 3;
   int32 auth = 4;
@@ -62,7 +62,7 @@ message Result {
 message TokenData {
   int64 id = 1;
   string token = 2;
-  int32 userid = 3;
+  int64 userid = 3;
   int64 begintime = 4;
   int64 endtime = 5;
 }
@@ -71,7 +71,7 @@ message TokenData {
 //Get : mode0 <-All | mode1 <- Select | mode2 <- MyGroup
 //Join: mode0 <- Add | mode1 <- Delete
 message GroupData {
-  string id = 1;
+  int64 id = 1;
   string name = 2;
   string admin = 3;
   string user = 4;
