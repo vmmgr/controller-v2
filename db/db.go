@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-const DBPath = "./controller.db"
+const dbPath = "./controller.db"
 
 type Node struct {
 	gorm.Model
@@ -93,7 +93,7 @@ func InitDB() *gorm.DB {
 }
 
 func initSQLite3() *gorm.DB {
-	db, err := gorm.Open("sqlite3", DBPath)
+	db, err := gorm.Open("sqlite3", dbPath)
 	if err != nil {
 		log.Println("SQL open error")
 	}
@@ -103,12 +103,14 @@ func initSQLite3() *gorm.DB {
 	db.AutoMigrate(&User{})
 	db.AutoMigrate(&Group{})
 	db.AutoMigrate(&Token{})
+	db.AutoMigrate(&ImaCon{})
+	db.AutoMigrate(&Node{})
 
 	return db
 }
 
 func initMySQL() *gorm.DB {
-	db, err := gorm.Open("mysql", DBPath)
+	db, err := gorm.Open("mysql", dbPath)
 	if err != nil {
 		log.Println("SQL open error")
 	}
