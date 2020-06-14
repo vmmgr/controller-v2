@@ -1,7 +1,5 @@
 package db
 
-import "log"
-
 //Add
 func AddDBUser(data User) bool {
 	db := InitDB()
@@ -34,7 +32,7 @@ func DeleteDBUser(data User) bool {
 func UpdateDBUser(data User) bool {
 	db := InitDB()
 	defer db.Close()
-	db.Model(&data).Updates(User{Name: data.Name, Pass: data.Pass, AdminGroup: data.AdminGroup, UserGroup: data.UserGroup})
+	db.Model(&data).Updates(User{Name: data.Name, Pass: data.Pass})
 
 	if err := db.Error; err != nil {
 		db.Rollback()
@@ -50,7 +48,7 @@ func GetAllDBUser() []User {
 	defer db.Close()
 
 	var user []User
-	log.Println(db.Find(&user))
+	db.Find(&user)
 	return user
 }
 
@@ -62,7 +60,7 @@ func SearchDBUser(data User) User {
 	//search UserName and UserID
 	if data.Name != "" {
 		db.Where("name = ?", data.Name).First(&result)
-	} else if data.ID != "" {
+	} else if data.ID != 0 { //初期値0であることが前提　確認の必要あり
 		db.Where("id = ?", data.ID).First(&result)
 	}
 

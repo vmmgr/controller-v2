@@ -1,7 +1,7 @@
 package db
 
 //Add
-func AddToken(token Token) bool {
+func AddDBToken(token Token) bool {
 	db := InitDB()
 	defer db.Close()
 	db.Create(&token)
@@ -15,7 +15,7 @@ func AddToken(token Token) bool {
 }
 
 //Delete
-func DeleteToken(token Token) bool {
+func DeleteDBToken(token Token) bool {
 	db := InitDB()
 	defer db.Close()
 	db.Delete(&token)
