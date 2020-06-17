@@ -3,27 +3,45 @@ package server
 // Client gRPC Server
 
 import (
-	"fmt"
-	pb "github.com/vmmgr/controller/proto/proto-go"
+	pb1 "github.com/vmmgr/controller/proto/proto-go"
+	pb2 "github.com/vmmgr/node/proto/proto-go"
 	"google.golang.org/grpc"
+	"log"
 	"net"
 )
 
-const port = ":50200"
+const basePort = ":50200"
+const vmPort = ":50210"
 
-type server struct {
-	pb.UnimplementedGrpcServer
+type baseServer struct {
+	pb1.UnimplementedControllerServer
+}
+type vmServer struct {
+	pb2.UnimplementedNodeServer
 }
 
-func Server() {
-	lis, err := net.Listen("tcp", port)
+func BaseServer() {
+	lis, err := net.Listen("tcp", basePort)
 	if err != nil {
-		fmt.Println("failed to listen: %v", err)
+		log.Printf("failed to listen: %v", err)
 	}
 
 	s := grpc.NewServer()
-	pb.RegisterGrpcServer(s, &server{})
+	pb1.RegisterControllerServer(s, &baseServer{})
 	if err := s.Serve(lis); err != nil {
-		fmt.Println("failed to serve: %v", err)
+		log.Printf("failed to serve: %v", err)
+	}
+}
+
+func VMServer() {
+	lis, err := net.Listen("tcp", vmPort)
+	if err != nil {
+		log.Printf("failed to listen: %v", err)
+	}
+
+	s := grpc.NewServer()
+	pb2.RegisterNodeServer(s, &vmServer{})
+	if err := s.Serve(lis); err != nil {
+		log.Printf("failed to serve: %v", err)
 	}
 }

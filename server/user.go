@@ -2,123 +2,91 @@ package server
 
 import (
 	"context"
-	"fmt"
 	"github.com/vmmgr/controller/data"
 	"github.com/vmmgr/controller/db"
+	"github.com/vmmgr/controller/etc"
 	pb "github.com/vmmgr/controller/proto/proto-go"
+	"google.golang.org/grpc/metadata"
 	"log"
+	"strconv"
 )
 
-func (s *server) AddUser(ctx context.Context, in *pb.UserData) (*pb.Result, error) {
+func (s *baseServer) AddUser(ctx context.Context, in *pb.UserData) (*pb.Result, error) {
+	md, _ := metadata.FromIncomingContext(ctx)
 	log.Println("----AddUser----")
-	log.Println("Receive UserName: " + in.GetUser())
+	log.Println("Receive UserName: " + in.GetName())
 	log.Println("Receive Pass: " + in.GetPass())
-	log.Println("Receive AuthUser: " + in.Base.GetUser() + ", AuthPass: " + in.Base.GetPass())
-	log.Println("Receive Token     : " + in.Base.GetToken())
+	log.Println("Receive Auth: " + strconv.Itoa(int(in.GetAuth())))
+	log.Println("Token: " + md.Get("authorization")[0])
 
-	if data.AdminUserCertification(in.Base.GetUser(), in.Base.GetPass(), in.Base.GetToken()) == false {
-		return &pb.Result{Status: false, Info: "Authentication failed!!"}, nil
+	//if data.AdminUserCertification(in.Base.GetUser(), in.Base.GetPass(), in.Base.GetToken()) == false {
+	//	return &pb.Result{Status: false, Info: "Authentication failed!!"}, nil
+	//}
+	if data.ExistUser(in.GetName()) {
+		return &pb.Result{Status: false, Info: "exists username !!"}, nil
 	}
-	if data.ExistUserCheck(in.GetUser()) {
-		return &pb.Result{Status: false, Info: "Exists User!!"}, nil
-	}
-	if data.GroupAllUserCheck(in.GetUser()) {
-		return &pb.Result{Status: false, Info: "Exists GroupUser!!"}, nil
-	}
-	db.AddDBUser(db.User{Name: in.GetUser(), Pass: in.GetPass()})
-	{
+	if db.AddDBUser(db.User{
+		Name: in.GetName(),
+		Pass: etc.HashGenerate(in.GetPass()),
+		Auth: int(in.GetAuth()),
+	}) {
 		return &pb.Result{Status: true, Info: "OK!"}, nil
+	} else {
+		return &pb.Result{Status: false, Info: "NG!!"}, nil
 	}
-	return &pb.Result{Status: false, Info: "DB Error!!"}, nil
 }
 
-func (s *server) RemoveUser(ctx context.Context, in *pb.UserData) (*pb.Result, error) {
-	log.Println("----RemoveUser----")
-	log.Println("Receive UserName: " + in.Base.GetUser())
-	log.Println("Receive AuthUser: " + in.Base.GetUser() + ", AuthPass: " + in.Base.GetPass())
-	log.Println("Receive Token     : " + in.Base.GetToken())
+func (s *baseServer) DeleteUser(ctx context.Context, in *pb.UserData) (*pb.Result, error) {
+	md, _ := metadata.FromIncomingContext(ctx)
+	log.Println("----DeleteUser----")
+	log.Println("Receive ID: " + strconv.Itoa(int(in.GetId())))
+	log.Println("Token: " + md.Get("authorization")[0])
 
-	if data.AdminUserCertification(in.Base.GetUser(), in.Base.GetPass(), in.Base.GetToken()) == false {
-		return &pb.Result{Status: false, Info: "Authentication failed!!"}, nil
+	if data.ExistUser(in.GetName()) == false {
+		return &pb.Result{Status: false, Info: "not exists username !!"}, nil
 	}
-	if data.ExistUserCheck(in.GetUser()) == false {
-		return &pb.Result{Status: false, Info: "Not exists User!!"}, nil
-	}
-	if data.GroupAllUserCheck(in.GetUser()) == false {
-		return &pb.Result{Status: false, Info: "Exists GroupUser!!"}, nil
-	}
-	db.RemoveDBUser(in.GetUser())
-	{
+	if db.DeleteDBUser(db.User{ID: int(in.GetId())}) {
 		return &pb.Result{Status: true, Info: "OK!"}, nil
+	} else {
+		return &pb.Result{Status: false, Info: "NG!!"}, nil
 	}
-	return &pb.Result{Status: false, Info: "DB Error!!"}, nil
 }
 
-func (s *server) GetUser(d *pb.UserData, stream pb.Grpc_GetUserServer) error {
-	log.Println("----GetUser----")
-	log.Println("Receive AuthUser: " + d.Base.GetUser() + ", AuthPass: " + d.Base.GetPass())
-	log.Println("Receive Token     : " + d.Base.GetToken())
+func (s *baseServer) GetAllUser(d *pb.Null, stream pb.Controller_GetAllUserServer) error {
+	md, _ := metadata.FromIncomingContext(stream.Context())
+	log.Println("----GetAllUser----")
+	log.Println("Token: " + md.Get("authorization")[0])
 
-	if d.Mode == 0 {
-		log.Println("GetAllUser")
-		if data.AdminUserCertification(d.Base.GetUser(), d.Base.GetPass(), d.Base.GetToken()) == false {
-			fmt.Println("Administrator certification failed!!!")
-			return nil
-		}
-		result := db.GetDBAllUser()
-		for _, a := range result {
-			if err := stream.Send(&pb.UserData{
-				Id:   int64(a.ID),
-				User: a.Name,
-			}); err != nil {
-				return err
-			}
+	result := db.GetAllDBUser()
+	for _, r := range result {
+		if err := stream.Send(&pb.UserData{
+			Id:   int64(r.ID),
+			Name: r.Name,
+			Pass: r.Pass,
+			Auth: int32(r.Auth),
+		}); err != nil {
+			return err
 		}
 	}
+
 	return nil
 }
 
-/*
-func (s *server) UserNameChange(ctx context.Context, in *pb.UserData) (*pb.Result, error) {
-	log.Println("----UserNameChange----")
-	afteruser := in.GetPass()
-	log.Println("Receive Before UserName: " + in.GetUser())
-	log.Println("Receive After UserName: " + afteruser)
-	log.Println("Receive AuthUser: " + in.GetBase().User + ", AuthPass: " + in.GetBase().Pass)
+func (s *baseServer) UpdateUser(ctx context.Context, in *pb.UserData) (*pb.Result, error) {
+	md, _ := metadata.FromIncomingContext(ctx)
+	log.Println("----UpdateUser----")
+	log.Println("Receive ID: " + strconv.Itoa(int(in.GetId())))
+	log.Println("Receive UserName: " + in.GetName())
+	log.Println("Token: " + md.Get("authorization")[0])
 
-	if data.AdminUserCertification(in.GetBase().User, in.GetBase().Pass) == false {
-		return &pb.Result{Status: false, Info: "Authentication failed!!"}, nil
-	}
-	if data.ExistUserCheck(afteruser) == false {
-		return &pb.Result{Status: false, Info: "Not exists User!!"}, nil
-	}
-	if data.GroupAllUserCheck(in.GetUser()) == false {
-		return &pb.Result{Status: false, Info: "Exists GroupUser!!"}, nil
-	}
-	db.RemoveDBUser(in.GetUser())
-	{
-		return &pb.Result{Status: true, Info: "OK!"}, nil
-	}
-	return &pb.Result{Status: false, Info: "DB Error!!"}, nil
-}
-*/
-
-func (s *server) UserPassChange(ctx context.Context, in *pb.UserData) (*pb.Result, error) {
-	log.Println("----UserPassChange----")
-	log.Println("Receive UserName: " + in.GetUser())
-	log.Println("Receive ChangeUserPass: " + in.GetPass())
-	log.Println("Receive AuthUser: " + in.GetBase().User + ", AuthPass: " + in.GetBase().Pass)
-
-	if data.UserCertification(in.GetBase().User, in.GetBase().Pass) == false {
-		return &pb.Result{Status: false, Info: "Authentication failed!!"}, nil
-	}
-	id, err := db.GetDBUserID(in.GetUser())
-	if err == false {
-		return &pb.Result{Status: false, Info: "Error Search UserID!!"}, nil
-	}
-	if db.ChangeDBUserPassword(id, in.GetPass()) {
+	if db.UpdateDBUser(db.User{
+		ID:   int(in.GetId()),
+		Name: in.GetName(),
+		Pass: in.GetPass(),
+		Auth: int(in.GetAuth()),
+	}) {
 		return &pb.Result{Status: true, Info: "OK!"}, nil
 	} else {
-		return &pb.Result{Status: false, Info: "Change Pass Error!!!"}, nil
+		return &pb.Result{Status: false, Info: "NG!!"}, nil
 	}
 }
