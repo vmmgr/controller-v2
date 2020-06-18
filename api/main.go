@@ -9,7 +9,7 @@ func VNCProxy() {
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
-	e.GET("/api/:uuid/:vmname/vnc", WebSocketProxy())
+	e.GET("/api/:token/:group/:id/vnc", webSocketProxy())
 
 	e.Start("0.0.0.0:8081")
 }
