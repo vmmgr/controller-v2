@@ -34,6 +34,7 @@ service Controller {
   }
   rpc GetAllGroup (Null) returns (stream GroupData){
   }
+
 }
 
 message Null {
