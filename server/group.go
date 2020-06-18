@@ -17,9 +17,10 @@ func (s *baseServer) AddGroup(ctx context.Context, in *pb.GroupData) (*pb.Result
 	log.Println("Receive Mode: " + strconv.Itoa(int(in.GetMode())))
 	log.Println("Token: " + md.Get("authorization")[0])
 
-	//if data.AdminUserCertification(in.Base.GetUser(), in.Base.GetPass(), in.Base.GetToken()) == false {
-	//	return &pb.Result{Status: false, Info: "Authentication failed!!"}, nil
-	//}
+	if data.VerifyGroup(md.Get("authorization")[0]) != 0 {
+		return &pb.Result{Status: false, Info: "Authorization NG!!"}, nil
+	}
+
 	if data.ExistUser(in.GetName()) {
 		return &pb.Result{Status: false, Info: "exists username !!"}, nil
 	}
@@ -38,6 +39,10 @@ func (s *baseServer) DeleteGroup(ctx context.Context, in *pb.GroupData) (*pb.Res
 	log.Println("Receive GroupID: " + strconv.Itoa(int(in.GetId())))
 	log.Println("Token: " + md.Get("authorization")[0])
 
+	if data.VerifyGroup(md.Get("authorization")[0]) != 0 {
+		return &pb.Result{Status: false, Info: "Authorization NG!!"}, nil
+	}
+
 	if data.ExistUser(in.GetName()) == false {
 		return &pb.Result{Status: false, Info: "not exists username !!"}, nil
 	}
@@ -53,10 +58,18 @@ func (s *baseServer) GetAllGroup(d *pb.Null, stream pb.Controller_GetAllGroupSer
 	log.Println("----GetAllUser----")
 	log.Println("Token: " + md.Get("authorization")[0])
 
-	result := db.GetAllDBGroup()
-	for _, r := range result {
+	if data.VerifyGroup(md.Get("authorization")[0]) != 0 {
 		if err := stream.Send(&pb.GroupData{
-			Id:   int64(r.ID),
+			Id: 0,
+		}); err != nil {
+			return err
+		}
+		return nil
+	}
+
+	for _, r := range db.GetAllDBGroup() {
+		if err := stream.Send(&pb.GroupData{
+			Id:   uint64(r.ID),
 			Name: r.Name,
 			//Admin: r.AdminUser,
 			//User:  r.StandardUser,
@@ -75,6 +88,10 @@ func (s *baseServer) UpdateGroup(ctx context.Context, in *pb.GroupData) (*pb.Res
 	log.Println("Receive GroupName: " + in.GetName())
 	log.Println("Token: " + md.Get("authorization")[0])
 
+	if data.VerifyGroup(md.Get("authorization")[0]) != 0 {
+		return &pb.Result{Status: false, Info: "Authorization NG!!"}, nil
+	}
+
 	if db.UpdateDBGroup(db.Group{
 		ID:   int(in.GetId()),
 		Name: in.GetName(),
@@ -92,6 +109,10 @@ func (s *baseServer) JoinAddGroup(ctx context.Context, in *pb.GroupData) (*pb.Re
 	log.Println("Receive GroupID: " + strconv.Itoa(int(in.GetId())))
 	log.Println("Receive GroupName: " + in.GetName())
 	log.Println("Token: " + md.Get("authorization")[0])
+
+	if data.VerifyGroup(md.Get("authorization")[0]) != 0 {
+		return &pb.Result{Status: false, Info: "Authorization NG!!"}, nil
+	}
 
 	admin := false
 	var user string
@@ -120,6 +141,10 @@ func (s *baseServer) JoinDeleteGroup(ctx context.Context, in *pb.GroupData) (*pb
 	log.Println("----JoinDeleteGroup----")
 	log.Println("Receive GroupID: " + strconv.Itoa(int(in.GetId())))
 	log.Println("Token: " + md.Get("authorization")[0])
+
+	if data.VerifyGroup(md.Get("authorization")[0]) != 0 {
+		return &pb.Result{Status: false, Info: "Authorization NG!!"}, nil
+	}
 
 	admin := false
 	var user string

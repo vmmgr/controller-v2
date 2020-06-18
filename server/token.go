@@ -17,9 +17,6 @@ func (s *baseServer) GenerateToken(ctx context.Context, in *pb.UserData) (*pb.Re
 	log.Println("Receive UserID: " + strconv.Itoa(int(in.GetId())))
 	log.Println("Token: " + md.Get("authorization")[0])
 
-	//if data.AdminUserCertification(in.Base.GetUser(), in.Base.GetPass(), in.Base.GetToken()) == false {
-	//	return &pb.Result{Status: false, Info: "Authentication failed!!"}, nil
-	//}
 	if data.ExistUser(in.GetName()) {
 		return &pb.Result{Status: false, Info: "exists username !!"}, nil
 	}
@@ -50,11 +47,20 @@ func (s *baseServer) GetAllToken(d *pb.Null, stream pb.Controller_GetAllTokenSer
 	log.Println("----GetAllUser----")
 	log.Println("Token: " + md.Get("authorization")[0])
 
+	if data.VerifyGroup(md.Get("authorization")[0]) != 0 {
+		if err := stream.Send(&pb.TokenData{
+			Userid: 0,
+		}); err != nil {
+			return err
+		}
+		return nil
+	}
+
 	result := db.GetAllDBToken()
 	for _, r := range result {
 		if err := stream.Send(&pb.TokenData{
 			Token:  r.Token,
-			Userid: int64(r.UserID),
+			Userid: uint64(r.UserID),
 		}); err != nil {
 			return err
 		}

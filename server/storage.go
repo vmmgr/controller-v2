@@ -33,7 +33,7 @@ func (s *vmServer) AddStorage(in *pb.StorageData, stream pb.Node_AddStorageServe
 	dataNode := db.SearchDBNode(int(in.GetID() / 100000))
 	in.ID = in.GetID() % 100000
 
-	result := data.VerifyGroup(md.Get("authorization")[0], int(in.GetGroupID()))
+	result := data.VerifySameGroup(md.Get("authorization")[0], int(in.GetGroupID()))
 	if result < 0 && 2 <= result {
 		if err := stream.Send(&pb.Result{
 			Info:   "Authentication Error!!",
@@ -91,8 +91,8 @@ func (s *vmServer) DeleteStorage(ctx context.Context, in *pb.StorageData) (*spb.
 	dataNode := db.SearchDBNode(int(in.GetID() / 100000))
 	in.ID = in.GetID() % 100000
 
-	result := data.VerifyGroup(md.Get("authorization")[0], int(in.GetGroupID()))
-	if result < 0 && 2 <= result {
+	if 2 <= data.VerifySameGroup(md.Get("authorization")[0], int(in.GetGroupID())) {
+		log.Println("Error: Authentication Error")
 		return &spb.Result{Status: false, Info: "Authentication Error "}, nil
 	}
 
@@ -126,8 +126,8 @@ func (s *vmServer) UpdateStorage(ctx context.Context, in *pb.StorageData) (*spb.
 	dataNode := db.SearchDBNode(int(in.GetID() / 100000))
 	in.ID = in.GetID() % 100000
 
-	result := data.VerifyGroup(md.Get("authorization")[0], int(in.GetGroupID()))
-	if result < 0 && 2 <= result {
+	if 2 <= data.VerifySameGroup(md.Get("authorization")[0], int(in.GetGroupID())) {
+		log.Println("Error: Authentication Error")
 		return &spb.Result{Status: false, Info: "Authentication Error "}, nil
 	}
 

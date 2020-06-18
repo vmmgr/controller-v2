@@ -16,8 +16,9 @@ import (
 func (s *vmServer) AddVM(ctx context.Context, in *pb.VMData) (*spb.Result, error) {
 	md, _ := metadata.FromIncomingContext(ctx)
 	log.Println("----AddVM----")
-	log.Println("Receive GroupName: " + in.GetName())
-	log.Println("Receive Mode: " + strconv.Itoa(int(in.GetMode())))
+	log.Println("Receive VMID    : " + strconv.Itoa(int(in.GetID())))
+	log.Println("Receive GroupID : " + strconv.Itoa(int(in.GetGroupID())))
+	log.Println("Receive Mode    : " + strconv.Itoa(int(in.GetMode())))
 	log.Println("Token: " + md.Get("authorization")[0])
 
 	if in.GetID() < 100000 {
@@ -26,8 +27,7 @@ func (s *vmServer) AddVM(ctx context.Context, in *pb.VMData) (*spb.Result, error
 	dataNode := db.SearchDBNode(int(in.GetID() / 100000))
 	in.ID = in.GetID() % 100000
 
-	result := data.VerifyGroup(md.Get("authorization")[0], int(in.GetGroupID()))
-	if result < 0 && 2 <= result {
+	if 2 <= data.VerifySameGroup(md.Get("authorization")[0], int(in.GetGroupID())) {
 		return &spb.Result{Status: false, Info: "Authentication Error "}, nil
 	}
 
@@ -51,8 +51,9 @@ func (s *vmServer) AddVM(ctx context.Context, in *pb.VMData) (*spb.Result, error
 func (s *vmServer) DeleteVM(ctx context.Context, in *pb.VMData) (*spb.Result, error) {
 	md, _ := metadata.FromIncomingContext(ctx)
 	log.Println("----DeleteVM----")
-	log.Println("Receive GroupName: " + in.GetName())
-	log.Println("Receive Mode: " + strconv.Itoa(int(in.GetMode())))
+	log.Println("Receive VMID    : " + strconv.Itoa(int(in.GetID())))
+	log.Println("Receive GroupID : " + strconv.Itoa(int(in.GetGroupID())))
+	log.Println("Receive Mode    : " + strconv.Itoa(int(in.GetMode())))
 	log.Println("Token: " + md.Get("authorization")[0])
 
 	if in.GetID() < 100000 {
@@ -61,8 +62,8 @@ func (s *vmServer) DeleteVM(ctx context.Context, in *pb.VMData) (*spb.Result, er
 	dataNode := db.SearchDBNode(int(in.GetID() / 100000))
 	in.ID = in.GetID() % 100000
 
-	result := data.VerifyGroup(md.Get("authorization")[0], int(in.GetGroupID()))
-	if result < 0 && 2 <= result {
+	if 2 <= data.VerifySameGroup(md.Get("authorization")[0], int(in.GetGroupID())) {
+		log.Println("Error: Authentication Error")
 		return &spb.Result{Status: false, Info: "Authentication Error "}, nil
 	}
 
@@ -85,9 +86,10 @@ func (s *vmServer) DeleteVM(ctx context.Context, in *pb.VMData) (*spb.Result, er
 
 func (s *vmServer) UpdateVM(ctx context.Context, in *pb.VMData) (*spb.Result, error) {
 	md, _ := metadata.FromIncomingContext(ctx)
-	log.Println("----UpdateVM----")
-	log.Println("Receive GroupName: " + in.GetName())
-	log.Println("Receive Mode: " + strconv.Itoa(int(in.GetMode())))
+	log.Println("----DeleteVM----")
+	log.Println("Receive VMID    : " + strconv.Itoa(int(in.GetID())))
+	log.Println("Receive GroupID : " + strconv.Itoa(int(in.GetGroupID())))
+	log.Println("Receive Mode    : " + strconv.Itoa(int(in.GetMode())))
 	log.Println("Token: " + md.Get("authorization")[0])
 
 	if in.GetID() < 100000 {
@@ -96,8 +98,8 @@ func (s *vmServer) UpdateVM(ctx context.Context, in *pb.VMData) (*spb.Result, er
 	dataNode := db.SearchDBNode(int(in.GetID() / 100000))
 	in.ID = in.GetID() % 100000
 
-	result := data.VerifyGroup(md.Get("authorization")[0], int(in.GetGroupID()))
-	if result < 0 && 2 <= result {
+	if 2 <= data.VerifySameGroup(md.Get("authorization")[0], int(in.GetGroupID())) {
+		log.Println("Error: Authentication Error")
 		return &spb.Result{Status: false, Info: "Authentication Error "}, nil
 	}
 
@@ -117,4 +119,22 @@ func (s *vmServer) UpdateVM(ctx context.Context, in *pb.VMData) (*spb.Result, er
 		return &spb.Result{Status: false, Info: r.Info}, nil
 	}
 	return &spb.Result{Status: r.Status, Info: r.Info}, nil
+}
+
+func getVMGroup(ip string, id uint64) int {
+	conn, err := grpc.Dial(ip, grpc.WithInsecure(), grpc.WithBlock(), grpc.WithTimeout(2*time.Second))
+	if err != nil {
+		log.Fatalf("Not connect; %v", err)
+	}
+	defer conn.Close()
+
+	client := pb.NewNodeClient(conn)
+	header := metadata.New(map[string]string{"node": "true"})
+	ctx := metadata.NewOutgoingContext(context.Background(), header)
+
+	r, err := client.GetVM(ctx, &pb.VMData{ID: id})
+	if err != nil {
+		log.Fatal(err)
+	}
+	return int(r.GroupID)
 }

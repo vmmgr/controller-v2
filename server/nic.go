@@ -24,7 +24,7 @@ func (s *vmServer) AddNIC(ctx context.Context, in *pb.NICData) (*spb.Result, err
 	dataNode := db.SearchDBNode(int(in.GetID() / 100000))
 	in.ID = in.GetID() % 100000
 
-	result := data.VerifyGroup(md.Get("authorization")[0], int(in.GetGroupID()))
+	result := data.VerifySameGroup(md.Get("authorization")[0], int(in.GetGroupID()))
 	if result < 0 && 2 <= result {
 		return &spb.Result{Status: false, Info: "Authentication Error "}, nil
 	}
@@ -57,7 +57,7 @@ func (s *vmServer) DeleteNIC(ctx context.Context, in *pb.NICData) (*spb.Result, 
 	dataNode := db.SearchDBNode(int(in.GetID() / 100000))
 	in.ID = in.GetID() % 100000
 
-	result := data.VerifyGroup(md.Get("authorization")[0], int(in.GetGroupID()))
+	result := data.VerifySameGroup(md.Get("authorization")[0], int(in.GetGroupID()))
 	if result < 0 && 2 <= result {
 		return &spb.Result{Status: false, Info: "Authentication Error "}, nil
 	}
@@ -91,7 +91,7 @@ func (s *vmServer) UpdateNIC(ctx context.Context, in *pb.NICData) (*spb.Result, 
 	dataNode := db.SearchDBNode(int(in.GetID() / 100000))
 	in.ID = in.GetID() % 100000
 
-	result := data.VerifyGroup(md.Get("authorization")[0], int(in.GetGroupID()))
+	result := data.VerifySameGroup(md.Get("authorization")[0], int(in.GetGroupID()))
 	if result < 0 && 2 <= result {
 		return &spb.Result{Status: false, Info: "Authentication Error "}, nil
 	}
