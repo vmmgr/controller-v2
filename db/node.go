@@ -1,35 +1,37 @@
 package db
 
+import "fmt"
+
 //Add
-func AddDBNode(data Node) bool {
+func AddDBNode(data Node) error {
 	db := InitDB()
 	defer db.Close()
 	db.Create(&data)
 
 	if err := db.Error; err != nil {
 		db.Rollback()
-		return false
+		return fmt.Errorf("DB Error ")
 	} else {
-		return true
+		return nil
 	}
 }
 
 //Delete
-func DeleteDBNode(data Node) bool {
+func DeleteDBNode(data Node) error {
 	db := InitDB()
 	defer db.Close()
 	db.Delete(&data)
 
 	if err := db.Error; err != nil {
 		db.Rollback()
-		return false
+		return fmt.Errorf("DB Error ")
 	} else {
-		return true
+		return nil
 	}
 }
 
 //Update
-func UpdateDBNode(data Node) bool {
+func UpdateDBNode(data Node) error {
 	db := InitDB()
 	defer db.Close()
 	db.Model(&data).Updates(Node{HostName: data.HostName, IP: data.IP, Path: data.Path,
@@ -37,9 +39,9 @@ func UpdateDBNode(data Node) bool {
 
 	if err := db.Error; err != nil {
 		db.Rollback()
-		return false
+		return fmt.Errorf("DB Error ")
 	} else {
-		return true
+		return nil
 	}
 }
 
@@ -53,14 +55,14 @@ func GetAllDBNode() []Node {
 	return user
 }
 
-func SearchDBNode(data Node) Node {
+func SearchDBNode(id int) Node {
 	db := InitDB()
 	defer db.Close()
 
 	var result Node
 	//search NodeName and NodeID
-	if data.ID != 0 { //初期値0であることが前提　確認の必要あり
-		db.Where("id = ?", data.ID).First(&result)
+	if id != 0 { //初期値0であることが前提　確認の必要あり
+		db.Where("id = ?", id).First(&result)
 	}
 
 	return result
