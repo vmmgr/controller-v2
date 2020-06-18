@@ -1,44 +1,46 @@
 package db
 
+import "fmt"
+
 //Add
-func AddDBImaCon(data ImaCon) bool {
+func AddDBImaCon(data ImaCon) error {
 	db := InitDB()
 	defer db.Close()
 	db.Create(&data)
 
 	if err := db.Error; err != nil {
 		db.Rollback()
-		return false
+		return fmt.Errorf("DB Error")
 	} else {
-		return true
+		return nil
 	}
 }
 
 //Delete
-func DeleteDBImaCon(data ImaCon) bool {
+func DeleteDBImaCon(data ImaCon) error {
 	db := InitDB()
 	defer db.Close()
 	db.Delete(&data)
 
 	if err := db.Error; err != nil {
 		db.Rollback()
-		return false
+		return fmt.Errorf("DB Error")
 	} else {
-		return true
+		return nil
 	}
 }
 
 //Update
-func UpdateDBImaCon(data ImaCon) bool {
+func UpdateDBImaCon(data ImaCon) error {
 	db := InitDB()
 	defer db.Close()
 	db.Model(&data).Updates(ImaCon{HostName: data.HostName, IP: data.IP, Status: data.Status})
 
 	if err := db.Error; err != nil {
 		db.Rollback()
-		return false
+		return fmt.Errorf("DB Error")
 	} else {
-		return true
+		return nil
 	}
 }
 
