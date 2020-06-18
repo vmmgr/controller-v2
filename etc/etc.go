@@ -1,16 +1,30 @@
 package etc
 
 import (
-	"fmt"
 	"github.com/google/uuid"
+	"log"
 )
 
-func GenerateToken() string {
-	u, err := uuid.NewRandom()
+func GenerateUUID() string {
+	uuid, err := uuid.NewRandom()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
-	uuid := u.String()
-	fmt.Println("GenerateToken: " + uuid)
+
+	return uuid.String()
+}
+
+func GenerateToken() string {
+	u1, err := uuid.NewRandom()
+	if err != nil {
+		log.Println(err)
+	}
+	u2, err := uuid.NewRandom()
+	if err != nil {
+		log.Println(err)
+	}
+
+	uuid := u1.String() + u2.String()
+	log.Println("GenerateToken:  " + uuid)
 	return uuid
 }
