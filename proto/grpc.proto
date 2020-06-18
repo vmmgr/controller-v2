@@ -110,7 +110,8 @@ message NodeData{
   uint32 cpu = 4;
   uint32 mem = 5;
   string path = 6;
-  bool active = 7;
+  bool onlyAdmin = 7;
+  bool active = 8;
 }
 
 message ImaConData{
