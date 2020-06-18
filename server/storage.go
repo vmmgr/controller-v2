@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"github.com/vmmgr/controller/data"
 	"github.com/vmmgr/controller/db"
 	spb "github.com/vmmgr/controller/proto/proto-go"
 	pb "github.com/vmmgr/node/proto/proto-go"
@@ -20,7 +21,6 @@ func (s *vmServer) AddStorage(in *pb.StorageData, stream pb.Node_AddStorageServe
 	log.Println("Receive Mode: " + strconv.Itoa(int(in.GetMode())))
 	log.Println("Token: " + md.Get("authorization")[0])
 
-	token := md.Get("authorization")
 	if in.GetID() < 100000 {
 		if err := stream.Send(&pb.Result{
 			Info:   "ID Error",
@@ -30,18 +30,28 @@ func (s *vmServer) AddStorage(in *pb.StorageData, stream pb.Node_AddStorageServe
 		}
 		return nil
 	}
-	node := in.GetID() / 100000
-	data := db.SearchDBNode(int(node))
+	dataNode := db.SearchDBNode(int(in.GetID() / 100000))
 	in.ID = in.GetID() % 100000
 
-	conn, err := grpc.Dial(data.IP, grpc.WithInsecure(), grpc.WithBlock(), grpc.WithTimeout(2*time.Second))
+	result := data.VerifyGroup(md.Get("authorization")[0], int(in.GetGroupID()))
+	if result < 0 && 2 <= result {
+		if err := stream.Send(&pb.Result{
+			Info:   "Authentication Error!!",
+			Status: false,
+		}); err != nil {
+			return err
+		}
+		return nil
+	}
+
+	conn, err := grpc.Dial(dataNode.IP, grpc.WithInsecure(), grpc.WithBlock(), grpc.WithTimeout(2*time.Second))
 	if err != nil {
 		log.Fatalf("Not connect; %v", err)
 	}
 	defer conn.Close()
 
 	client := pb.NewNodeClient(conn)
-	header := metadata.New(map[string]string{"authorization": token[0]})
+	header := metadata.New(map[string]string{"node": "true"})
 	cCtx := metadata.NewOutgoingContext(context.Background(), header)
 
 	cStream, err := client.AddStorage(cCtx, in)
@@ -75,22 +85,25 @@ func (s *vmServer) DeleteStorage(ctx context.Context, in *pb.StorageData) (*spb.
 	log.Println("Receive Mode: " + strconv.Itoa(int(in.GetMode())))
 	log.Println("Token: " + md.Get("authorization")[0])
 
-	token := md.Get("authorization")
 	if in.GetID() < 100000 {
 		return &spb.Result{Status: false, Info: "ID Error!!"}, nil
 	}
-	node := in.GetID() / 100000
-	data := db.SearchDBNode(int(node))
+	dataNode := db.SearchDBNode(int(in.GetID() / 100000))
 	in.ID = in.GetID() % 100000
 
-	conn, err := grpc.Dial(data.IP, grpc.WithInsecure(), grpc.WithBlock(), grpc.WithTimeout(2*time.Second))
+	result := data.VerifyGroup(md.Get("authorization")[0], int(in.GetGroupID()))
+	if result < 0 && 2 <= result {
+		return &spb.Result{Status: false, Info: "Authentication Error "}, nil
+	}
+
+	conn, err := grpc.Dial(dataNode.IP, grpc.WithInsecure(), grpc.WithBlock(), grpc.WithTimeout(2*time.Second))
 	if err != nil {
 		log.Fatalf("Not connect; %v", err)
 	}
 	defer conn.Close()
 
 	client := pb.NewNodeClient(conn)
-	header := metadata.New(map[string]string{"authorization": token[0]})
+	header := metadata.New(map[string]string{"node": "true"})
 	cCtx := metadata.NewOutgoingContext(context.Background(), header)
 
 	r, err := client.DeleteStorage(cCtx, in)
@@ -107,22 +120,25 @@ func (s *vmServer) UpdateStorage(ctx context.Context, in *pb.StorageData) (*spb.
 	log.Println("Receive Mode: " + strconv.Itoa(int(in.GetMode())))
 	log.Println("Token: " + md.Get("authorization")[0])
 
-	token := md.Get("authorization")
 	if in.GetID() < 100000 {
 		return &spb.Result{Status: false, Info: "ID Error!!"}, nil
 	}
-	node := in.GetID() / 100000
-	data := db.SearchDBNode(int(node))
+	dataNode := db.SearchDBNode(int(in.GetID() / 100000))
 	in.ID = in.GetID() % 100000
 
-	conn, err := grpc.Dial(data.IP, grpc.WithInsecure(), grpc.WithBlock(), grpc.WithTimeout(2*time.Second))
+	result := data.VerifyGroup(md.Get("authorization")[0], int(in.GetGroupID()))
+	if result < 0 && 2 <= result {
+		return &spb.Result{Status: false, Info: "Authentication Error "}, nil
+	}
+
+	conn, err := grpc.Dial(dataNode.IP, grpc.WithInsecure(), grpc.WithBlock(), grpc.WithTimeout(2*time.Second))
 	if err != nil {
 		log.Fatalf("Not connect; %v", err)
 	}
 	defer conn.Close()
 
 	client := pb.NewNodeClient(conn)
-	header := metadata.New(map[string]string{"authorization": token[0]})
+	header := metadata.New(map[string]string{"node": "true"})
 	cCtx := metadata.NewOutgoingContext(context.Background(), header)
 
 	r, err := client.UpdateStorage(cCtx, in)
