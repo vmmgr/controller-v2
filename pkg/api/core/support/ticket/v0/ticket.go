@@ -192,16 +192,16 @@ func GetWebSocket(c *gin.Context) {
 		if err != nil {
 			conn.WriteJSON(&support.WebSocketResult{Err: "db write error"})
 		} else {
-
-			controller.SendChatUser(controllerInterface.Chat{CreatedAt: msg.CreatedAt,
-				UserID: result.User.ID, GroupID: resultGroup.Group.ID, Admin: msg.Admin, Message: msg.Message})
-
 			msg.UserID = result.User.ID
 			msg.GroupID = resultGroup.Group.ID
 			msg.Admin = false
 			// Token関連の初期化
 			msg.AccessToken = ""
 			msg.UserToken = ""
+
+			controller.SendChatUser(controllerInterface.Chat{CreatedAt: msg.CreatedAt,
+				UserID: result.User.ID, GroupID: resultGroup.Group.ID, Admin: msg.Admin, Message: msg.Message})
+
 			support.Broadcast <- msg
 		}
 	}
