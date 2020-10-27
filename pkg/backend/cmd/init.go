@@ -1,10 +1,25 @@
 package cmd
 
 import (
+	"github.com/jinzhu/gorm"
 	"github.com/spf13/cobra"
+	"github.com/vmmgr/controller/pkg/api/core/group"
+	"github.com/vmmgr/controller/pkg/api/core/node"
+	"github.com/vmmgr/controller/pkg/api/core/node/nodenic"
+	"github.com/vmmgr/controller/pkg/api/core/node/nodestorage"
+	"github.com/vmmgr/controller/pkg/api/core/notice"
+	"github.com/vmmgr/controller/pkg/api/core/region"
+	"github.com/vmmgr/controller/pkg/api/core/region/zone"
+	"github.com/vmmgr/controller/pkg/api/core/support/chat"
+	"github.com/vmmgr/controller/pkg/api/core/support/ticket"
+	"github.com/vmmgr/controller/pkg/api/core/token"
 	"github.com/vmmgr/controller/pkg/api/core/tool/config"
-	"github.com/vmmgr/controller/pkg/api/store"
+	"github.com/vmmgr/controller/pkg/api/core/user"
+	"github.com/vmmgr/controller/pkg/api/core/vm"
+	"github.com/vmmgr/node/pkg/api/core/nic"
+	"github.com/vmmgr/node/pkg/api/core/storage"
 	"log"
+	"strconv"
 )
 
 var initCmd = &cobra.Command{
@@ -20,8 +35,15 @@ var initCmd = &cobra.Command{
 			log.Fatalf("error config process |%v", err)
 		}
 
-		store.InitDB()
-
+		db, err := gorm.Open("mysql", config.Conf.DB.User+":"+config.Conf.DB.Pass+"@"+
+			"tcp("+config.Conf.DB.IP+":"+strconv.Itoa(config.Conf.DB.Port)+")"+"/"+config.Conf.DB.DBName+"?parseTime=true")
+		if err != nil {
+			panic(err)
+		}
+		result := db.AutoMigrate(&user.User{}, &group.Group{}, &token.Token{}, &notice.Notice{},
+			&ticket.Ticket{}, &chat.Chat{}, &region.Region{}, &zone.Zone{}, &node.Node{}, &nodestorage.NodeStorage{},
+			&nodenic.NodeNIC{}, &vm.VM{}, &storage.Storage{}, &nic.NIC{})
+		log.Println(result.Error)
 		log.Println("end")
 	},
 }
