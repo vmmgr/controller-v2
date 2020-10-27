@@ -14,11 +14,10 @@ import (
 	"strconv"
 )
 
-func ControllerRestAPI() {
+func AdminRestAPI() error {
+
 	router := gin.Default()
 	router.Use(cors)
-
-	go token.TokenRemove()
 
 	api := router.Group("/api")
 	{
@@ -45,16 +44,16 @@ func ControllerRestAPI() {
 			v1.DELETE("/user", user.DeleteAdmin)
 			// User Update
 			v1.PUT("/user", user.UpdateAdmin)
-			v1.GET("/user", user.GetAllAdmin)
+			v1.GET("/user", user.GetAdmin)
 			v1.GET("/user/:id", user.GetAdmin)
 			//
 			// Token
 			//
 			v1.POST("/token/generate", token.GenerateAdmin)
 
-			v1.POST("/token", token.AddAdmin)
+			v1.POST("/token", token.GenerateAdmin)
 			// Token Delete
-			v1.DELETE("/token", token.DeleteAllAdmin)
+			v1.DELETE("/token", token.Delete)
 			v1.DELETE("/token/:id", token.DeleteAdmin)
 			// Token Update
 			v1.PUT("/token", token.UpdateAdmin)
@@ -91,6 +90,88 @@ func ControllerRestAPI() {
 
 	go ticket.HandleMessagesAdmin()
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(config.Conf.Controller.Admin.Port), router))
+	return nil
+}
+
+func UserRestAPI() {
+	router := gin.Default()
+	router.Use(cors)
+
+	api := router.Group("/api")
+	{
+		v1 := api.Group("/v1")
+		{
+			// Controller
+			//
+			v1.POST("/controller/chat", controller.ReceiveChatUser)
+
+			//
+			// User
+			//
+			// User Delete
+			//router.DELETE("/user", user.Delete)
+			// User Get
+			v1.GET("/user", user.Get)
+			v1.GET("/user/all", user.GetGroup)
+			// User ID Get
+			// v1.GET("/user/:id",user.GetId)
+			// User Update
+			v1.PUT("/user/:id", user.Update)
+			// User Mail MailVerify
+			v1.GET("/user/verify/:token", user.MailVerify)
+			//
+			// Token
+			//
+			// get token for CHAP authentication
+			v1.GET("/token/init", token.GenerateInit)
+			// get token for user
+			v1.GET("/token", token.Generate)
+			// delete
+			v1.DELETE("/token", token.Delete)
+			//
+			// Group
+			//
+			// Group Create
+			v1.POST("/group", group.Add)
+			v1.GET("/group", group.Get)
+			v1.PUT("/group", group.Update)
+			v1.GET("/group/all", group.GetAll)
+
+			//
+			// Support
+			//
+			v1.POST("/support", ticket.Create)
+			v1.GET("/support", ticket.GetTitle)
+			v1.GET("/support/:id", ticket.Get)
+			//
+			// Notice
+			//
+			v1.GET("/notice", notice.Get)
+
+			// 現在検討中
+
+			// Network JPNIC Admin
+			//v1.POST("/group/network/jpnic/admin", jpnicAdmin.Add)
+			//v1.DELETE("/group/network/jpnic/admin", jpnicAdmin.Delete)
+			//v1.GET("/group/network/jpnic/admin", jpnicAdmin.Get)
+			// Network JPNIC Tech
+			//v1.POST("/group/network/jpnic/tech", jpnicTech.Add)
+			//v1.DELETE("/group/network/jpnic/tech", jpnicTech.Delete)
+			//v1.GET("/group/network/jpnic/tech", jpnicTech.Get)
+		}
+	}
+
+	ws := router.Group("/ws")
+	{
+		v1 := ws.Group("/v1")
+		{
+			v1.GET("/support", ticket.GetWebSocket)
+		}
+	}
+
+	go ticket.HandleMessages()
+
+	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(config.Conf.Controller.User.Port), router))
 }
 
 func cors(c *gin.Context) {
