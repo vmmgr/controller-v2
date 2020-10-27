@@ -23,7 +23,7 @@ func updateAdminUser(input, replace zone.Zone) (zone.Zone, error) {
 		replace.Mail = input.Mail
 	}
 	if replace.RegionID != input.RegionID {
-		replace.Name = input.Name
+		replace.RegionID = input.RegionID
 	}
 
 	return replace, nil
