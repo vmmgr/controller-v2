@@ -6,6 +6,7 @@ import (
 	auth "github.com/vmmgr/controller/pkg/api/core/auth/v0"
 	"github.com/vmmgr/controller/pkg/api/core/region"
 	"github.com/vmmgr/controller/pkg/api/core/region/zone"
+	dbRegion "github.com/vmmgr/controller/pkg/api/store/region/v0"
 	dbZone "github.com/vmmgr/controller/pkg/api/store/region/zone/v0"
 	"log"
 	"net/http"
@@ -22,6 +23,16 @@ func AddAdmin(c *gin.Context) {
 	}
 	err := c.BindJSON(&input)
 	log.Println(err)
+
+	resultRegion := dbRegion.Get(region.ID, &region.Region{Model: gorm.Model{ID: input.ID}})
+	if resultRegion.Err != nil {
+		c.JSON(http.StatusBadRequest, zone.Result{Status: false, Error: resultRegion.Err.Error()})
+		return
+	}
+	if len(resultRegion.Region) != 0 {
+		c.JSON(http.StatusBadRequest, zone.Result{Status: false, Error: "same id !!"})
+		return
+	}
 
 	if err := check(input); err != nil {
 		c.JSON(http.StatusBadRequest, zone.Result{Status: false, Error: err.Error()})
