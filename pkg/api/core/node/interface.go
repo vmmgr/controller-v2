@@ -20,7 +20,7 @@ type Node struct {
 	IP        string `json:"ip"`
 	Port      uint   `json:"port"`
 	WsPort    uint   `json:"ws_port"`
-	ManageNet uint   `json:"manage_net"`
+	ManageNet string `json:"manage_net"`
 	Comment   string `json:"comment"`
 }
 
