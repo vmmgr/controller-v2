@@ -5,8 +5,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/vmmgr/controller/pkg/api/core/group"
 	"github.com/vmmgr/controller/pkg/api/core/node"
-	"github.com/vmmgr/controller/pkg/api/core/node/nodenic"
-	"github.com/vmmgr/controller/pkg/api/core/node/nodestorage"
+	nodeNIC "github.com/vmmgr/controller/pkg/api/core/node/nic"
+	nodeStorage "github.com/vmmgr/controller/pkg/api/core/node/storage"
 	"github.com/vmmgr/controller/pkg/api/core/notice"
 	"github.com/vmmgr/controller/pkg/api/core/region"
 	"github.com/vmmgr/controller/pkg/api/core/region/zone"
@@ -41,8 +41,8 @@ var initCmd = &cobra.Command{
 			panic(err)
 		}
 		result := db.AutoMigrate(&user.User{}, &group.Group{}, &token.Token{}, &notice.Notice{},
-			&ticket.Ticket{}, &chat.Chat{}, &region.Region{}, &zone.Zone{}, &node.Node{}, &nodestorage.NodeStorage{},
-			&nodenic.NodeNIC{}, &vm.VM{}, &storage.Storage{}, &nic.NIC{})
+			&ticket.Ticket{}, &chat.Chat{}, &region.Region{}, &zone.Zone{}, &node.Node{}, &nodeStorage.Storage{},
+			&nodeNIC.NIC{}, &vm.VM{}, &storage.Storage{}, &nic.NIC{})
 		log.Println(result.Error)
 		log.Println("end")
 	},
