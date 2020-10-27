@@ -14,7 +14,7 @@ type Storage struct {
 	gorm.Model
 	NodeID      uint   `json:"node_id"`
 	AdminOnly   *bool  `json:"admin"`
-	Name        uint   `json:"name"`
+	Name        string `json:"name"`
 	Type        uint   `json:"type"`
 	Path        string `json:"path"`
 	MaxCapacity uint   `json:"max_capacity"`
