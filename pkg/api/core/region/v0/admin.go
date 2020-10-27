@@ -6,6 +6,7 @@ import (
 	auth "github.com/vmmgr/controller/pkg/api/core/auth/v0"
 	"github.com/vmmgr/controller/pkg/api/core/region"
 	dbRegion "github.com/vmmgr/controller/pkg/api/store/region/v0"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -18,7 +19,8 @@ func AddAdmin(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, region.Result{Status: false, Error: resultAdmin.Err.Error()})
 		return
 	}
-	c.BindJSON(&input)
+	err := c.BindJSON(&input)
+	log.Println(err)
 
 	if err := check(input); err != nil {
 		c.JSON(http.StatusBadRequest, region.Result{Status: false, Error: err.Error()})
@@ -60,7 +62,8 @@ func UpdateAdmin(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, region.Result{Status: false, Error: resultAdmin.Err.Error()})
 		return
 	}
-	c.BindJSON(&input)
+	err := c.BindJSON(&input)
+	log.Println(err)
 
 	tmp := dbRegion.Get(region.ID, &region.Region{Model: gorm.Model{ID: input.ID}})
 	if tmp.Err != nil {
@@ -95,7 +98,7 @@ func GetAdmin(c *gin.Context) {
 
 	result := dbRegion.Get(region.ID, &region.Region{Model: gorm.Model{ID: uint(id)}})
 	if result.Err != nil {
-		c.JSON(http.StatusInternalServerError, region.Result{Status: false, Error: err.Error()})
+		c.JSON(http.StatusInternalServerError, region.Result{Status: false, Error: result.Err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, region.Result{Status: true, Region: result.Region})
