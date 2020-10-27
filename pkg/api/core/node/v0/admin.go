@@ -4,9 +4,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	auth "github.com/vmmgr/controller/pkg/api/core/auth/v0"
+	"github.com/vmmgr/controller/pkg/api/core/group"
 	"github.com/vmmgr/controller/pkg/api/core/node"
 	"github.com/vmmgr/controller/pkg/api/core/region"
+	"github.com/vmmgr/controller/pkg/api/core/region/zone"
+	dbGroup "github.com/vmmgr/controller/pkg/api/store/group/v0"
 	dbNode "github.com/vmmgr/controller/pkg/api/store/node/v0"
+	dbZone "github.com/vmmgr/controller/pkg/api/store/region/zone/v0"
 	"log"
 	"net/http"
 	"strconv"
@@ -26,6 +30,17 @@ func AddAdmin(c *gin.Context) {
 	if err := check(input); err != nil {
 		c.JSON(http.StatusBadRequest, node.Result{Status: false, Error: err.Error()})
 		return
+	}
+
+	if resultZone := dbZone.Get(zone.ID, &zone.Zone{Model: gorm.Model{ID: input.ZoneID}}); resultZone.Err != nil {
+		c.JSON(http.StatusBadRequest, node.Result{Status: false, Error: "This zone is not found..."})
+		return
+	}
+	if input.GroupID != 0 {
+		if resultGroup := dbGroup.Get(group.ID, &group.Group{Model: gorm.Model{ID: input.GroupID}}); resultGroup.Err != nil {
+			c.JSON(http.StatusBadRequest, node.Result{Status: false, Error: "This group is not found..."})
+			return
+		}
 	}
 
 	if _, err := dbNode.Create(&input); err != nil {
