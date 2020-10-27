@@ -31,7 +31,7 @@ type VM struct {
 	Memory   uint   `json:"memory"`
 	VNCPort  uint   `json:"vnc_port"`
 	Boot     uint   `json:"boot"` //0: hd 1:cdrom 2:floppy
-	Lock     bool   `json:"lock"`
+	Lock     *bool  `json:"lock"`
 }
 
 type Result struct {
