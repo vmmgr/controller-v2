@@ -14,9 +14,10 @@ type Config struct {
 }
 
 type Controller struct {
-	User  User  `json:"user"`
-	Admin Admin `json:"admin"`
-	Auth  Auth  `json:"auth"`
+	TemplateConfPath string `json:"template_path"`
+	User             User   `json:"user"`
+	Admin            Admin  `json:"admin"`
+	Auth             Auth   `json:"auth"`
 }
 
 type User struct {
