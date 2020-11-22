@@ -16,3 +16,11 @@ type Chat struct {
 	Admin     bool      `json:"admin"`
 	Message   string    `json:"message"`
 }
+
+type Node struct {
+	GroupID  uint   `json:"group_id"`
+	UUID     string `json:"uuid"`
+	Progress uint   `json:"progress"`
+	Error    error  `json:"error"`
+	Comment  string `json:"comment"`
+}
