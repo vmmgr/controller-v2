@@ -20,6 +20,7 @@ type Chat struct {
 type Node struct {
 	GroupID  uint   `json:"group_id"`
 	UUID     string `json:"uuid"`
+	FilePath string `json:"file_path"`
 	Progress uint   `json:"progress"`
 	Error    error  `json:"error"`
 	Comment  string `json:"comment"`
