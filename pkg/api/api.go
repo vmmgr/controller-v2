@@ -4,11 +4,17 @@ import (
 	"github.com/gin-gonic/gin"
 	controller "github.com/vmmgr/controller/pkg/api/core/controller/v0"
 	group "github.com/vmmgr/controller/pkg/api/core/group/v0"
+	nodeNIC "github.com/vmmgr/controller/pkg/api/core/node/nic/v0"
+	nodeStorage "github.com/vmmgr/controller/pkg/api/core/node/storage/v0"
+	node "github.com/vmmgr/controller/pkg/api/core/node/v0"
 	notice "github.com/vmmgr/controller/pkg/api/core/notice/v0"
+	region "github.com/vmmgr/controller/pkg/api/core/region/v0"
+	zone "github.com/vmmgr/controller/pkg/api/core/region/zone/v0"
 	ticket "github.com/vmmgr/controller/pkg/api/core/support/ticket/v0"
 	token "github.com/vmmgr/controller/pkg/api/core/token/v0"
 	"github.com/vmmgr/controller/pkg/api/core/tool/config"
 	user "github.com/vmmgr/controller/pkg/api/core/user/v0"
+	vm "github.com/vmmgr/controller/pkg/api/core/vm/v0"
 	"log"
 	"net/http"
 	"strconv"
@@ -26,6 +32,7 @@ func AdminRestAPI() error {
 			// Controller
 			//
 			v1.POST("/controller/chat", controller.ReceiveChatAdmin)
+			v1.POST("/controller/node", controller.ReceiveNode)
 
 			// Notice
 			//
@@ -46,6 +53,7 @@ func AdminRestAPI() error {
 			v1.PUT("/user", user.UpdateAdmin)
 			v1.GET("/user", user.GetAdmin)
 			v1.GET("/user/:id", user.GetAdmin)
+
 			//
 			// Token
 			//
@@ -78,6 +86,57 @@ func AdminRestAPI() error {
 			//v1.POST("/support/:id", chat.AddAdmin)
 			v1.GET("/support/:id", ticket.GetAdmin)
 			v1.PUT("/support/:id", ticket.UpdateAdmin)
+
+			//
+			// Region
+			//
+			v1.POST("/region", region.AddAdmin)
+			v1.GET("/region", region.GetAllAdmin)
+			v1.DELETE("/region/:id", region.DeleteAdmin)
+			v1.GET("/region/:id", region.GetAdmin)
+			v1.PUT("/region/:id", region.UpdateAdmin)
+
+			//
+			// Zone
+			//
+			v1.POST("/region/:region_id/zone", zone.AddAdmin)
+			v1.GET("/region/:region_id/zone", zone.GetAllAdmin)
+			v1.DELETE("/region/:region_id/zone/:zone_id", zone.DeleteAdmin)
+			v1.GET("/region/:region_id/zone/:zone_id", zone.GetAdmin)
+			v1.PUT("/region/:region_id/zone/:zone_id", zone.UpdateAdmin)
+
+			//
+			// Node
+			//
+			v1.POST("/node", node.AddAdmin)
+			v1.GET("/node", node.GetAllAdmin)
+			v1.DELETE("/node/:id", node.DeleteAdmin)
+			v1.GET("/node/:id", node.GetAdmin)
+			v1.PUT("/node/:id", node.UpdateAdmin)
+
+			//
+			// Node Storage
+			//
+			v1.POST("/node/:node_id/storage", nodeStorage.AddAdmin)
+			v1.GET("/node/:node_id/storage", nodeStorage.GetAllAdmin)
+			v1.DELETE("/node/:node_id/storage/:storage_id", nodeStorage.DeleteAdmin)
+			v1.GET("/node/:node_id/storage/:storage_id", nodeStorage.GetAdmin)
+			v1.PUT("/node/:node_id/storage/:storage_id", nodeStorage.UpdateAdmin)
+
+			//
+			// Node NIC
+			//
+			v1.POST("/node/:node_id/nic", nodeNIC.AddAdmin)
+			v1.GET("/node/:node_id/nic", nodeNIC.GetAllAdmin)
+			v1.DELETE("/node/:node_id/nic/:nic_id", nodeNIC.DeleteAdmin)
+			v1.GET("/node/:node_id/nic/:nic_id", nodeNIC.GetAdmin)
+			v1.PUT("/node/:node_id/nic/:nic_id", nodeNIC.UpdateAdmin)
+
+			//
+			//VM
+			//
+			v1.POST("/vm", vm.AddAdmin)
+
 		}
 	}
 	ws := router.Group("/ws")
@@ -89,6 +148,7 @@ func AdminRestAPI() error {
 	}
 
 	go ticket.HandleMessagesAdmin()
+	go vm.HandleMessages(true)
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(config.Conf.Controller.Admin.Port), router))
 	return nil
 }
@@ -101,9 +161,13 @@ func UserRestAPI() {
 	{
 		v1 := api.Group("/v1")
 		{
+			// Node
+			//
+
 			// Controller
 			//
 			v1.POST("/controller/chat", controller.ReceiveChatUser)
+			v1.POST("/controller/node", controller.ReceiveNode)
 
 			//
 			// User
@@ -128,6 +192,7 @@ func UserRestAPI() {
 			v1.GET("/token", token.Generate)
 			// delete
 			v1.DELETE("/token", token.Delete)
+
 			//
 			// Group
 			//
@@ -143,21 +208,16 @@ func UserRestAPI() {
 			v1.POST("/support", ticket.Create)
 			v1.GET("/support", ticket.GetTitle)
 			v1.GET("/support/:id", ticket.Get)
+
 			//
 			// Notice
 			//
 			v1.GET("/notice", notice.Get)
 
-			// 現在検討中
-
-			// Network JPNIC Admin
-			//v1.POST("/group/network/jpnic/admin", jpnicAdmin.Add)
-			//v1.DELETE("/group/network/jpnic/admin", jpnicAdmin.Delete)
-			//v1.GET("/group/network/jpnic/admin", jpnicAdmin.Get)
-			// Network JPNIC Tech
-			//v1.POST("/group/network/jpnic/tech", jpnicTech.Add)
-			//v1.DELETE("/group/network/jpnic/tech", jpnicTech.Delete)
-			//v1.GET("/group/network/jpnic/tech", jpnicTech.Get)
+			//
+			// VM
+			//
+			v1.POST("/vm", vm.Create)
 		}
 	}
 
@@ -166,10 +226,12 @@ func UserRestAPI() {
 		v1 := ws.Group("/v1")
 		{
 			v1.GET("/support", ticket.GetWebSocket)
+			v1.GET("/vm", vm.GetWebSocket)
 		}
 	}
 
 	go ticket.HandleMessages()
+	go vm.HandleMessages(false)
 
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(config.Conf.Controller.User.Port), router))
 }
