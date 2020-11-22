@@ -26,7 +26,7 @@ type Storage struct {
 	Type          uint   `json:"type"`
 	FileType      uint   `json:"file_type"`
 	MaxCapacity   uint   `json:"max_capacity"`
-	Path          string `json:"path"`
+	UUID          string `json:"path"`
 	ReadOnly      *bool  `json:"readonly"`
 	Comment       string `json:"comment"`
 	Lock          *bool  `json:"lock"`

@@ -1,7 +1,12 @@
 package template
 
+type Root struct {
+	Template []Template `json:"template"`
+}
+
 type Template struct {
 	ID        uint   `json:"id"`
+	UUID      string `json:"uuid"`
 	Name      string `json:"name"`
 	Tag       string `json:"tag"`
 	ImageName string `json:"image_name"`
