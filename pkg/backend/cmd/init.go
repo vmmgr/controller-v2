@@ -16,8 +16,6 @@ import (
 	"github.com/vmmgr/controller/pkg/api/core/tool/config"
 	"github.com/vmmgr/controller/pkg/api/core/user"
 	"github.com/vmmgr/controller/pkg/api/core/vm"
-	"github.com/vmmgr/node/pkg/api/core/nic"
-	"github.com/vmmgr/node/pkg/api/core/storage"
 	"log"
 	"strconv"
 )
@@ -42,7 +40,7 @@ var initCmd = &cobra.Command{
 		}
 		result := db.AutoMigrate(&user.User{}, &group.Group{}, &token.Token{}, &notice.Notice{},
 			&ticket.Ticket{}, &chat.Chat{}, &region.Region{}, &zone.Zone{}, &node.Node{}, &nodeStorage.Storage{},
-			&nodeNIC.NIC{}, &vm.VM{}, &storage.Storage{}, &nic.NIC{})
+			&nodeNIC.NIC{}, &vm.VM{})
 		log.Println(result.Error)
 		log.Println("end")
 	},
