@@ -51,7 +51,7 @@ func Update(base int, data storage.Storage) error {
 		result = db.Model(&storage.Storage{Model: gorm.Model{ID: data.ID}}).Update(storage.Storage{
 			VMID: data.VMID, NodeStorageID: data.NodeStorageID, GroupID: data.GroupID,
 			Name: data.Name, Type: data.Type, FileType: data.FileType, MaxCapacity: data.MaxCapacity,
-			Path: data.Path, ReadOnly: data.ReadOnly, Comment: data.Comment, Lock: data.Lock})
+			ReadOnly: data.ReadOnly, Comment: data.Comment, Lock: data.Lock})
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())

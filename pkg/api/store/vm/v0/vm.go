@@ -47,16 +47,13 @@ func Update(base int, data vm.VM) error {
 		result = db.Model(&vm.VM{Model: gorm.Model{ID: data.ID}}).Update(vm.VM{NodeID: data.NodeID})
 	} else if vm.UpdateGroup == base {
 		result = db.Model(&vm.VM{Model: gorm.Model{ID: data.ID}}).Update(vm.VM{GroupID: data.GroupID})
-	} else if vm.UpdateBoot == base {
-		result = db.Model(&vm.VM{Model: gorm.Model{ID: data.ID}}).Update(vm.VM{Boot: data.Boot})
 	} else if vm.UpdateInfo == base {
 		result = db.Model(&vm.VM{Model: gorm.Model{ID: data.ID}}).Update(vm.VM{
-			Name: data.Name, UUID: data.UUID, OS: data.OS, CPU: data.CPU,
-			CPUModel: data.CPUModel, Memory: data.Memory, VNCPort: data.VNCPort, Boot: data.Boot})
+			Name: data.Name, UUID: data.UUID, VNCPort: data.VNCPort})
 	} else if vm.UpdateAll == base {
 		result = db.Model(&vm.VM{Model: gorm.Model{ID: data.ID}}).Update(vm.VM{
-			NodeID: data.NodeID, GroupID: data.GroupID, Name: data.Name, UUID: data.UUID, OS: data.OS, CPU: data.CPU,
-			CPUModel: data.CPUModel, Memory: data.Memory, VNCPort: data.VNCPort, Boot: data.Boot, Lock: data.Lock})
+			NodeID: data.NodeID, GroupID: data.GroupID, Name: data.Name, UUID: data.UUID, VNCPort: data.VNCPort, Lock: data.Lock,
+		})
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
