@@ -8,6 +8,7 @@ import (
 type Config struct {
 	Controller Controller `json:"controller"`
 	DB         DB         `json:"db"`
+	ImaCon     []ImaCon   `json:"imacon"`
 	Mail       Mail       `json:"mail"`
 	Radius     Radius     `json:"radius"`
 	Slack      []Slack    `json:"slack"`
@@ -18,6 +19,13 @@ type Controller struct {
 	User             User   `json:"user"`
 	Admin            Admin  `json:"admin"`
 	Auth             Auth   `json:"auth"`
+}
+
+type ImaCon struct {
+	IP   string `json:"ip"`
+	Port uint   `json:"port"`
+	User string `json:"user"`
+	Pass string `json:"pass"`
 }
 
 type User struct {
