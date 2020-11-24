@@ -1,22 +1,113 @@
 package v0
 
 import (
+	"fmt"
+	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	auth "github.com/vmmgr/controller/pkg/api/core/auth/v0"
 	"github.com/vmmgr/controller/pkg/api/core/token"
+	"github.com/vmmgr/controller/pkg/api/core/tool/config"
+	"github.com/vmmgr/controller/pkg/api/core/tool/gen"
+	"github.com/vmmgr/controller/pkg/api/core/tool/hash"
+	"github.com/vmmgr/controller/pkg/api/core/tool/mail"
+	"github.com/vmmgr/controller/pkg/api/core/tool/notification"
+	toolToken "github.com/vmmgr/controller/pkg/api/core/tool/token"
 	user "github.com/vmmgr/controller/pkg/api/core/user"
 	dbUser "github.com/vmmgr/controller/pkg/api/store/user/v0"
+	"log"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 func AddAdmin(c *gin.Context) {
+	var input, data user.User
+
+	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
+	if resultAdmin.Err != nil {
+		c.JSON(http.StatusForbidden, token.Result{Status: false, Error: resultAdmin.Err.Error()})
+		return
+	}
+
+	c.BindJSON(&input)
+
+	if !strings.Contains(input.Email, "@") {
+		c.JSON(http.StatusBadRequest, user.Result{Status: false, Error: fmt.Sprintf("wrong email address")})
+		return
+	}
+	if input.Name == "" {
+		c.JSON(http.StatusBadRequest, user.Result{Status: false, Error: fmt.Sprintf("wrong name")})
+		return
+	}
+
+	if err := check(input); err != nil {
+		c.JSON(http.StatusBadRequest, user.Result{Status: false, Error: err.Error()})
+		return
+	}
+
+	mailToken, _ := toolToken.Generate(4)
+
+	pass := ""
+
+	// 新規ユーザ
+	if input.GroupID == 0 { //new user
+		if input.Pass == "" {
+			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: fmt.Sprintf("wrong pass")})
+			return
+		}
+		data = user.User{GroupID: 0, Name: input.Name, Email: input.Email, Pass: input.Pass, Status: 0, Level: 1,
+			MailVerify: false, MailToken: mailToken}
+
+		// グループ所属ユーザの登録
+	} else {
+		pass = gen.GenerateUUID()
+		log.Println("Email: " + input.Email)
+		log.Println("tmp_Pass: " + pass)
+
+		data = user.User{GroupID: input.GroupID, Name: input.Name, Email: input.Email, Status: 0, Level: input.Level,
+			Pass: strings.ToLower(hash.Generate(pass)), MailVerify: false, MailToken: mailToken}
+	}
+
+	//check exist for database
+	if err := dbUser.Create(&data); err != nil {
+		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error()})
+	} else {
+		attachment := slack.Attachment{}
+		attachment.AddField(slack.Field{Title: "E-Mail", Value: input.Email}).
+			AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(input.GroupID))}).
+			AddField(slack.Field{Title: "Name", Value: input.Name})
+
+		notification.SendSlack(notification.Slack{Attachment: attachment, Channel: "user", Status: true})
+
+		if pass == "" {
+			mail.SendMail(mail.Mail{
+				ToMail:  data.Email,
+				Subject: "本人確認のメールにつきまして",
+				Content: " " + input.Name + "様\n\n" + "以下のリンクから本人確認を完了してください。\n" +
+					config.Conf.Controller.User.Url + "/api/v1/user/verify/" + mailToken + "\n" +
+					"本人確認が完了次第、ログイン可能になります。\n",
+			})
+		} else {
+			mail.SendMail(mail.Mail{
+				ToMail:  data.Email,
+				Subject: "本人確認メールにつきまして",
+				Content: " " + input.Name + "様\n\n" + "以下のリンクから本人確認を完了してください。\n" +
+					config.Conf.Controller.User.Url + "/api/v1/user/verify/" + mailToken + "\n" +
+					"本人確認が完了次第、ログイン可能になります。\n" + "仮パスワード: " + pass,
+			})
+		}
+
+		c.JSON(http.StatusOK, user.Result{Status: true})
+	}
+}
+
+func GenerateAdmin(c *gin.Context) {
 	var input user.User
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
-		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: resultAdmin.Err.Error()})
+		c.JSON(http.StatusForbidden, token.Result{Status: false, Error: resultAdmin.Err.Error()})
 		return
 	}
 	c.BindJSON(&input)
@@ -31,7 +122,7 @@ func AddAdmin(c *gin.Context) {
 func DeleteAdmin(c *gin.Context) {
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
-		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: resultAdmin.Err.Error()})
+		c.JSON(http.StatusForbidden, token.Result{Status: false, Error: resultAdmin.Err.Error()})
 		return
 	}
 
@@ -53,7 +144,7 @@ func UpdateAdmin(c *gin.Context) {
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
-		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: resultAdmin.Err.Error()})
+		c.JSON(http.StatusForbidden, token.Result{Status: false, Error: resultAdmin.Err.Error()})
 		return
 	}
 	c.BindJSON(&input)
@@ -80,7 +171,7 @@ func UpdateAdmin(c *gin.Context) {
 func GetAdmin(c *gin.Context) {
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
-		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: resultAdmin.Err.Error()})
+		c.JSON(http.StatusForbidden, token.Result{Status: false, Error: resultAdmin.Err.Error()})
 		return
 	}
 	id, err := strconv.Atoi(c.Param("id"))
@@ -100,7 +191,7 @@ func GetAdmin(c *gin.Context) {
 func GetAllAdmin(c *gin.Context) {
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
-		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: resultAdmin.Err.Error()})
+		c.JSON(http.StatusForbidden, token.Result{Status: false, Error: resultAdmin.Err.Error()})
 		return
 	}
 

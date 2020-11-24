@@ -16,6 +16,7 @@ import (
 	dbNode "github.com/vmmgr/controller/pkg/api/store/node/v0"
 	nodeNIC "github.com/vmmgr/node/pkg/api/core/nic"
 	"github.com/vmmgr/node/pkg/api/core/storage"
+	"github.com/vmmgr/node/pkg/api/core/tool/cloudinit"
 	nodeVM "github.com/vmmgr/node/pkg/api/core/vm"
 	"log"
 	"net/http"
@@ -78,7 +79,8 @@ func Create(c *gin.Context) {
 
 		log.Println(imaConResult)
 		uuid := gen.GenerateUUID()
-		path := strconv.Itoa(1) + gen.GenerateUUID() + "-1.img"
+		name := strconv.Itoa(1) + gen.GenerateUUID()
+		path := name + "-1.img"
 		// path := strconv.Itoa(int(result.Group.ID)) + gen.GenerateUUID() + "-1.img"
 		gid := uint(0)
 		// Storage作成用にbodyを作成する
@@ -141,11 +143,19 @@ func Create(c *gin.Context) {
 
 		//VM作成用のデータ
 		body, _ := json.Marshal(nodeVM.VirtualMachine{
-			Name:    input.Name,
+			Name:    name,
 			Memory:  vmTemplatePlan.Mem,
 			CPUMode: 0,
 			VCPU:    vmTemplatePlan.CPU,
-			NIC:     []nodeNIC.NIC{},
+			NIC: []nodeNIC.NIC{
+				{
+					Type:   0,
+					Driver: 0,
+					Mode:   0,
+					MAC:    "",
+					Device: "br190",
+				},
+			},
 			VNCPort: 0, //VNCポートをNode側で自動生成
 			Storage: []storage.VMStorage{
 				{
@@ -156,7 +166,35 @@ func Create(c *gin.Context) {
 					Boot:     0,
 				},
 			},
+			CloudInit: cloudinit.CloudInit{
+				MetaData: cloudinit.MetaData{LocalHostName: input.Name},
+				UserData: cloudinit.UserData{
+					Password: input.Password,
+					//ChPasswd:  "{ expire: False }",
+					SshPwAuth: false,
+				},
+				NetworkConfig: cloudinit.NetworkCon{
+					Config: []cloudinit.NetworkConfig{
+						{
+							Type:       "physical",
+							Name:       "",
+							MacAddress: "",
+							Subnets: []cloudinit.NetworkConfigSubnet{
+								{
+									Type:    "static",
+									Address: "172.40.0.124",
+									Netmask: "255.255.252.0",
+									Gateway: "172.40.0.1",
+									DNS:     []string{"1.1.1.1"},
+								},
+							},
+						},
+					},
+				},
+			},
+			CloudInitApply: imageResult.Data.CloudInit,
 		})
+
 		resultVMCreateProcess, err := client.Post(
 			"http://"+resultNode.Node[0].IP+":"+strconv.Itoa(int(resultNode.Node[0].Port))+"/api/v1/vm",
 			body)
@@ -165,13 +203,13 @@ func Create(c *gin.Context) {
 			return
 		}
 		log.Println(resultVMCreateProcess)
+
+		////DB追加
+		//dbVM.Create(&vm.VM{NodeID: input.NodeID, GroupID: result.Group.ID, Name: input.Name,
+		//	UUID: input.UUID, VNCPort: input.VM.VNCPort})
 	}()
 
 	c.JSON(http.StatusOK, vm.Result{Status: true})
-
-	////DB追加
-	//dbVM.Create(&vm.VM{NodeID: input.NodeID, GroupID: result.Group.ID, Name: input.Name,
-	//	UUID: input.UUID, VNCPort: input.VM.VNCPort})
 
 }
 
