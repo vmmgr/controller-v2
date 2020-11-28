@@ -3,8 +3,12 @@ package vm
 import (
 	"github.com/gorilla/websocket"
 	"github.com/jinzhu/gorm"
+	libvirtxml "github.com/libvirt/libvirt-go-xml"
 	"github.com/vmmgr/controller/pkg/api/core/vm/nic"
 	"github.com/vmmgr/controller/pkg/api/core/vm/storage"
+	imaConStorage "github.com/vmmgr/imacon/pkg/api/core/storage"
+	nodeCloudInit "github.com/vmmgr/node/pkg/api/core/tool/cloudinit"
+	nodeVM "github.com/vmmgr/node/pkg/api/core/vm"
 	"net/http"
 	"time"
 )
@@ -76,11 +80,10 @@ type Input struct {
 }
 
 type CreateAdmin struct {
-	VM            VM              `json:"vm"`
-	Storage       storage.Storage `json:"storage"`
-	NIC           nic.NIC         `json:"nic"`
-	TemplateApply bool            `json:"template_apply"`
-	Template      Template        `json:"template"`
+	VM            nodeVM.VirtualMachine `json:"vm"`
+	NodeID        uint                  `json:"node_id"`
+	TemplateApply bool                  `json:"template_apply"`
+	Template      Template              `json:"template"`
 }
 
 type DeleteAdmin struct {
@@ -91,10 +94,8 @@ type UserInput struct {
 }
 
 type GetImaCon struct {
-	Status int `json:"status"`
-	Data   struct {
-		Path string `json:"path"`
-	} `json:"data"`
+	Status int               `json:"status"`
+	Data   imaConStorage.Get `json:"data"`
 }
 
 type VMAll struct {
@@ -103,8 +104,15 @@ type VMAll struct {
 	NIC     nic.NIC
 }
 
+type Detail struct {
+	VM   libvirtxml.Domain `json:"vm"`
+	Stat uint              `json:"stat"`
+	Node uint              `json:"node"`
+}
+
 type Template struct {
 	Name            string `json:"name"`
+	Password        string `json:"password"`
 	NodeID          uint   `json:"node_id"`
 	TemplateID      uint   `json:"template_id"`
 	TemplatePlanID  uint   `json:"template_plan_id"`
@@ -113,10 +121,29 @@ type Template struct {
 	NICType         uint   `json:"nic_type"` //0:default 1~:custom
 }
 
+type CloudInit struct {
+	HostName string                            `json:"hostname"`
+	Name     string                            `json:"name"`
+	Password string                            `json:"password"`
+	Network  nodeCloudInit.NetworkConfigSubnet `json:"network"`
+}
+
 type Result struct {
 	Status bool   `json:"status"`
 	Error  string `json:"error"`
 	VM     []VM   `json:"vm"`
+}
+
+type ResultAdmin struct {
+	Status int      `json:"status"`
+	Error  string   `json:"error"`
+	VM     []Detail `json:"vm"`
+}
+
+type ResultOneAdmin struct {
+	Status int    `json:"status"`
+	Error  string `json:"error"`
+	VM     Detail `json:"vm"`
 }
 
 type ResultOne struct {
