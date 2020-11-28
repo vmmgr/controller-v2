@@ -99,11 +99,11 @@ func AdminRestAPI() error {
 			//
 			// Zone
 			//
-			v1.POST("/region/:region_id/zone", zone.AddAdmin)
-			v1.GET("/region/:region_id/zone", zone.GetAllAdmin)
-			v1.DELETE("/region/:region_id/zone/:zone_id", zone.DeleteAdmin)
-			v1.GET("/region/:region_id/zone/:zone_id", zone.GetAdmin)
-			v1.PUT("/region/:region_id/zone/:zone_id", zone.UpdateAdmin)
+			v1.POST("/zone/:region_id", zone.AddAdmin)
+			v1.GET("/zone", zone.GetAllAdmin)
+			v1.DELETE("/zone/:region_id/:zone_id", zone.DeleteAdmin)
+			v1.GET("/zone/:region_id/:zone_id", zone.GetAdmin)
+			v1.PUT("/zone/:region_id/:zone_id", zone.UpdateAdmin)
 
 			//
 			// Node
@@ -117,26 +117,29 @@ func AdminRestAPI() error {
 			//
 			// Node Storage
 			//
-			v1.POST("/node/:node_id/storage", nodeStorage.AddAdmin)
-			v1.GET("/node/:node_id/storage", nodeStorage.GetAllAdmin)
-			v1.DELETE("/node/:node_id/storage/:storage_id", nodeStorage.DeleteAdmin)
-			v1.GET("/node/:node_id/storage/:storage_id", nodeStorage.GetAdmin)
-			v1.PUT("/node/:node_id/storage/:storage_id", nodeStorage.UpdateAdmin)
+			v1.POST("/storage/:node_id", nodeStorage.AddAdmin)
+			v1.GET("/storage/:node_id", nodeStorage.GetAllAdmin)
+			v1.DELETE("/storage/:node_id/:storage_id", nodeStorage.DeleteAdmin)
+			v1.GET("/storage/:node_id/:storage_id", nodeStorage.GetAdmin)
+			v1.PUT("/storage/:node_id/:storage_id", nodeStorage.UpdateAdmin)
 
 			//
 			// Node NIC
 			//
-			v1.POST("/node/:node_id/nic", nodeNIC.AddAdmin)
-			v1.GET("/node/:node_id/nic", nodeNIC.GetAllAdmin)
-			v1.DELETE("/node/:node_id/nic/:nic_id", nodeNIC.DeleteAdmin)
-			v1.GET("/node/:node_id/nic/:nic_id", nodeNIC.GetAdmin)
-			v1.PUT("/node/:node_id/nic/:nic_id", nodeNIC.UpdateAdmin)
+			v1.POST("/nic/:node_id", nodeNIC.AddAdmin)
+			v1.GET("/nic/:node_id", nodeNIC.GetAllAdmin)
+			v1.DELETE("/nic/:node_id/:nic_id", nodeNIC.DeleteAdmin)
+			v1.GET("/nic/:node_id/:nic_id", nodeNIC.GetAdmin)
+			v1.PUT("/nic/:node_id/:nic_id", nodeNIC.UpdateAdmin)
 
 			//
 			//VM
 			//
 			v1.POST("/vm", vm.AddAdmin)
-
+			v1.DELETE("/vm/:node_id/:uuid", vm.DeleteAdmin)
+			v1.PUT("/vm/:node_id/:uuid", vm.UpdateAdmin)
+			v1.GET("/vm/:node_id/:uuid", vm.GetAdmin)
+			v1.GET("/vm", vm.GetAllAdmin)
 		}
 	}
 	ws := router.Group("/ws")
@@ -218,6 +221,7 @@ func UserRestAPI() {
 			// VM
 			//
 			v1.POST("/vm", vm.Create)
+			v1.DELETE("/vm/:id", vm.Delete)
 		}
 	}
 
