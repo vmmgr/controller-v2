@@ -16,6 +16,7 @@ import (
 	nodeVM "github.com/vmmgr/node/pkg/api/core/vm"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -51,12 +52,18 @@ func (t *VMTemplateHandler) templateApply() error {
 
 		log.Println(imaConResult)
 		uuid := gen.GenerateUUID()
-		name := strconv.Itoa(1) + gen.GenerateUUID()
 		var path string
+		var nic string
+		var name string
+
 		if t.admin {
+			name = strconv.Itoa(0) + "-" + t.input.Name
 			path = name + "-1.img"
+			nic = t.input.NICType
 		} else {
-			path = strconv.Itoa(int(t.authUser.Group.ID)) + gen.GenerateUUID() + "-1.img"
+			name = strconv.Itoa(int(t.authUser.Group.ID)) + "-" + gen.GenerateUUID()
+			path = name + "-1.img"
+			nic = "br190"
 		}
 		gid := uint(0)
 		// Storage作成用にbodyを作成する
@@ -75,6 +82,8 @@ func (t *VMTemplateHandler) templateApply() error {
 			ReadOnly: false,
 			Path:     path,
 		})
+
+		log.Println(string(createStorageBody))
 
 		resultStorageProcess, err := client.Post(
 			"http://"+t.node.IP+":"+strconv.Itoa(int(t.node.Port))+"/api/v1/storage",
@@ -129,7 +138,7 @@ func (t *VMTemplateHandler) templateApply() error {
 					Driver: 0,
 					Mode:   0,
 					MAC:    "",
-					Device: "br190",
+					Device: nic,
 				},
 			},
 			VNCPort: 0, //VNCポートをNode側で自動生成
@@ -158,10 +167,10 @@ func (t *VMTemplateHandler) templateApply() error {
 							Subnets: []cloudinit.NetworkConfigSubnet{
 								{
 									Type:    "static",
-									Address: "172.40.0.124",
-									Netmask: "255.255.252.0",
-									Gateway: "172.40.0.1",
-									DNS:     []string{"1.1.1.1"},
+									Address: t.input.IP,
+									Netmask: t.input.NetMask,
+									Gateway: t.input.Gateway,
+									DNS:     strings.Split(t.input.DNS, ","),
 								},
 							},
 						},

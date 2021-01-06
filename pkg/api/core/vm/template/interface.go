@@ -19,3 +19,8 @@ type Plan struct {
 	Mem     uint `json:"mem"`
 	Storage uint `json:"storage"`
 }
+
+type Result struct {
+	Error error `json:"error"`
+	Root  Root  `json:"root"`
+}

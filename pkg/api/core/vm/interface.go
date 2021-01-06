@@ -48,11 +48,10 @@ type WebSocketResult struct {
 }
 
 type WebSocket struct {
-	TicketID uint
-	GroupID  uint
-	UserID   uint
-	Admin    bool
-	Socket   *websocket.Conn
+	GroupID uint
+	UserID  uint
+	Admin   bool
+	Socket  *websocket.Conn
 }
 
 type VM struct {
@@ -118,7 +117,11 @@ type Template struct {
 	TemplatePlanID  uint   `json:"template_plan_id"`
 	StorageCapacity uint   `json:"storage_capacity"`
 	StoragePathType uint   `json:"storage_path_type"`
-	NICType         uint   `json:"nic_type"` //0:default 1~:custom
+	IP              string `json:"ip"`
+	NetMask         string `json:"netmask"`
+	Gateway         string `json:"gateway"`
+	DNS             string `json:"dns"`
+	NICType         string `json:"nic_type"` //0:default 1~:custom
 }
 
 type CloudInit struct {

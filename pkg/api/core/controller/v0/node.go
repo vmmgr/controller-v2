@@ -10,8 +10,10 @@ import (
 
 func ReceiveNode(c *gin.Context) {
 	var input controller.Node
-	c.BindJSON(&input)
-
+	err := c.BindJSON(&input)
+	if err != nil {
+		log.Println(err)
+	}
 	log.Println(input)
 
 	vm.Broadcast <- vm.WebSocketResult{
@@ -20,5 +22,6 @@ func ReceiveNode(c *gin.Context) {
 		GroupID:   input.GroupID,
 		UUID:      input.UUID,
 		FilePath:  input.FilePath,
+		Message:   input.Comment,
 	}
 }

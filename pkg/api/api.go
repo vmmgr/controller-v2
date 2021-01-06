@@ -14,6 +14,7 @@ import (
 	token "github.com/vmmgr/controller/pkg/api/core/token/v0"
 	"github.com/vmmgr/controller/pkg/api/core/tool/config"
 	user "github.com/vmmgr/controller/pkg/api/core/user/v0"
+	template "github.com/vmmgr/controller/pkg/api/core/vm/template/v0"
 	vm "github.com/vmmgr/controller/pkg/api/core/vm/v0"
 	"log"
 	"net/http"
@@ -140,6 +141,18 @@ func AdminRestAPI() error {
 			v1.PUT("/vm/:node_id/:uuid", vm.UpdateAdmin)
 			v1.GET("/vm/:node_id/:uuid", vm.GetAdmin)
 			v1.GET("/vm", vm.GetAllAdmin)
+
+			//
+			//VM
+			//
+			v1.PUT("/vm/:node_id/:uuid/power", vm.StartupAdmin)
+			v1.DELETE("/vm/:node_id/:uuid/power", vm.ShutdownAdmin)
+			v1.PUT("/vm/:node_id/:uuid/reset", vm.ResetAdmin)
+
+			//
+			//Template
+			//
+			v1.GET("/template", template.Get)
 		}
 	}
 	ws := router.Group("/ws")
@@ -147,6 +160,7 @@ func AdminRestAPI() error {
 		v1 := ws.Group("/v1")
 		{
 			v1.GET("/support", ticket.GetAdminWebSocket)
+			v1.GET("/vm", vm.GetWebSocketAdmin)
 		}
 	}
 
