@@ -31,6 +31,7 @@ const (
 // channel定義(websocketで使用)
 var Clients = make(map[*WebSocket]bool)
 var Broadcast = make(chan WebSocketResult)
+var ClientBroadcast = make(chan WebSocketResult)
 
 // websocket用
 type WebSocketResult struct {

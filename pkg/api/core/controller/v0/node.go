@@ -24,4 +24,13 @@ func ReceiveNode(c *gin.Context) {
 		FilePath:  input.FilePath,
 		Message:   input.Comment,
 	}
+
+	vm.ClientBroadcast <- vm.WebSocketResult{
+		CreatedAt: time.Now(),
+		Progress:  input.Progress,
+		GroupID:   input.GroupID,
+		UUID:      input.UUID,
+		FilePath:  input.FilePath,
+		Message:   input.Comment,
+	}
 }

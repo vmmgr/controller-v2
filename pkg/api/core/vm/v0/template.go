@@ -130,7 +130,7 @@ func (t *VMTemplateHandler) templateApply() error {
 		body, _ := json.Marshal(nodeVM.VirtualMachine{
 			Name:    name,
 			Memory:  vmTemplatePlan.Mem,
-			CPUMode: 0,
+			CPUMode: 1, //host-model
 			VCPU:    vmTemplatePlan.CPU,
 			NIC: []nodeNIC.NIC{
 				{

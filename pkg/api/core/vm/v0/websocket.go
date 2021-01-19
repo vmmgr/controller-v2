@@ -64,7 +64,7 @@ func GetWebSocket(c *gin.Context) {
 
 func HandleMessages(admin bool) {
 	for {
-		msg := <-vm.Broadcast
+		msg := <-vm.ClientBroadcast
 
 		//登録されているクライアント宛にデータ送信する
 		//コントローラが管理者モードの場合

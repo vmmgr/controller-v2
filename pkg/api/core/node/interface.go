@@ -14,7 +14,7 @@ const (
 type Node struct {
 	gorm.Model
 	ZoneID    uint   `json:"zone_id"`
-	GroupID   uint   `json:"group_ids"`
+	GroupID   uint   `json:"group_id"`
 	AdminOnly *bool  `json:"admin_only"`
 	Name      string `json:"name"`
 	IP        string `json:"ip"`
