@@ -1,0 +1,5 @@
+POST http://localhost:8081/api/v1/token/generate
+Accept: application/json
+USER: user
+PASS: pass
+###

@@ -1,0 +1,25 @@
+GET http://localhost:8081/api/v1/zone
+Content-Type: application/json
+ACCESS_TOKEN: {{token}}
+
+###
+
+POST http://localhost:8081/api/v1/zone
+Content-Type: application/json
+ACCESS_TOKEN: {{token}}
+
+{
+  "region_id": 1,
+  "name": "n01",
+  "postcode": "",
+  "address": "",
+  "tel": "",
+  "mail": "",
+  "comment": ""
+}
+
+###
+
+GET http://localhost:8081/api/v1/zone
+Content-Type: application/json
+ACCESS_TOKEN: {{token}}

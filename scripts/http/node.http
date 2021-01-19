@@ -1,0 +1,26 @@
+GET http://localhost:8081/api/v1/node
+Content-Type: application/json
+ACCESS_TOKEN: {{token}}
+
+###
+
+POST http://localhost:8081/api/v1/node
+Content-Type: application/json
+ACCESS_TOKEN: {{token}}
+
+{
+  "zone_id": 1,
+  "group_id": 1,
+  "admin_only": true,
+  "name": "n01srv1",
+  "ip": "10.100.1.180",
+  "port": 8080,
+  "ws_port": 8080,
+  "manage_net": "ens1"
+}
+
+###
+
+GET http://localhost:8081/api/v1/node
+Content-Type: application/json
+ACCESS_TOKEN: {{token}}
