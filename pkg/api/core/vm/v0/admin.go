@@ -214,18 +214,15 @@ func GetAllAdmin(c *gin.Context) {
 		var res nodeAllVMResponse
 
 		response, err := client.Get("http://"+node.IP+":"+strconv.Itoa(int(node.Port))+"/api/v1/vm", "")
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, vm.Result{Status: false, Error: err.Error()})
-			return
-		}
+		if err == nil {
+			if json.Unmarshal([]byte(response), &res) != nil {
+				c.JSON(http.StatusInternalServerError, vm.Result{Status: false, Error: err.Error()})
+				return
+			}
 
-		if json.Unmarshal([]byte(response), &res) != nil {
-			c.JSON(http.StatusInternalServerError, vm.Result{Status: false, Error: err.Error()})
-			return
-		}
-
-		for _, virtualMachine := range res.Data.VM {
-			allVMs = append(allVMs, vm.Detail{VM: virtualMachine.VM, Stat: virtualMachine.Stat, Node: node.ID})
+			for _, virtualMachine := range res.Data.VM {
+				allVMs = append(allVMs, vm.Detail{VM: virtualMachine.VM, Stat: virtualMachine.Stat, Node: node.ID})
+			}
 		}
 	}
 
