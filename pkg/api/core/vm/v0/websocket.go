@@ -30,8 +30,6 @@ func GetWebSocketAdmin(c *gin.Context) {
 			delete(vm.Clients, &vm.WebSocket{Admin: true, GroupID: 0, Socket: conn})
 			break
 		}
-
-		vm.Broadcast <- msg
 	}
 }
 
