@@ -21,7 +21,8 @@ type Node struct {
 	GroupID  uint   `json:"group_id"`
 	UUID     string `json:"uuid"`
 	FilePath string `json:"file_path"`
+	Code     uint   `json:"code"` //1: Image Copy 2:VM Create
 	Progress uint   `json:"progress"`
-	Error    error  `json:"error"`
+	Status   bool   `json:"status ,string"`
 	Comment  string `json:"comment"`
 }

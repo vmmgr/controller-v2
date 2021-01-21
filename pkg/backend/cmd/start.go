@@ -3,9 +3,11 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"github.com/vmmgr/controller/pkg/api"
+	request "github.com/vmmgr/controller/pkg/api/core/request/v0"
 	"github.com/vmmgr/controller/pkg/api/core/tool/config"
 	logging "github.com/vmmgr/controller/pkg/api/core/tool/log"
 	"log"
+	"time"
 )
 
 // startCmd represents the start command
@@ -30,6 +32,18 @@ var startUserCmd = &cobra.Command{
 
 		logging.WriteLog("------Application Start(User)------")
 
+		go func() {
+			ticker := time.NewTicker(time.Minute * 10)
+			defer ticker.Stop()
+
+			for {
+				select {
+				case <-ticker.C:
+					request.AutoDelete()
+				}
+			}
+		}()
+
 		api.UserRestAPI()
 		log.Println("end")
 	},
@@ -49,6 +63,18 @@ var startAdminCmd = &cobra.Command{
 		}
 
 		logging.WriteLog("------Application Start(User)------")
+
+		go func() {
+			ticker := time.NewTicker(time.Minute * 10)
+			defer ticker.Stop()
+
+			for {
+				select {
+				case <-ticker.C:
+					request.AutoDelete()
+				}
+			}
+		}()
 
 		api.AdminRestAPI()
 		log.Println("end")

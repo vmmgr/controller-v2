@@ -41,6 +41,8 @@ type WebSocketResult struct {
 	UserToken   string    `json:"user_token"`
 	AccessToken string    `json:"access_token"`
 	UUID        string    `json:"uuid"`
+	Status      bool      `json:"status"`
+	Code        uint      `json:"code"`
 	GroupID     uint      `json:"group_id"`
 	FilePath    string    `json:"file_path"`
 	Admin       bool      `json:"admin"`
