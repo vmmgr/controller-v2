@@ -8,8 +8,9 @@ import (
 const (
 	ID                      = 0
 	UserToken               = 10
-	UserTokenAndAccessToken = 11
-	ExpiredTime             = 12
+	AccessToken             = 11
+	UserTokenAndAccessToken = 12
+	ExpiredTime             = 13
 	AdminToken              = 20
 	AddToken                = 100
 	UpdateToken             = 101

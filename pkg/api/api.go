@@ -16,6 +16,7 @@ import (
 	user "github.com/vmmgr/controller/pkg/api/core/user/v0"
 	template "github.com/vmmgr/controller/pkg/api/core/vm/template/v0"
 	vm "github.com/vmmgr/controller/pkg/api/core/vm/v0"
+	wsVNC "github.com/vmmgr/controller/pkg/api/core/wsvnc/v0"
 	"log"
 	"net/http"
 	"strconv"
@@ -161,6 +162,8 @@ func AdminRestAPI() error {
 		{
 			v1.GET("/support", ticket.GetAdminWebSocket)
 			v1.GET("/vm", vm.GetWebSocketAdmin)
+			// noVNC
+			v1.GET("/vnc/:user_token/:access_token/:node", wsVNC.Get)
 		}
 	}
 
@@ -234,8 +237,8 @@ func UserRestAPI() {
 			//
 			// VM
 			//
-			v1.POST("/vm", vm.Create)
-			v1.DELETE("/vm/:id", vm.Delete)
+			v1.POST("/vm", vm.UserCreate)
+			v1.DELETE("/vm/:id", vm.UserDelete)
 		}
 	}
 
