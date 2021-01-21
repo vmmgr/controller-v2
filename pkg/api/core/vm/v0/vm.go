@@ -11,7 +11,8 @@ import (
 	"net/http"
 )
 
-func Create(c *gin.Context) {
+// #13 Issue
+func UserCreate(c *gin.Context) {
 	var input vm.Template
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
@@ -61,7 +62,7 @@ func Create(c *gin.Context) {
 	c.JSON(http.StatusOK, vm.Result{Status: true})
 }
 
-func Delete(c *gin.Context) {
+func UserDelete(c *gin.Context) {
 	//var input vm.Template
 	//userToken := c.Request.Header.Get("USER_TOKEN")
 	//accessToken := c.Request.Header.Get("ACCESS_TOKEN")

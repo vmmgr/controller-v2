@@ -30,6 +30,8 @@ type nodeAllVMResponse struct {
 	} `json:"data"`
 }
 
+// #12 Issue
+
 func AddAdmin(c *gin.Context) {
 	var input vm.CreateAdmin
 
@@ -177,16 +179,9 @@ func GetAdmin(c *gin.Context) {
 		return
 	}
 
-	var res nodeOneVMResponse
-
-	response, err := client.Get("http://"+resultNode.Node[0].IP+":"+
-		strconv.Itoa(int(resultNode.Node[0].Port))+"/api/v1/vm/"+uuid, "")
+	res, err := Get(resultNode.Node[0].IP, resultNode.Node[0].Port, uuid)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, vm.Result{Status: false, Error: err.Error()})
-		return
-	}
-
-	if json.Unmarshal([]byte(response), &res) != nil {
+		log.Println(err)
 		c.JSON(http.StatusInternalServerError, vm.Result{Status: false, Error: err.Error()})
 		return
 	}
