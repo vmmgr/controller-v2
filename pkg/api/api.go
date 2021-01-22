@@ -5,7 +5,9 @@ import (
 	controller "github.com/vmmgr/controller/pkg/api/core/controller/v0"
 	group "github.com/vmmgr/controller/pkg/api/core/group/v0"
 	nodeNIC "github.com/vmmgr/controller/pkg/api/core/node/nic/v0"
+	pci "github.com/vmmgr/controller/pkg/api/core/node/pci/v0"
 	nodeStorage "github.com/vmmgr/controller/pkg/api/core/node/storage/v0"
+	usb "github.com/vmmgr/controller/pkg/api/core/node/usb/v0"
 	node "github.com/vmmgr/controller/pkg/api/core/node/v0"
 	notice "github.com/vmmgr/controller/pkg/api/core/notice/v0"
 	region "github.com/vmmgr/controller/pkg/api/core/region/v0"
@@ -115,6 +117,11 @@ func AdminRestAPI() error {
 			v1.DELETE("/node/:id", node.DeleteAdmin)
 			v1.GET("/node/:id", node.GetAdmin)
 			v1.PUT("/node/:id", node.UpdateAdmin)
+
+			// Node PCI
+			v1.GET("node/:id/pci", pci.Get)
+			// Node USB
+			v1.GET("node/:id/usb", usb.Get)
 
 			//
 			// Node Storage
