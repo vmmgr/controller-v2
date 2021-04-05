@@ -1,10 +1,10 @@
 package v0
 
 import (
-	"github.com/vmmgr/controller/pkg/api/core/node/nic"
+	"github.com/vmmgr/controller/pkg/api/core"
 )
 
-func updateAdminUser(input, replace nic.NIC) (nic.NIC, error) {
+func updateAdminUser(input, replace core.NIC) (core.NIC, error) {
 
 	//Name
 	if input.Name != "" {

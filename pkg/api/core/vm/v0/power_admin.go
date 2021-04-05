@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+	"github.com/vmmgr/controller/pkg/api/core"
 	"github.com/vmmgr/controller/pkg/api/core/node"
 	"github.com/vmmgr/controller/pkg/api/core/tool/client"
 	"github.com/vmmgr/controller/pkg/api/core/vm"
@@ -20,7 +21,7 @@ func StartupAdmin(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, vm.ResultAdmin{Status: http.StatusBadRequest, Error: err.Error()})
 		return
 	}
-	nodeResult := dbNode.Get(node.ID, &node.Node{Model: gorm.Model{ID: uint(nodeID)}})
+	nodeResult := dbNode.Get(node.ID, &core.Node{Model: gorm.Model{ID: uint(nodeID)}})
 	if nodeResult.Err != nil {
 		c.JSON(http.StatusBadRequest, vm.ResultAdmin{Status: http.StatusBadRequest, Error: err.Error()})
 		return
@@ -54,7 +55,7 @@ func ShutdownAdmin(c *gin.Context) {
 		return
 	}
 
-	nodeResult := dbNode.Get(node.ID, &node.Node{Model: gorm.Model{ID: uint(nodeID)}})
+	nodeResult := dbNode.Get(node.ID, &core.Node{Model: gorm.Model{ID: uint(nodeID)}})
 	if nodeResult.Err != nil {
 		c.JSON(http.StatusBadRequest, vm.ResultAdmin{Status: http.StatusBadRequest, Error: err.Error()})
 		return
@@ -81,7 +82,7 @@ func ResetAdmin(c *gin.Context) {
 		return
 	}
 
-	nodeResult := dbNode.Get(node.ID, &node.Node{Model: gorm.Model{ID: uint(nodeID)}})
+	nodeResult := dbNode.Get(node.ID, &core.Node{Model: gorm.Model{ID: uint(nodeID)}})
 	if nodeResult.Err != nil {
 		c.JSON(http.StatusBadRequest, vm.ResultAdmin{Status: http.StatusBadRequest, Error: err.Error()})
 		return

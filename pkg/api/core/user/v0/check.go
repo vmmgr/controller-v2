@@ -2,10 +2,10 @@ package v0
 
 import (
 	"fmt"
-	"github.com/vmmgr/controller/pkg/api/core/user"
+	"github.com/vmmgr/controller/pkg/api/core"
 )
 
-func check(input user.User) error {
+func check(input core.User) error {
 	// check
 	if input.Name == "" {
 		return fmt.Errorf("no data: name")

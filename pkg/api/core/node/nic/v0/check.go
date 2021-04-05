@@ -2,10 +2,10 @@ package v0
 
 import (
 	"fmt"
-	"github.com/vmmgr/controller/pkg/api/core/node/nic"
+	"github.com/vmmgr/controller/pkg/api/core"
 )
 
-func check(input nic.NIC) error {
+func check(input core.NIC) error {
 	// check
 	if input.Name == "" {
 		return fmt.Errorf("no data: name")

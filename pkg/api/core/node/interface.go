@@ -1,6 +1,8 @@
 package node
 
-import "github.com/jinzhu/gorm"
+import (
+	"github.com/vmmgr/controller/pkg/api/core"
+)
 
 const (
 	ID        = 0
@@ -11,32 +13,19 @@ const (
 	UpdateAll = 110
 )
 
-type Node struct {
-	gorm.Model
-	ZoneID    uint   `json:"zone_id"`
-	GroupID   uint   `json:"group_id"`
-	AdminOnly *bool  `json:"admin_only"`
-	Name      string `json:"name"`
-	IP        string `json:"ip"`
-	Port      uint   `json:"port"`
-	WsPort    uint   `json:"ws_port"`
-	ManageNet string `json:"manage_net"`
-	Comment   string `json:"comment"`
-}
-
 type Result struct {
-	Status bool   `json:"status"`
-	Error  string `json:"error"`
-	Node   []Node `json:"node"`
+	Status bool        `json:"status"`
+	Error  string      `json:"error"`
+	Node   []core.Node `json:"node"`
 }
 
 type ResultOne struct {
-	Status bool   `json:"status"`
-	Error  string `json:"error"`
-	Node   Node   `json:"node"`
+	Status bool      `json:"status"`
+	Error  string    `json:"error"`
+	Node   core.Node `json:"node"`
 }
 
 type ResultDatabase struct {
 	Err  error
-	Node []Node
+	Node []core.Node
 }

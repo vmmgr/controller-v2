@@ -2,6 +2,7 @@ package v0
 
 import (
 	"fmt"
+	"github.com/vmmgr/controller/pkg/api/core"
 	"github.com/vmmgr/controller/pkg/api/core/auth"
 	"github.com/vmmgr/controller/pkg/api/core/token"
 	"github.com/vmmgr/controller/pkg/api/core/tool/config"
@@ -18,7 +19,7 @@ func AdminRadiusAuthentication(data auth.AdminStruct) auth.AdminResult {
 }
 
 func AdminAuthentication(accessToken string) auth.AdminResult {
-	tokenResult := dbToken.Get(token.AdminToken, &token.Token{AccessToken: accessToken})
+	tokenResult := dbToken.Get(token.AdminToken, &core.Token{AccessToken: accessToken})
 	if tokenResult.Err != nil {
 		return auth.AdminResult{Err: tokenResult.Err}
 	}

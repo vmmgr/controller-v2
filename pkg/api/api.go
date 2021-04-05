@@ -36,7 +36,7 @@ func AdminRestAPI() error {
 			// Controller
 			//
 			v1.POST("/controller/chat", controller.ReceiveChatAdmin)
-			v1.POST("/controller/node", controller.ReceiveNode)
+			//v1.POST("/controller/node", controller.ReceiveNode)
 
 			// Notice
 			//
@@ -194,7 +194,7 @@ func UserRestAPI() {
 			// Controller
 			//
 			v1.POST("/controller/chat", controller.ReceiveChatUser)
-			v1.POST("/controller/node", controller.ReceiveNode)
+			//v1.POST("/controller/node", controller.ReceiveNode)
 
 			//
 			// User
@@ -233,7 +233,7 @@ func UserRestAPI() {
 			// Support
 			//
 			v1.POST("/support", ticket.Create)
-			v1.GET("/support", ticket.GetTitle)
+			//v1.GET("/support", ticket.GetTitle)
 			v1.GET("/support/:id", ticket.Get)
 
 			//

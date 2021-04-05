@@ -2,8 +2,8 @@ package v0
 
 import (
 	"encoding/json"
+	"github.com/vmmgr/controller/pkg/api/core"
 	"github.com/vmmgr/controller/pkg/api/core/auth"
-	"github.com/vmmgr/controller/pkg/api/core/node"
 	requestInt "github.com/vmmgr/controller/pkg/api/core/request"
 	request "github.com/vmmgr/controller/pkg/api/core/request/v0"
 	"github.com/vmmgr/controller/pkg/api/core/tool/client"
@@ -22,22 +22,23 @@ import (
 )
 
 type VMTemplateHandler struct {
-	input    vm.Template
-	node     node.Node
+	input    nodeVM.VirtualMachine
+	template vm.Template
+	node     core.Node
 	authUser auth.GroupResult
 	admin    bool
 }
 
 func NewVMAdminTemplateHandler(input VMTemplateHandler) *VMTemplateHandler {
-	return &VMTemplateHandler{input: input.input, node: input.node, admin: true}
+	return &VMTemplateHandler{template: input.template, node: input.node, admin: true}
 }
 
 func NewVMUserTemplateHandler(input VMTemplateHandler) *VMTemplateHandler {
-	return &VMTemplateHandler{input: input.input, node: input.node, authUser: input.authUser, admin: false}
+	return &VMTemplateHandler{template: input.template, node: input.node, authUser: input.authUser, admin: false}
 }
 
 func (t *VMTemplateHandler) templateApply() error {
-	vmTemplate, vmTemplatePlan, err := template.GetTemplate(t.input.TemplateID, t.input.TemplatePlanID)
+	vmTemplate, vmTemplatePlan, err := template.GetTemplate(t.template.TemplateID, t.template.TemplatePlanID)
 	if err != nil {
 		return err
 	}
@@ -57,9 +58,9 @@ func (t *VMTemplateHandler) templateApply() error {
 
 		// 管理者側
 		if t.admin {
-			name = strconv.Itoa(0) + "-" + t.input.Name
-			path = name + "-1.img"
-			nic = t.input.NICType
+			name = strconv.Itoa(0) + "-" + t.template.Name
+			path = name + ".img"
+			nic = t.template.NICType
 		} else {
 			// 管理者以外
 			name = strconv.Itoa(int(t.authUser.Group.ID)) + "-" + gen.GenerateUUID()
@@ -68,8 +69,13 @@ func (t *VMTemplateHandler) templateApply() error {
 		}
 		gid := uint(0)
 
+		storageType := 0
+		if !imageResult.Data.VirtIO {
+			storageType = 11
+		}
+
 		//VM作成用のデータ
-		body, _ := json.Marshal(nodeVM.VirtualMachine{
+		virtualMachineTemplate := nodeVM.VirtualMachine{
 			Info: gateway.Info{
 				GroupID: gid,
 				UUID:    uuid,
@@ -90,17 +96,17 @@ func (t *VMTemplateHandler) templateApply() error {
 			VNCPort: 0, //VNCポートをNode側で自動生成
 			Storage: []storage.VMStorage{
 				{
-					Type:     10, // BootDisk(virtIO)
-					FileType: 0,  //qcow2
+					Type:     uint(storageType),
+					FileType: 0, //qcow2
 					Path:     path,
 					ReadOnly: false,
 					Boot:     0,
 				},
 			},
 			CloudInit: cloudinit.CloudInit{
-				MetaData: cloudinit.MetaData{LocalHostName: t.input.Name},
+				MetaData: cloudinit.MetaData{LocalHostName: t.template.Name},
 				UserData: cloudinit.UserData{
-					Password: t.input.Password,
+					Password: t.template.Password,
 					//ChPasswd:  "{ expire: False }",
 					SshPwAuth: false,
 				},
@@ -113,10 +119,10 @@ func (t *VMTemplateHandler) templateApply() error {
 							Subnets: []cloudinit.NetworkConfigSubnet{
 								{
 									Type:    "static",
-									Address: t.input.IP,
-									Netmask: t.input.NetMask,
-									Gateway: t.input.Gateway,
-									DNS:     strings.Split(t.input.DNS, ","),
+									Address: t.template.IP,
+									Netmask: t.template.NetMask,
+									Gateway: t.template.Gateway,
+									DNS:     strings.Split(t.template.DNS, ","),
 								},
 							},
 						},
@@ -134,13 +140,28 @@ func (t *VMTemplateHandler) templateApply() error {
 					},
 					Type:     10, // BootDisk(virtIO)
 					FileType: 0,  // qcow2
-					PathType: t.input.StoragePathType,
-					Capacity: t.input.StorageCapacity,
+					PathType: t.template.StoragePathType,
+					Capacity: t.template.StorageCapacity,
 					ReadOnly: false,
 					Path:     path,
 				},
 			},
-		})
+		}
+
+		log.Println(t.template.PCI)
+
+		if t.admin {
+			if len(t.template.USB) > 0 {
+				virtualMachineTemplate.USB = t.template.USB
+			}
+			if len(t.template.PCI) > 0 {
+				virtualMachineTemplate.PCI = t.template.PCI
+			}
+		}
+
+		body, _ := json.Marshal(virtualMachineTemplate)
+
+		log.Println(string(body))
 
 		resultVMCreateProcess, err := client.Post(
 			"http://"+t.node.IP+":"+strconv.Itoa(int(t.node.Port))+"/api/v1/vm", body)
@@ -156,9 +177,9 @@ func (t *VMTemplateHandler) templateApply() error {
 
 		//DB追加
 		//if t.admin {
-		//	dbVM.Create(&vm.VM{NodeID: t.input.NodeID, GroupID: 0, Name: t.input.Name, UUID: uuid})
+		//	dbVM.Create(&core.VM{NodeID: t.input.NodeID, GroupID: 0, Name: t.input.Name, UUID: uuid})
 		//} else {
-		//	dbVM.Create(&vm.VM{NodeID: t.input.NodeID, GroupID: t.authUser.Group.ID, Name: t.input.Name, UUID: uuid})
+		//	dbVM.Create(&core.VM{NodeID: t.input.NodeID, GroupID: t.authUser.Group.ID, Name: t.input.Name, UUID: uuid})
 		//}
 	}()
 	return nil

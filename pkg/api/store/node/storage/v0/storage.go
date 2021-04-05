@@ -3,13 +3,14 @@ package v0
 import (
 	"fmt"
 	"github.com/jinzhu/gorm"
+	"github.com/vmmgr/controller/pkg/api/core"
 	"github.com/vmmgr/controller/pkg/api/core/node/storage"
 	"github.com/vmmgr/controller/pkg/api/store"
 	"log"
 	"time"
 )
 
-func Create(storage *storage.Storage) (*storage.Storage, error) {
+func Create(storage *core.Storage) (*core.Storage, error) {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -21,7 +22,7 @@ func Create(storage *storage.Storage) (*storage.Storage, error) {
 	return storage, err
 }
 
-func Delete(storage *storage.Storage) error {
+func Delete(storage *core.Storage) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -32,7 +33,7 @@ func Delete(storage *storage.Storage) error {
 	return db.Delete(storage).Error
 }
 
-func Update(base int, data storage.Storage) error {
+func Update(base int, data core.Storage) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -42,7 +43,7 @@ func Update(base int, data storage.Storage) error {
 
 	var result *gorm.DB
 	if storage.UpdateAll == base {
-		result = db.Model(&storage.Storage{Model: gorm.Model{ID: data.ID}}).Update(storage.Storage{
+		result = db.Model(&core.Storage{Model: gorm.Model{ID: data.ID}}).Update(core.Storage{
 			NodeID: data.NodeID, AdminOnly: data.AdminOnly, Type: data.Type, Path: data.Path,
 			MaxCapacity: data.MaxCapacity, Comment: data.Comment})
 	} else {
@@ -52,7 +53,7 @@ func Update(base int, data storage.Storage) error {
 	return result.Error
 }
 
-func Get(base int, data *storage.Storage) storage.ResultDatabase {
+func Get(base int, data *core.Storage) storage.ResultDatabase {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -60,7 +61,7 @@ func Get(base int, data *storage.Storage) storage.ResultDatabase {
 	}
 	defer db.Close()
 
-	var storageStruct []storage.Storage
+	var storageStruct []core.Storage
 
 	if base == storage.ID { //ID
 		err = db.First(&storageStruct, data.ID).Error
@@ -85,7 +86,7 @@ func GetAll() storage.ResultDatabase {
 	}
 	defer db.Close()
 
-	var storages []storage.Storage
+	var storages []core.Storage
 	err = db.Find(&storages).Error
 	return storage.ResultDatabase{Storage: storages, Err: err}
 }

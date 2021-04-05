@@ -2,6 +2,7 @@ package v0
 
 import (
 	"fmt"
+	"github.com/vmmgr/controller/pkg/api/core"
 	toolToken "github.com/vmmgr/controller/pkg/api/core/tool/token"
 	"github.com/vmmgr/controller/pkg/api/core/user"
 	dbUser "github.com/vmmgr/controller/pkg/api/store/user/v0"
@@ -9,8 +10,7 @@ import (
 	"strings"
 )
 
-func replaceUser(serverData, input, replace user.User) (user.User, error) {
-	updateInfo := 0
+func replaceUser(serverData, input, replace core.User) (core.User, error) {
 	//Name
 	if input.Name == "" {
 		replace.Name = serverData.Name
@@ -25,9 +25,9 @@ func replaceUser(serverData, input, replace user.User) (user.User, error) {
 		replace.MailVerify = serverData.MailVerify
 	} else {
 		if !strings.Contains(input.Email, "@") {
-			return user.User{}, fmt.Errorf("wrong email address")
+			return core.User{}, fmt.Errorf("wrong email address")
 		}
-		tmp := dbUser.Get(user.Email, &user.User{Email: input.Email})
+		tmp := dbUser.Get(user.Email, &core.User{Email: input.Email})
 		if tmp.Err != nil {
 			return replace, tmp.Err
 		}
@@ -38,7 +38,7 @@ func replaceUser(serverData, input, replace user.User) (user.User, error) {
 
 		mailToken, _ := toolToken.Generate(4)
 		replace.Email = input.Email
-		replace.MailVerify = false
+		replace.MailVerify = &[]bool{false}[0]
 		replace.MailToken = mailToken
 	}
 
@@ -49,16 +49,10 @@ func replaceUser(serverData, input, replace user.User) (user.User, error) {
 		replace.Pass = input.Pass
 	}
 
-	if serverData.Status == 0 && updateInfo == 5 {
-		replace.Status = 1
-	} else if serverData.Status == 0 && updateInfo < 5 {
-		return replace, fmt.Errorf("lack of information")
-	}
-
 	return replace, nil
 }
 
-func updateAdminUser(input, replace user.User) (user.User, error) {
+func updateAdminUser(input, replace core.User) (core.User, error) {
 	//Name
 	if input.Name != "" {
 		replace.Name = input.Name
@@ -67,9 +61,9 @@ func updateAdminUser(input, replace user.User) (user.User, error) {
 	//E-Mail
 	if input.Email != "" {
 		if !strings.Contains(input.Email, "@") {
-			return user.User{}, fmt.Errorf("wrong email address")
+			return core.User{}, fmt.Errorf("wrong email address")
 		}
-		tmp := dbUser.Get(user.Email, &user.User{Email: input.Email})
+		tmp := dbUser.Get(user.Email, &core.User{Email: input.Email})
 		if tmp.Err != nil {
 			return replace, tmp.Err
 		}
@@ -80,18 +74,13 @@ func updateAdminUser(input, replace user.User) (user.User, error) {
 
 		mailToken, _ := toolToken.Generate(4)
 		replace.Email = input.Email
-		replace.MailVerify = false
+		replace.MailVerify = &[]bool{false}[0]
 		replace.MailToken = mailToken
 	}
 
 	//Pass
 	if input.Pass != "" {
 		replace.Pass = input.Pass
-	}
-
-	//Status
-	if input.Status != replace.Status {
-		replace.Status = input.Status
 	}
 
 	//Level

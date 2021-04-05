@@ -2,10 +2,10 @@ package v0
 
 import (
 	"fmt"
-	"github.com/vmmgr/controller/pkg/api/core/vm"
+	"github.com/vmmgr/controller/pkg/api/core"
 )
 
-func check(input vm.VM) error {
+func check(input core.VM) error {
 	// check
 	if input.GroupID == 0 {
 		return fmt.Errorf("no data: groupID")

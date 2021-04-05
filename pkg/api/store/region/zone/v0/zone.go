@@ -3,13 +3,14 @@ package v0
 import (
 	"fmt"
 	"github.com/jinzhu/gorm"
+	"github.com/vmmgr/controller/pkg/api/core"
 	zone "github.com/vmmgr/controller/pkg/api/core/region/zone"
 	"github.com/vmmgr/controller/pkg/api/store"
 	"log"
 	"time"
 )
 
-func Create(zone *zone.Zone) (*zone.Zone, error) {
+func Create(zone *core.Zone) (*core.Zone, error) {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -21,7 +22,7 @@ func Create(zone *zone.Zone) (*zone.Zone, error) {
 	return zone, err
 }
 
-func Delete(zone *zone.Zone) error {
+func Delete(zone *core.Zone) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -32,7 +33,7 @@ func Delete(zone *zone.Zone) error {
 	return db.Delete(zone).Error
 }
 
-func Update(base int, data zone.Zone) error {
+func Update(base int, data core.Zone) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -42,7 +43,7 @@ func Update(base int, data zone.Zone) error {
 
 	var result *gorm.DB
 	if zone.UpdateAll == base {
-		result = db.Model(&zone.Zone{Model: gorm.Model{ID: data.ID}}).Update(zone.Zone{
+		result = db.Model(&core.Zone{Model: gorm.Model{ID: data.ID}}).Update(core.Zone{
 			Name: data.Name, Comment: data.Comment, Lock: data.Lock})
 	} else {
 		log.Println("base select error")
@@ -51,7 +52,7 @@ func Update(base int, data zone.Zone) error {
 	return result.Error
 }
 
-func Get(base int, data *zone.Zone) zone.ResultDatabase {
+func Get(base int, data *core.Zone) zone.ResultDatabase {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -59,7 +60,7 @@ func Get(base int, data *zone.Zone) zone.ResultDatabase {
 	}
 	defer db.Close()
 
-	var zoneStruct []zone.Zone
+	var zoneStruct []core.Zone
 
 	if base == zone.ID { //ID
 		err = db.First(&zoneStruct, data.ID).Error
@@ -82,7 +83,7 @@ func GetAll() zone.ResultDatabase {
 	}
 	defer db.Close()
 
-	var zones []zone.Zone
+	var zones []core.Zone
 	err = db.Find(&zones).Error
 	return zone.ResultDatabase{Zone: zones, Err: err}
 }

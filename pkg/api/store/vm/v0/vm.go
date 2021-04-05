@@ -3,13 +3,14 @@ package v0
 import (
 	"fmt"
 	"github.com/jinzhu/gorm"
+	"github.com/vmmgr/controller/pkg/api/core"
 	"github.com/vmmgr/controller/pkg/api/core/vm"
 	"github.com/vmmgr/controller/pkg/api/store"
 	"log"
 	"time"
 )
 
-func Create(vm *vm.VM) (*vm.VM, error) {
+func Create(vm *core.VM) (*core.VM, error) {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -21,7 +22,7 @@ func Create(vm *vm.VM) (*vm.VM, error) {
 	return vm, err
 }
 
-func Delete(vm *vm.VM) error {
+func Delete(vm *core.VM) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -32,7 +33,7 @@ func Delete(vm *vm.VM) error {
 	return db.Delete(vm).Error
 }
 
-func Update(base int, data vm.VM) error {
+func Update(base int, data core.VM) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -42,16 +43,16 @@ func Update(base int, data vm.VM) error {
 
 	var result *gorm.DB
 	if vm.UpdateName == base {
-		result = db.Model(&vm.VM{Model: gorm.Model{ID: data.ID}}).Update(vm.VM{Name: data.Name})
+		result = db.Model(&core.VM{Model: gorm.Model{ID: data.ID}}).Update(core.VM{Name: data.Name})
 	} else if vm.UpdateNode == base {
-		result = db.Model(&vm.VM{Model: gorm.Model{ID: data.ID}}).Update(vm.VM{NodeID: data.NodeID})
+		result = db.Model(&core.VM{Model: gorm.Model{ID: data.ID}}).Update(core.VM{NodeID: data.NodeID})
 	} else if vm.UpdateGroup == base {
-		result = db.Model(&vm.VM{Model: gorm.Model{ID: data.ID}}).Update(vm.VM{GroupID: data.GroupID})
+		result = db.Model(&core.VM{Model: gorm.Model{ID: data.ID}}).Update(core.VM{GroupID: data.GroupID})
 	} else if vm.UpdateInfo == base {
-		result = db.Model(&vm.VM{Model: gorm.Model{ID: data.ID}}).Update(vm.VM{
+		result = db.Model(&core.VM{Model: gorm.Model{ID: data.ID}}).Update(core.VM{
 			Name: data.Name, UUID: data.UUID, VNCPort: data.VNCPort})
 	} else if vm.UpdateAll == base {
-		result = db.Model(&vm.VM{Model: gorm.Model{ID: data.ID}}).Update(vm.VM{
+		result = db.Model(&core.VM{Model: gorm.Model{ID: data.ID}}).Update(core.VM{
 			NodeID: data.NodeID, GroupID: data.GroupID, Name: data.Name, UUID: data.UUID, VNCPort: data.VNCPort, Lock: data.Lock,
 		})
 	} else {
@@ -61,7 +62,7 @@ func Update(base int, data vm.VM) error {
 	return result.Error
 }
 
-func Get(base int, data *vm.VM) vm.ResultDatabase {
+func Get(base int, data *core.VM) vm.ResultDatabase {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -69,7 +70,7 @@ func Get(base int, data *vm.VM) vm.ResultDatabase {
 	}
 	defer db.Close()
 
-	var vmStruct []vm.VM
+	var vmStruct []core.VM
 
 	if base == vm.ID { //ID
 		err = db.First(&vmStruct, data.ID).Error
@@ -98,7 +99,7 @@ func GetAll() vm.ResultDatabase {
 	}
 	defer db.Close()
 
-	var vms []vm.VM
+	var vms []core.VM
 	err = db.Find(&vms).Error
 	return vm.ResultDatabase{VMs: vms, Err: err}
 }

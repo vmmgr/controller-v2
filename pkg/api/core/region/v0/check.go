@@ -2,10 +2,10 @@ package v0
 
 import (
 	"fmt"
-	"github.com/vmmgr/controller/pkg/api/core/region"
+	"github.com/vmmgr/controller/pkg/api/core"
 )
 
-func check(input region.Region) error {
+func check(input core.Region) error {
 	// check
 	if input.Name == "" {
 		return fmt.Errorf("no data: name")

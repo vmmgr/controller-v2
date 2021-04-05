@@ -3,13 +3,14 @@ package v0
 import (
 	"fmt"
 	"github.com/jinzhu/gorm"
+	"github.com/vmmgr/controller/pkg/api/core"
 	"github.com/vmmgr/controller/pkg/api/core/node/nic"
 	"github.com/vmmgr/controller/pkg/api/store"
 	"log"
 	"time"
 )
 
-func Create(nic *nic.NIC) (*nic.NIC, error) {
+func Create(nic *core.NIC) (*core.NIC, error) {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -21,7 +22,7 @@ func Create(nic *nic.NIC) (*nic.NIC, error) {
 	return nic, err
 }
 
-func Delete(nic *nic.NIC) error {
+func Delete(nic *core.NIC) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -32,7 +33,7 @@ func Delete(nic *nic.NIC) error {
 	return db.Delete(nic).Error
 }
 
-func Update(base int, data nic.NIC) error {
+func Update(base int, data core.NIC) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -42,7 +43,7 @@ func Update(base int, data nic.NIC) error {
 
 	var result *gorm.DB
 	if nic.UpdateAll == base {
-		result = db.Model(&nic.NIC{Model: gorm.Model{ID: data.ID}}).Update(nic.NIC{
+		result = db.Model(&core.NIC{Model: gorm.Model{ID: data.ID}}).Update(core.NIC{
 			NodeID: data.NodeID, GroupID: data.GroupID, AdminOnly: data.AdminOnly, Name: data.Name, Enable: data.Enable,
 			Virtual: data.Virtual, Type: data.Type, Vlan: data.Vlan, Speed: data.Speed, MAC: data.MAC,
 			Comment: data.Comment})
@@ -53,7 +54,7 @@ func Update(base int, data nic.NIC) error {
 	return result.Error
 }
 
-func Get(base int, data *nic.NIC) nic.ResultDatabase {
+func Get(base int, data *core.NIC) nic.ResultDatabase {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -61,7 +62,7 @@ func Get(base int, data *nic.NIC) nic.ResultDatabase {
 	}
 	defer db.Close()
 
-	var nicStruct []nic.NIC
+	var nicStruct []core.NIC
 
 	if base == nic.ID { //ID
 		err = db.First(&nicStruct, data.ID).Error
@@ -92,7 +93,7 @@ func GetAll() nic.ResultDatabase {
 	}
 	defer db.Close()
 
-	var nics []nic.NIC
+	var nics []core.NIC
 	err = db.Find(&nics).Error
 	return nic.ResultDatabase{NIC: nics, Err: err}
 }

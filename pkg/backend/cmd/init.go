@@ -3,19 +3,8 @@ package cmd
 import (
 	"github.com/jinzhu/gorm"
 	"github.com/spf13/cobra"
-	"github.com/vmmgr/controller/pkg/api/core/group"
-	"github.com/vmmgr/controller/pkg/api/core/node"
-	nodeNIC "github.com/vmmgr/controller/pkg/api/core/node/nic"
-	nodeStorage "github.com/vmmgr/controller/pkg/api/core/node/storage"
-	"github.com/vmmgr/controller/pkg/api/core/notice"
-	"github.com/vmmgr/controller/pkg/api/core/region"
-	"github.com/vmmgr/controller/pkg/api/core/region/zone"
-	"github.com/vmmgr/controller/pkg/api/core/support/chat"
-	"github.com/vmmgr/controller/pkg/api/core/support/ticket"
-	"github.com/vmmgr/controller/pkg/api/core/token"
+	"github.com/vmmgr/controller/pkg/api/core"
 	"github.com/vmmgr/controller/pkg/api/core/tool/config"
-	"github.com/vmmgr/controller/pkg/api/core/user"
-	"github.com/vmmgr/controller/pkg/api/core/vm"
 	"log"
 	"strconv"
 )
@@ -38,9 +27,19 @@ var initCmd = &cobra.Command{
 		if err != nil {
 			panic(err)
 		}
-		result := db.AutoMigrate(&user.User{}, &group.Group{}, &token.Token{}, &notice.Notice{},
-			&ticket.Ticket{}, &chat.Chat{}, &region.Region{}, &zone.Zone{}, &node.Node{}, &nodeStorage.Storage{},
-			&nodeNIC.NIC{}, &vm.VM{})
+		result := db.AutoMigrate(
+			&core.User{},
+			&core.Group{},
+			&core.Token{},
+			&core.Notice{},
+			&core.Ticket{},
+			&core.Chat{},
+			&core.Region{},
+			&core.Zone{},
+			&core.Node{},
+			&core.Storage{},
+			&core.NIC{},
+			&core.VM{})
 		log.Println(result.Error)
 		log.Println("end")
 	},

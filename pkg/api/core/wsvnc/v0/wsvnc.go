@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"github.com/koding/websocketproxy"
+	"github.com/vmmgr/controller/pkg/api/core"
 	"github.com/vmmgr/controller/pkg/api/core/node"
 	"github.com/vmmgr/controller/pkg/api/core/token"
 	vm "github.com/vmmgr/controller/pkg/api/core/vm/v0"
@@ -32,13 +33,13 @@ func Get(c *gin.Context) {
 	var tokenResult token.ResultDatabase
 
 	if userToken == "0" {
-		tokenResult = dbToken.Get(token.AccessToken, &token.Token{AccessToken: accessToken})
+		tokenResult = dbToken.Get(token.AccessToken, &core.Token{AccessToken: accessToken})
 		if tokenResult.Err != nil {
 			log.Println(tokenResult.Err)
 			return
 		}
 	} else {
-		tokenResult = dbToken.Get(token.UserTokenAndAccessToken, &token.Token{UserToken: userToken, AccessToken: accessToken})
+		tokenResult = dbToken.Get(token.UserTokenAndAccessToken, &core.Token{UserToken: userToken, AccessToken: accessToken})
 		if tokenResult.Err != nil {
 			log.Println(tokenResult.Err)
 			return
@@ -48,11 +49,11 @@ func Get(c *gin.Context) {
 	log.Println(tokenResult)
 
 	//管理者ではない場合
-	if !tokenResult.Token[0].Admin {
+	if !*tokenResult.Token[0].Admin {
 		//管理者ではない場合はVM Tableより検証を行う必要あり
 	}
 
-	nodeResult := dbNode.Get(node.ID, &node.Node{Model: gorm.Model{ID: uint(nodeID)}})
+	nodeResult := dbNode.Get(node.ID, &core.Node{Model: gorm.Model{ID: uint(nodeID)}})
 	if nodeResult.Err != nil {
 		log.Println(nodeResult.Err)
 		return

@@ -7,6 +7,7 @@ import (
 
 type Config struct {
 	Controller Controller `json:"controller"`
+	Node       Node       `json:"node"`
 	DB         DB         `json:"db"`
 	ImaCon     []ImaCon   `json:"imacon"`
 	Mail       Mail       `json:"mail"`
@@ -19,6 +20,10 @@ type Controller struct {
 	User             User   `json:"user"`
 	Admin            Admin  `json:"admin"`
 	Auth             Auth   `json:"auth"`
+}
+
+type Node struct {
+	User string `json:"user"`
 }
 
 type ImaCon struct {

@@ -1,10 +1,10 @@
 package v0
 
 import (
-	"github.com/vmmgr/controller/pkg/api/core/region/zone"
+	"github.com/vmmgr/controller/pkg/api/core"
 )
 
-func updateAdminUser(input, replace zone.Zone) (zone.Zone, error) {
+func updateAdminUser(input, replace core.Zone) (core.Zone, error) {
 
 	//Name
 	if input.Name != "" {

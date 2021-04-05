@@ -3,8 +3,8 @@ package v0
 import (
 	"github.com/gin-gonic/gin"
 	websocket "github.com/gorilla/websocket"
+	"github.com/vmmgr/controller/pkg/api/core"
 	auth "github.com/vmmgr/controller/pkg/api/core/auth/v0"
-	"github.com/vmmgr/controller/pkg/api/core/token"
 	"github.com/vmmgr/controller/pkg/api/core/vm"
 	"log"
 )
@@ -24,7 +24,7 @@ func GetWebSocketAdmin(c *gin.Context) {
 	//WebSocket受信
 	for {
 		var msg vm.WebSocketResult
-		err := conn.ReadJSON(&msg)
+		err = conn.ReadJSON(&msg)
 		if err != nil {
 			log.Printf("error: %v", err)
 			delete(vm.Clients, &vm.WebSocket{Admin: true, GroupID: 0, Socket: conn})
@@ -49,7 +49,7 @@ func GetWebSocket(c *gin.Context) {
 
 	defer conn.Close()
 
-	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.GroupAuthentication(0, core.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		log.Println("ws:// support error:Auth error")
 		conn.WriteMessage(websocket.TextMessage, []byte("error: auth error"))

@@ -2,10 +2,8 @@ package vm
 
 import (
 	"github.com/gorilla/websocket"
-	"github.com/jinzhu/gorm"
 	libvirtxml "github.com/libvirt/libvirt-go-xml"
-	"github.com/vmmgr/controller/pkg/api/core/vm/nic"
-	"github.com/vmmgr/controller/pkg/api/core/vm/storage"
+	"github.com/vmmgr/controller/pkg/api/core"
 	imaConStorage "github.com/vmmgr/imacon/pkg/api/core/storage"
 	nodeCloudInit "github.com/vmmgr/node/pkg/api/core/tool/cloudinit"
 	nodeVM "github.com/vmmgr/node/pkg/api/core/vm"
@@ -57,16 +55,6 @@ type WebSocket struct {
 	Socket  *websocket.Conn
 }
 
-type VM struct {
-	gorm.Model
-	NodeID  uint   `json:"node_id"`
-	GroupID uint   `json:"group_id"`
-	Name    string `json:"name"`
-	UUID    string `json:"uuid"`
-	VNCPort uint   `json:"vnc_port"`
-	Lock    *bool  `json:"lock"`
-}
-
 type Input struct {
 	NodeID   uint   `json:"node_id"`
 	GroupID  uint   `json:"group_id"`
@@ -101,9 +89,9 @@ type GetImaCon struct {
 }
 
 type VMAll struct {
-	VM      VM
-	Storage storage.Storage
-	NIC     nic.NIC
+	VM      core.VM
+	Storage core.Storage
+	NIC     core.NIC
 }
 
 type Detail struct {
@@ -113,18 +101,20 @@ type Detail struct {
 }
 
 type Template struct {
-	Name            string `json:"name"`
-	Password        string `json:"password"`
-	NodeID          uint   `json:"node_id"`
-	TemplateID      uint   `json:"template_id"`
-	TemplatePlanID  uint   `json:"template_plan_id"`
-	StorageCapacity uint   `json:"storage_capacity"`
-	StoragePathType uint   `json:"storage_path_type"`
-	IP              string `json:"ip"`
-	NetMask         string `json:"netmask"`
-	Gateway         string `json:"gateway"`
-	DNS             string `json:"dns"`
-	NICType         string `json:"nic_type"` //0:default 1~:custom
+	Name            string   `json:"name"`
+	Password        string   `json:"password"`
+	NodeID          uint     `json:"node_id"`
+	TemplateID      uint     `json:"template_id"`
+	TemplatePlanID  uint     `json:"template_plan_id"`
+	StorageCapacity uint     `json:"storage_capacity"`
+	StoragePathType uint     `json:"storage_path_type"`
+	IP              string   `json:"ip"`
+	NetMask         string   `json:"netmask"`
+	Gateway         string   `json:"gateway"`
+	DNS             string   `json:"dns"`
+	PCI             []string `json:"pci"`
+	USB             []string `json:"usb"`
+	NICType         string   `json:"nic_type"` //0:default 1~:custom
 }
 
 type CloudInit struct {
@@ -135,9 +125,9 @@ type CloudInit struct {
 }
 
 type Result struct {
-	Status bool   `json:"status"`
-	Error  string `json:"error"`
-	VM     []VM   `json:"vm"`
+	Status bool      `json:"status"`
+	Error  string    `json:"error"`
+	VM     []core.VM `json:"vm"`
 }
 
 type ResultAdmin struct {
@@ -153,14 +143,14 @@ type ResultOneAdmin struct {
 }
 
 type ResultOne struct {
-	Status bool   `json:"status"`
-	Error  string `json:"error"`
-	VM     VM     `json:"vm"`
+	Status bool    `json:"status"`
+	Error  string  `json:"error"`
+	VM     core.VM `json:"vm"`
 }
 
 type ResultDatabase struct {
 	Err error
-	VMs []VM
+	VMs []core.VM
 }
 
 var WsUpgrader = websocket.Upgrader{

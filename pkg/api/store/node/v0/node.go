@@ -3,13 +3,14 @@ package v0
 import (
 	"fmt"
 	"github.com/jinzhu/gorm"
+	"github.com/vmmgr/controller/pkg/api/core"
 	node "github.com/vmmgr/controller/pkg/api/core/node"
 	"github.com/vmmgr/controller/pkg/api/store"
 	"log"
 	"time"
 )
 
-func Create(node *node.Node) (*node.Node, error) {
+func Create(node *core.Node) (*core.Node, error) {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -21,7 +22,7 @@ func Create(node *node.Node) (*node.Node, error) {
 	return node, err
 }
 
-func Delete(node *node.Node) error {
+func Delete(node *core.Node) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -32,7 +33,7 @@ func Delete(node *node.Node) error {
 	return db.Delete(node).Error
 }
 
-func Update(base int, data node.Node) error {
+func Update(base int, data core.Node) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -42,7 +43,7 @@ func Update(base int, data node.Node) error {
 
 	var result *gorm.DB
 	if node.UpdateAll == base {
-		result = db.Model(&node.Node{Model: gorm.Model{ID: data.ID}}).Update(node.Node{
+		result = db.Model(&core.Node{Model: gorm.Model{ID: data.ID}}).Update(core.Node{
 			ZoneID: data.ZoneID, GroupID: data.GroupID, AdminOnly: data.AdminOnly, Name: data.Name, IP: data.IP,
 			Port: data.Port, WsPort: data.WsPort, ManageNet: data.ManageNet, Comment: data.Comment})
 	} else {
@@ -52,7 +53,7 @@ func Update(base int, data node.Node) error {
 	return result.Error
 }
 
-func Get(base int, data *node.Node) node.ResultDatabase {
+func Get(base int, data *core.Node) node.ResultDatabase {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -60,7 +61,7 @@ func Get(base int, data *node.Node) node.ResultDatabase {
 	}
 	defer db.Close()
 
-	var nodeStruct []node.Node
+	var nodeStruct []core.Node
 
 	if base == node.ID { //ID
 		err = db.First(&nodeStruct, data.ID).Error
@@ -87,7 +88,7 @@ func GetAll() node.ResultDatabase {
 	}
 	defer db.Close()
 
-	var nodes []node.Node
+	var nodes []core.Node
 	err = db.Find(&nodes).Error
 	return node.ResultDatabase{Node: nodes, Err: err}
 }

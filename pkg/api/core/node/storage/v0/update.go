@@ -1,10 +1,10 @@
 package v0
 
 import (
-	"github.com/vmmgr/controller/pkg/api/core/node/storage"
+	"github.com/vmmgr/controller/pkg/api/core"
 )
 
-func updateAdminUser(input, replace storage.Storage) (storage.Storage, error) {
+func updateAdminUser(input, replace core.Storage) (core.Storage, error) {
 
 	//Name
 	if input.Name != "" {

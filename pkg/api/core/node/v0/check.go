@@ -2,10 +2,10 @@ package v0
 
 import (
 	"fmt"
-	"github.com/vmmgr/controller/pkg/api/core/node"
+	"github.com/vmmgr/controller/pkg/api/core"
 )
 
-func check(input node.Node) error {
+func check(input core.Node) error {
 	// check
 	if input.ZoneID == 0 {
 		return fmt.Errorf("no data: zoneID")

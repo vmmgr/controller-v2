@@ -2,10 +2,10 @@ package v0
 
 import (
 	"fmt"
-	"github.com/vmmgr/controller/pkg/api/core/region/zone"
+	"github.com/vmmgr/controller/pkg/api/core"
 )
 
-func check(input zone.Zone) error {
+func check(input core.Zone) error {
 	// check
 	if input.RegionID == 0 {
 		return fmt.Errorf("no data: regionID")

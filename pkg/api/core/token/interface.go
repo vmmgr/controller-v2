@@ -1,9 +1,6 @@
 package token
 
-import (
-	"github.com/jinzhu/gorm"
-	"time"
-)
+import "github.com/vmmgr/controller/pkg/api/core"
 
 const (
 	ID                      = 0
@@ -17,23 +14,10 @@ const (
 	UpdateAll               = 110
 )
 
-type Token struct {
-	gorm.Model
-	ExpiredAt   time.Time `json:"expired_at"`
-	UserID      uint      `json:"user_id"`
-	AdminID     uint      `json:"admin_id"`
-	Status      uint      `json:"status"` //0: initToken(30m) 1: 30m 2:6h 3: 12h 10: 30d 11:180d
-	Admin       bool      `json:"admin"`
-	UserToken   string    `json:"user_token"`
-	TmpToken    string    `json:"tmp_token"`
-	AccessToken string    `json:"access_token"`
-	Debug       string    `json:"debug"`
-}
-
 type Result struct {
-	Status bool    `json:"status"`
-	Error  string  `json:"error"`
-	Token  []Token `json:"token"`
+	Status bool         `json:"status"`
+	Error  string       `json:"error"`
+	Token  []core.Token `json:"token"`
 }
 
 type ResultTmpToken struct {
@@ -44,5 +28,5 @@ type ResultTmpToken struct {
 
 type ResultDatabase struct {
 	Err   error
-	Token []Token
+	Token []core.Token
 }

@@ -1,18 +1,17 @@
 package auth
 
 import (
-	"github.com/vmmgr/controller/pkg/api/core/group"
-	"github.com/vmmgr/controller/pkg/api/core/user"
+	"github.com/vmmgr/controller/pkg/api/core"
 )
 
 type UserResult struct {
-	User user.User
+	User core.User
 	Err  error
 }
 
 type GroupResult struct {
-	Group group.Group
-	User  user.User
+	Group core.Group
+	User  core.User
 	Err   error
 }
 

@@ -1,10 +1,10 @@
 package v0
 
 import (
-	"github.com/vmmgr/controller/pkg/api/core/node"
+	"github.com/vmmgr/controller/pkg/api/core"
 )
 
-func updateAdminUser(input, replace node.Node) (node.Node, error) {
+func updateAdminUser(input, replace core.Node) (core.Node, error) {
 
 	//Name
 	if input.Name != "" {

@@ -3,13 +3,14 @@ package v0
 import (
 	"fmt"
 	"github.com/jinzhu/gorm"
+	"github.com/vmmgr/controller/pkg/api/core"
 	"github.com/vmmgr/controller/pkg/api/core/notice"
 	"github.com/vmmgr/controller/pkg/api/store"
 	"log"
 	"time"
 )
 
-func Create(notice *notice.Notice) (*notice.Notice, error) {
+func Create(notice *core.Notice) (*core.Notice, error) {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -21,7 +22,7 @@ func Create(notice *notice.Notice) (*notice.Notice, error) {
 	return notice, err
 }
 
-func Delete(notice *notice.Notice) error {
+func Delete(notice *core.Notice) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -32,7 +33,7 @@ func Delete(notice *notice.Notice) error {
 	return db.Delete(notice).Error
 }
 
-func Update(base int, data notice.Notice) error {
+func Update(base int, data core.Notice) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -43,7 +44,7 @@ func Update(base int, data notice.Notice) error {
 	var result *gorm.DB
 
 	if notice.UpdateAll == base {
-		result = db.Model(&notice.Notice{Model: gorm.Model{ID: data.ID}}).Update(notice.Notice{
+		result = db.Model(&core.Notice{Model: gorm.Model{ID: data.ID}}).Update(core.Notice{
 			UserID: data.UserID, GroupID: data.GroupID, StartTime: data.StartTime, EndingTime: data.EndingTime,
 			Important: data.Important, Fault: data.Fault, Info: data.Info, Title: data.Title, Data: data.Data})
 	} else {
@@ -53,7 +54,7 @@ func Update(base int, data notice.Notice) error {
 	return result.Error
 }
 
-func Get(base int, data *notice.Notice) notice.ResultDatabase {
+func Get(base int, data *core.Notice) notice.ResultDatabase {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -61,7 +62,7 @@ func Get(base int, data *notice.Notice) notice.ResultDatabase {
 	}
 	defer db.Close()
 
-	var noticeStruct []notice.Notice
+	var noticeStruct []core.Notice
 
 	dateTime := time.Now().Unix()
 
@@ -101,7 +102,7 @@ func GetAll() notice.ResultDatabase {
 	}
 	defer db.Close()
 
-	var notices []notice.Notice
+	var notices []core.Notice
 	err = db.Find(&notices).Error
 	return notice.ResultDatabase{Notice: notices, Err: err}
 }

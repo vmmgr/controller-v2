@@ -1,6 +1,8 @@
 package region
 
-import "github.com/jinzhu/gorm"
+import (
+	"github.com/vmmgr/controller/pkg/api/core"
+)
 
 const (
 	ID        = 0
@@ -8,26 +10,19 @@ const (
 	UpdateAll = 110
 )
 
-type Region struct {
-	gorm.Model
-	Name    string `json:"name"`
-	Comment string `json:"comment"`
-	Lock    *bool  `json:"lock"`
-}
-
 type Result struct {
-	Status bool     `json:"status"`
-	Error  string   `json:"error"`
-	Region []Region `json:"region"`
+	Status bool          `json:"status"`
+	Error  string        `json:"error"`
+	Region []core.Region `json:"region"`
 }
 
 type ResultOne struct {
-	Status bool   `json:"status"`
-	Error  string `json:"error"`
-	Region Region `json:"region"`
+	Status bool        `json:"status"`
+	Error  string      `json:"error"`
+	Region core.Region `json:"region"`
 }
 
 type ResultDatabase struct {
 	Err    error
-	Region []Region
+	Region []core.Region
 }

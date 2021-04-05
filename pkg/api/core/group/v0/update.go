@@ -1,8 +1,10 @@
 package v0
 
-import "github.com/vmmgr/controller/pkg/api/core/group"
+import (
+	"github.com/vmmgr/controller/pkg/api/core"
+)
 
-func updateAdminUser(input, replace group.Group) (group.Group, error) {
+func updateAdminUser(input, replace core.Group) (core.Group, error) {
 
 	// uint boolean
 	//Lock

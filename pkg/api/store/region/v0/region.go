@@ -3,13 +3,14 @@ package v0
 import (
 	"fmt"
 	"github.com/jinzhu/gorm"
+	"github.com/vmmgr/controller/pkg/api/core"
 	region "github.com/vmmgr/controller/pkg/api/core/region"
 	"github.com/vmmgr/controller/pkg/api/store"
 	"log"
 	"time"
 )
 
-func Create(region *region.Region) (*region.Region, error) {
+func Create(region *core.Region) (*core.Region, error) {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -21,7 +22,7 @@ func Create(region *region.Region) (*region.Region, error) {
 	return region, err
 }
 
-func Delete(region *region.Region) error {
+func Delete(region *core.Region) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -32,7 +33,7 @@ func Delete(region *region.Region) error {
 	return db.Delete(region).Error
 }
 
-func Update(base int, data region.Region) error {
+func Update(base int, data core.Region) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -42,7 +43,7 @@ func Update(base int, data region.Region) error {
 
 	var result *gorm.DB
 	if region.UpdateAll == base {
-		result = db.Model(&region.Region{Model: gorm.Model{ID: data.ID}}).Update(region.Region{
+		result = db.Model(&core.Region{Model: gorm.Model{ID: data.ID}}).Update(core.Region{
 			Name: data.Name, Comment: data.Comment, Lock: data.Lock})
 	} else {
 		log.Println("base select error")
@@ -51,7 +52,7 @@ func Update(base int, data region.Region) error {
 	return result.Error
 }
 
-func Get(base int, data *region.Region) region.ResultDatabase {
+func Get(base int, data *core.Region) region.ResultDatabase {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -59,7 +60,7 @@ func Get(base int, data *region.Region) region.ResultDatabase {
 	}
 	defer db.Close()
 
-	var regionStruct []region.Region
+	var regionStruct []core.Region
 
 	if base == region.ID { //ID
 		err = db.First(&regionStruct, data.ID).Error
@@ -80,7 +81,7 @@ func GetAll() region.ResultDatabase {
 	}
 	defer db.Close()
 
-	var regions []region.Region
+	var regions []core.Region
 	err = db.Find(&regions).Error
 	return region.ResultDatabase{Region: regions, Err: err}
 }

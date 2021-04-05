@@ -2,6 +2,7 @@ package v0
 
 import (
 	"github.com/jinzhu/gorm"
+	"github.com/vmmgr/controller/pkg/api/core"
 	"github.com/vmmgr/controller/pkg/api/core/token"
 	dbToken "github.com/vmmgr/controller/pkg/api/store/token/v0"
 	"log"
@@ -15,12 +16,12 @@ func TokenRemove() {
 		for {
 			select {
 			case <-t.C:
-				result := dbToken.Get(token.ExpiredTime, &token.Token{})
+				result := dbToken.Get(token.ExpiredTime, &core.Token{})
 				if result.Err != nil {
 					log.Println(result.Err)
 				}
 				for _, tmp := range result.Token {
-					dbToken.Delete(&token.Token{Model: gorm.Model{ID: tmp.ID}})
+					dbToken.Delete(&core.Token{Model: gorm.Model{ID: tmp.ID}})
 				}
 			}
 		}

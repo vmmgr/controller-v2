@@ -1,10 +1,10 @@
 package v0
 
 import (
-	"github.com/vmmgr/controller/pkg/api/core/notice"
+	"github.com/vmmgr/controller/pkg/api/core"
 )
 
-func updateAdminUser(input, replace notice.Notice) (notice.Notice, error) {
+func updateAdminUser(input, replace core.Notice) (core.Notice, error) {
 
 	//Title
 	if input.Title != "" {

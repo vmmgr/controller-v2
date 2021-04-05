@@ -1,8 +1,10 @@
 package v0
 
-import "github.com/vmmgr/controller/pkg/api/core/vm"
+import (
+	"github.com/vmmgr/controller/pkg/api/core"
+)
 
-func updateAdminUser(input, replace vm.VM) (vm.VM, error) {
+func updateAdminUser(input, replace core.VM) (core.VM, error) {
 
 	//Name
 	if input.Name != "" {

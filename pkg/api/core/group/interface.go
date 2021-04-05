@@ -1,7 +1,7 @@
 package group
 
 import (
-	"github.com/jinzhu/gorm"
+	"github.com/vmmgr/controller/pkg/api/core"
 )
 
 const (
@@ -16,37 +16,25 @@ const (
 	UpdateAll    = 110
 )
 
-type Group struct {
-	gorm.Model
-	Org       string `json:"org"`
-	Status    uint   `json:"status"`
-	Comment   string `json:"comment"`
-	Vlan      uint   `json:"vlan"`
-	Lock      bool   `json:"lock"`
-	MaxVM     uint   `json:"max_VM"`
-	MaxCPU    uint   `json:"max_cpu"`
-	MaxMemory uint   `json:"max_memory"`
-}
-
 type Result struct {
-	Status bool    `json:"status"`
-	Error  string  `json:"error"`
-	Group  []Group `json:"group"`
+	Status bool         `json:"status"`
+	Error  string       `json:"error"`
+	Group  []core.Group `json:"group"`
 }
 
 type ResultOne struct {
-	Status bool   `json:"status"`
-	Error  string `json:"error"`
-	Group  Group  `json:"group"`
+	Status bool       `json:"status"`
+	Error  string     `json:"error"`
+	Group  core.Group `json:"group"`
 }
 
 type ResultAll struct {
-	Status bool   `json:"status"`
-	Error  string `json:"error"`
-	Group  Group  `json:"group"`
+	Status bool       `json:"status"`
+	Error  string     `json:"error"`
+	Group  core.Group `json:"group"`
 }
 
 type ResultDatabase struct {
 	Err   error
-	Group []Group
+	Group []core.Group
 }

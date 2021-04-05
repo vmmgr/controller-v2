@@ -2,10 +2,10 @@ package v0
 
 import (
 	"fmt"
-	"github.com/vmmgr/controller/pkg/api/core/node/storage"
+	"github.com/vmmgr/controller/pkg/api/core"
 )
 
-func check(input storage.Storage) error {
+func check(input core.Storage) error {
 	// check
 	if input.Name == "" {
 		return fmt.Errorf("no data: name")
