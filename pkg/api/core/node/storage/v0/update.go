@@ -22,9 +22,6 @@ func updateAdminUser(input, replace core.Storage) (core.Storage, error) {
 	if replace.NodeID != input.NodeID {
 		replace.NodeID = input.NodeID
 	}
-	if replace.MaxCapacity != input.MaxCapacity {
-		replace.MaxCapacity = input.MaxCapacity
-	}
 	if replace.Type != input.Type {
 		replace.Type = input.Type
 	}

@@ -64,7 +64,7 @@ func Get(base int, data *core.Node) node.ResultDatabase {
 	var nodeStruct []core.Node
 
 	if base == node.ID { //ID
-		err = db.First(&nodeStruct, data.ID).Error
+		err = db.First(&nodeStruct, data.ID).Preload("Storage").Preload("VM").Error
 	} else if base == node.ZoneID { //Zone内の全VM検索
 		err = db.Where("zone_id = ?", data.ZoneID).Find(&nodeStruct).Error
 	} else if base == node.GroupID { //GroupID

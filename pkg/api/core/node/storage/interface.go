@@ -13,8 +13,6 @@ const (
 )
 
 type Result struct {
-	Status  bool           `json:"status"`
-	Error   string         `json:"error"`
 	Storage []core.Storage `json:"storage"`
 }
 

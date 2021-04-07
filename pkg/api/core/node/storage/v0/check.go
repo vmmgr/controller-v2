@@ -16,10 +16,7 @@ func check(input core.Storage) error {
 	if input.Path == "" {
 		return fmt.Errorf("no data: path")
 	}
-	if input.MaxCapacity == 0 {
-		return fmt.Errorf("no data: Max capacity")
-	}
-	if input.Type == 0 {
+	if *input.Type == 0 {
 		return fmt.Errorf("no data: type")
 	}
 

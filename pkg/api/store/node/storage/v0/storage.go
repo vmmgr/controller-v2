@@ -44,8 +44,7 @@ func Update(base int, data core.Storage) error {
 	var result *gorm.DB
 	if storage.UpdateAll == base {
 		result = db.Model(&core.Storage{Model: gorm.Model{ID: data.ID}}).Update(core.Storage{
-			NodeID: data.NodeID, AdminOnly: data.AdminOnly, Type: data.Type, Path: data.Path,
-			MaxCapacity: data.MaxCapacity, Comment: data.Comment})
+			NodeID: data.NodeID, AdminOnly: data.AdminOnly, Type: data.Type, Path: data.Path, Comment: data.Comment})
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
@@ -64,7 +63,7 @@ func Get(base int, data *core.Storage) storage.ResultDatabase {
 	var storageStruct []core.Storage
 
 	if base == storage.ID { //ID
-		err = db.First(&storageStruct, data.ID).Error
+		err = db.First(&storageStruct, data.ID).Preload("Node").Error
 	} else if base == storage.NodeID { //Node内の全Storage検索
 		err = db.Where("node_id = ?", data.NodeID).Find(&storageStruct).Error
 	} else if base == storage.AdminOnly { //Node StorageID とVMIDから検索

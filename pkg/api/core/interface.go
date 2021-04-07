@@ -85,6 +85,7 @@ type Region struct {
 	Name    string `json:"name"`
 	Comment string `json:"comment"`
 	Lock    *bool  `json:"lock"`
+	Zone    []Zone `json:"zone"`
 }
 
 type Zone struct {
@@ -97,30 +98,40 @@ type Zone struct {
 	Mail     string `json:"mail"`
 	Comment  string `json:"comment"`
 	Lock     *bool  `json:"lock"`
+	Node     []Node `json:"node"`
 }
 
 type Node struct {
 	gorm.Model
-	ZoneID    uint   `json:"zone_id"`
-	GroupID   uint   `json:"group_id"`
-	AdminOnly *bool  `json:"admin_only"`
-	Name      string `json:"name"`
-	IP        string `json:"ip"`
-	Port      uint   `json:"port"`
-	WsPort    uint   `json:"ws_port"`
-	ManageNet string `json:"manage_net"`
-	Comment   string `json:"comment"`
+	ZoneID    uint      `json:"zone_id"`
+	GroupID   uint      `json:"group_id"`
+	AdminOnly *bool     `json:"admin_only"`
+	Name      string    `json:"name"`
+	UserName  string    `json:"username"`
+	Password  string    `json:"password"`
+	PublicKey string    `json:"public_key" gorm:"size:65535"`
+	UseKey    *bool     `json:"use_key"`
+	IP        string    `json:"ip"`
+	Port      uint      `json:"port"`
+	WsPort    uint      `json:"ws_port"`
+	ManageNet string    `json:"manage_net"`
+	Storage   []Storage `json:"storage"`
+	VM        []VM      `json:"vm"`
+	Comment   string    `json:"comment"`
 }
 
+// [Type] 1:HDD 2:SSD 3:NVMe
+// [VMImage] true: VMImage格納 false:ISO,Floppyデータ格納時
 type Storage struct {
 	gorm.Model
-	NodeID      uint   `json:"node_id"`
-	AdminOnly   *bool  `json:"admin"`
-	Name        string `json:"name"`
-	Type        uint   `json:"type"`
-	Path        string `json:"path"`
-	MaxCapacity uint   `json:"max_capacity"`
-	Comment     string `json:"comment"`
+	NodeID    uint   `json:"node_id"`
+	AdminOnly *bool  `json:"admin"`
+	Name      string `json:"name"`
+	Type      *uint  `json:"type"`
+	Path      string `json:"path"`
+	VMImage   *bool  `json:"vm_image"`
+	Comment   string `json:"comment"`
+	Node      Node   `json:"node"`
 }
 
 type NIC struct {
