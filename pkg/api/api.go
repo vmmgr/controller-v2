@@ -172,7 +172,7 @@ func AdminRestAPI() error {
 			v1.POST("/vm", vm.AddAdmin)
 			v1.DELETE("/vm/:node_id/:uuid", vm.DeleteAdmin)
 			v1.PUT("/vm/:node_id/:uuid", vm.UpdateAdmin)
-			v1.GET("/vm/:node_id/:uuid", vm.GetAdmin)
+			v1.GET("/vm/:node_id/:vm_uuid", vm.GetAdmin)
 			v1.GET("/vm", vm.GetAllAdmin)
 
 			//
@@ -193,7 +193,7 @@ func AdminRestAPI() error {
 		v1 := ws.Group("/v1")
 		{
 			v1.GET("/support", ticket.GetAdminWebSocket)
-			v1.GET("/vm", vm.GetWebSocketAdmin)
+			v1.GET("/vm/list", vm.GetListWebSocketAdmin)
 			v1.GET("/storage/progress", storage.GetWebSocketProgressAdmin)
 			// noVNC
 			v1.GET("/vnc/:user_token/:access_token/:node", wsVNC.Get)
@@ -201,7 +201,7 @@ func AdminRestAPI() error {
 	}
 
 	go ticket.HandleMessagesAdmin()
-	go vm.HandleMessages(true)
+	go vm.ListHandleMessages(true)
 	go storage.HandleMessagesProgress(true)
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(config.Conf.Controller.Admin.Port), router))
 	return nil
@@ -281,12 +281,12 @@ func UserRestAPI() {
 		v1 := ws.Group("/v1")
 		{
 			v1.GET("/support", ticket.GetWebSocket)
-			v1.GET("/vm", vm.GetWebSocket)
+			v1.GET("/vm", vm.GetListWebSocket)
 		}
 	}
 
 	go ticket.HandleMessages()
-	go vm.HandleMessages(false)
+	go vm.ListHandleMessages(false)
 
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(config.Conf.Controller.User.Port), router))
 }

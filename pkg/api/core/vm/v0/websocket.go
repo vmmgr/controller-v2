@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-func GetWebSocketAdmin(c *gin.Context) {
+func GetListWebSocketAdmin(c *gin.Context) {
 	conn, err := vm.WsUpgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		log.Printf("Failed to set websocket upgrade: %+v\n", err)
@@ -52,7 +52,7 @@ func GetWebSocketAdmin(c *gin.Context) {
 	}
 }
 
-func GetWebSocket(c *gin.Context) {
+func GetListWebSocket(c *gin.Context) {
 
 	// /vm?user_token=accessID?access_token=token
 	//  user_token = UserToken, access_token = AccessToken
@@ -79,7 +79,7 @@ func GetWebSocket(c *gin.Context) {
 	vm.Clients[&vm.WebSocket{Admin: false, UserID: result.User.ID, GroupID: result.Group.ID, Socket: conn}] = true
 }
 
-func HandleMessages(admin bool) {
+func ListHandleMessages(admin bool) {
 	for {
 		msg := <-vm.ClientBroadcast
 
@@ -142,9 +142,10 @@ func GetWebSocketAdminVM(node core.Node, uuid string) {
 
 	for _, dom := range doms {
 		t := libVirtXml.Domain{}
-		//stat, _, _ := dom.GetState()
+		stat, _, _ := dom.GetState()
 		xmlString, _ := dom.GetXMLDesc(libvirt.DOMAIN_XML_SECURE)
 		xml.Unmarshal([]byte(xmlString), &t)
+
 		vm.ClientBroadcast <- vm.WebSocketResult{
 			NodeID:      node.ID,
 			Name:        t.Name,
@@ -158,6 +159,7 @@ func GetWebSocketAdminVM(node core.Node, uuid string) {
 			Memory:      t.Memory.Value,
 			Code:        0,
 			GroupID:     0,
+			Status:      int(stat),
 			FilePath:    "",
 			Admin:       false,
 			Message:     "",
