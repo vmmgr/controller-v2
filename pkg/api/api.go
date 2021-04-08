@@ -170,17 +170,19 @@ func AdminRestAPI() error {
 			//VM
 			//
 			v1.POST("/vm", vm.AddAdmin)
-			v1.DELETE("/vm/:node_id/:uuid", vm.DeleteAdmin)
-			v1.PUT("/vm/:node_id/:uuid", vm.UpdateAdmin)
+			v1.DELETE("/vm/:node_id/:vm_uuid", vm.DeleteAdmin)
+			v1.PUT("/vm/:node_id/:vm_uuid", vm.UpdateAdmin)
 			v1.GET("/vm/:node_id/:vm_uuid", vm.GetAdmin)
 			v1.GET("/vm", vm.GetAllAdmin)
 
 			//
 			//VM
 			//
-			v1.PUT("/vm/:node_id/:uuid/power", vm.StartupAdmin)
-			v1.DELETE("/vm/:node_id/:uuid/power", vm.ShutdownAdmin)
-			v1.PUT("/vm/:node_id/:uuid/reset", vm.ResetAdmin)
+			v1.PUT("/vm/:node_id/:vm_uuid/power", vm.StartupAdmin)
+			v1.DELETE("/vm/:node_id/:vm_uuid/power", vm.ShutdownAdmin)
+			v1.PUT("/vm/:node_id/:vm_uuid/reset", vm.ResetAdmin)
+			v1.PUT("/vm/:node_id/:vm_uuid/suspend", vm.SuspendAdmin)
+			v1.PUT("/vm/:node_id/:vm_uuid/resume", vm.ResumeAdmin)
 
 			//
 			//Template

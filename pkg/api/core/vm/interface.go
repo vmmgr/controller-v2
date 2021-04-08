@@ -86,7 +86,8 @@ type DeleteAdmin struct {
 	DeleteStorage bool `json:"delete_storage"`
 }
 
-type UserInput struct {
+type VirtualMachineStop struct {
+	Force bool `json:"force"`
 }
 
 type GetImaCon struct {
