@@ -4,9 +4,11 @@ import (
 	"github.com/gin-gonic/gin"
 	controller "github.com/vmmgr/controller/pkg/api/core/controller/v0"
 	group "github.com/vmmgr/controller/pkg/api/core/group/v0"
+	cdrom "github.com/vmmgr/controller/pkg/api/core/node/cdrom/v0"
 	nodeNIC "github.com/vmmgr/controller/pkg/api/core/node/nic/v0"
 	pci "github.com/vmmgr/controller/pkg/api/core/node/pci/v0"
 	nodeStorage "github.com/vmmgr/controller/pkg/api/core/node/storage/v0"
+	storage "github.com/vmmgr/controller/pkg/api/core/node/storage/v0"
 	usb "github.com/vmmgr/controller/pkg/api/core/node/usb/v0"
 	node "github.com/vmmgr/controller/pkg/api/core/node/v0"
 	notice "github.com/vmmgr/controller/pkg/api/core/notice/v0"
@@ -124,13 +126,36 @@ func AdminRestAPI() error {
 			v1.GET("node/:id/usb", usb.Get)
 
 			//
-			// Node Storage
+			// Storage
 			//
-			v1.POST("/storage/:node_id", nodeStorage.AddAdmin)
-			v1.GET("/storage/:node_id", nodeStorage.GetAllAdmin)
-			v1.DELETE("/storage/:node_id/:storage_id", nodeStorage.DeleteAdmin)
-			v1.GET("/storage/:node_id/:storage_id", nodeStorage.GetAdmin)
-			v1.PUT("/storage/:node_id/:storage_id", nodeStorage.UpdateAdmin)
+			//v1.POST("/storage/:node_id", nodeStorage.AddAdmin)
+			v1.GET("/storage", nodeStorage.GetAllAdmin)
+			//v1.DELETE("/storage/:node_id/:storage_id", nodeStorage.DeleteAdmin)
+			//v1.GET("/storage/:id/:storage_id", nodeStorage.GetAdmin)
+			//v1.PUT("/storage/:id/:storage_id", nodeStorage.UpdateAdmin)
+
+			//
+			// Storage Floppy
+			//
+			v1.POST("/storage/:id/floppy", cdrom.AddAdmin)
+			v1.DELETE("/storage/:id/floppy/:image_id", cdrom.DeleteAdmin)
+			v1.GET("/storage/:id/floppy", cdrom.GetAllAdmin)
+
+			//
+			// Storage CDROM
+			//
+			v1.POST("/storage/:id/cdrom", cdrom.AddAdmin)
+			v1.DELETE("/storage/:id/cdrom/:image_id", cdrom.DeleteAdmin)
+			v1.GET("/storage/:id/cdrom", cdrom.GetAllAdmin)
+			//v1.GET("/node/:id", image.GetAdmin)
+
+			//
+			// Storage VM
+			//
+			v1.POST("/storage/:id/vm", cdrom.AddAdmin)
+			v1.DELETE("/storage/:id/vm/:image_id", cdrom.DeleteAdmin)
+			v1.GET("/storage/:id/vm", cdrom.GetAllAdmin)
+			//v1.GET("/node/:id", image.GetAdmin)
 
 			//
 			// Node NIC
@@ -169,6 +194,7 @@ func AdminRestAPI() error {
 		{
 			v1.GET("/support", ticket.GetAdminWebSocket)
 			v1.GET("/vm", vm.GetWebSocketAdmin)
+			v1.GET("/storage/progress", storage.GetWebSocketProgressAdmin)
 			// noVNC
 			v1.GET("/vnc/:user_token/:access_token/:node", wsVNC.Get)
 		}
@@ -176,6 +202,7 @@ func AdminRestAPI() error {
 
 	go ticket.HandleMessagesAdmin()
 	go vm.HandleMessages(true)
+	go storage.HandleMessagesProgress(true)
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(config.Conf.Controller.Admin.Port), router))
 	return nil
 }
