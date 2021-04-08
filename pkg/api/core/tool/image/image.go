@@ -3,12 +3,15 @@ package v0
 import (
 	"github.com/pkg/sftp"
 	"github.com/schollz/progressbar"
+	"github.com/vmmgr/controller/pkg/api/core/node/storage"
 	"golang.org/x/crypto/ssh"
 	"io"
 	"log"
 	"net/http"
 	"time"
 )
+
+var ImageDownloadProcess = false
 
 type Progress struct {
 	total int64
@@ -18,6 +21,7 @@ type Progress struct {
 type ImageHandler struct {
 	SSHClient *ssh.Client
 	DstPath   string
+	UUID      string
 }
 
 func (p *Progress) Write(data []byte) (int, error) {
@@ -28,9 +32,7 @@ func (p *Progress) Write(data []byte) (int, error) {
 }
 
 func (h ImageHandler) ImageDownload(url string) error {
-
-	log.Println(h)
-	log.Println(url)
+	ImageDownloadProcess = true
 
 	defer h.SSHClient.Close()
 
@@ -44,6 +46,7 @@ func (h ImageHandler) ImageDownload(url string) error {
 	// SFTP Client
 	client, err := sftp.NewClient(h.SSHClient)
 	if err != nil {
+		ImageDownloadProcess = false
 		return err
 	}
 	defer client.Close()
@@ -51,6 +54,7 @@ func (h ImageHandler) ImageDownload(url string) error {
 	// dstFileの作成(ssh先)
 	dstFile, err := client.Create(h.DstPath)
 	if err != nil {
+		ImageDownloadProcess = false
 		log.Println(err)
 	}
 
@@ -58,6 +62,7 @@ func (h ImageHandler) ImageDownload(url string) error {
 
 	resp, err := http.Get(url)
 	if err != nil {
+		ImageDownloadProcess = false
 		return err
 	}
 	defer resp.Body.Close()
@@ -83,10 +88,50 @@ func (h ImageHandler) ImageDownload(url string) error {
 		}
 	}()
 
+	// Client側に通知
+	go func() {
+		for {
+			if p.size != p.total {
+				<-time.NewTimer(1 * time.Second).C
+				storage.ClientBroadcast <- storage.WebSocketResult{
+					NodeID:    0,
+					Name:      "[Image Download]+URL: " + url,
+					Err:       "",
+					CreatedAt: time.Time{},
+					Status:    0,
+					Code:      0,
+					FilePath:  "",
+					Admin:     false,
+					Message:   "",
+					Progress:  uint(float64(p.size) / float64(p.total) * 100),
+					UUID:      h.UUID,
+				}
+			} else {
+				storage.ClientBroadcast <- storage.WebSocketResult{
+					Name:      "[Image Download]+URL: " + url,
+					CreatedAt: time.Time{},
+					FilePath:  "",
+					Admin:     false,
+					Message:   "Finish!!",
+					Progress:  100,
+					UUID:      h.UUID,
+				}
+				return
+			}
+		}
+	}()
+
 	// Write the body to file
 	_, err = io.Copy(dstFile, io.TeeReader(resp.Body, &p))
 	if err != nil {
+		ImageDownloadProcess = false
 		return err
 	}
+	ImageDownloadProcess = false
+
 	return nil
+}
+
+func GetImageDownloadProcess() bool {
+	return ImageDownloadProcess
 }

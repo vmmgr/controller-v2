@@ -5,5 +5,6 @@ type Error struct {
 }
 
 type Result struct {
+	UUID   string `json:"uuid"`
 	Result string `json:"result"`
 }

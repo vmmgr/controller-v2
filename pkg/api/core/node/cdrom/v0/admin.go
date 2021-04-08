@@ -9,6 +9,7 @@ import (
 	"github.com/vmmgr/controller/pkg/api/core/common"
 	cdrom "github.com/vmmgr/controller/pkg/api/core/node/cdrom"
 	"github.com/vmmgr/controller/pkg/api/core/node/storage"
+	"github.com/vmmgr/controller/pkg/api/core/tool/gen"
 	image "github.com/vmmgr/controller/pkg/api/core/tool/image"
 	"github.com/vmmgr/controller/pkg/api/core/tool/ssh"
 	dbNIC "github.com/vmmgr/controller/pkg/api/store/node/nic/v0"
@@ -47,6 +48,11 @@ func AddAdmin(c *gin.Context) {
 		return
 	}
 
+	if image.GetImageDownloadProcess() {
+		c.JSON(http.StatusServiceUnavailable, common.Error{Error: "Another process is downloading"})
+		return
+	}
+
 	resultStorage := dbStorage.Get(storage.ID, &core.Storage{Model: gorm.Model{ID: uint(id)}})
 	if resultStorage.Err != nil {
 		log.Println(resultStorage.Err)
@@ -68,14 +74,17 @@ func AddAdmin(c *gin.Context) {
 		return
 	}
 
+	uuid := gen.GenerateUUID()
+
 	imageHandler := image.ImageHandler{
 		SSHClient: conn,
 		DstPath:   resultStorage.Storage[0].Path + "/" + input.Name + ".iso",
+		UUID:      uuid,
 	}
 
 	go imageHandler.ImageDownload(input.URL)
 
-	c.JSON(http.StatusOK, common.Result{})
+	c.JSON(http.StatusOK, common.Result{UUID: uuid})
 }
 
 func DeleteAdmin(c *gin.Context) {

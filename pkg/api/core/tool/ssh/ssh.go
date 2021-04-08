@@ -28,7 +28,8 @@ func ConnectSSH(nodeID uint) (*ssh.Client, error) {
 	if *resultNode.Node[0].UseKey {
 		key, err := ssh.ParsePrivateKey([]byte(resultNode.Node[0].PublicKey))
 		if err != nil {
-			panic(err)
+			log.Println(err)
+			return nil, err
 		}
 
 		config = &ssh.ClientConfig{
