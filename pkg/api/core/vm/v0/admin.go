@@ -13,7 +13,6 @@ import (
 	"github.com/vmmgr/controller/pkg/api/core/node"
 	"github.com/vmmgr/controller/pkg/api/core/region"
 	"github.com/vmmgr/controller/pkg/api/core/tool/client"
-	"github.com/vmmgr/controller/pkg/api/core/tool/config"
 	"github.com/vmmgr/controller/pkg/api/core/vm"
 	dbNode "github.com/vmmgr/controller/pkg/api/store/node/v0"
 	dbVM "github.com/vmmgr/controller/pkg/api/store/vm/v0"
@@ -227,85 +226,6 @@ func GetAdmin(c *gin.Context) {
 		Node: uint(nodeID),
 	}})
 }
-
-func GetAllAdmin(c *gin.Context) {
-	// Todo: websocketで処理をするべきかも
-	var vms []vm.Detail
-
-	resultNode := dbNode.GetAll()
-	if resultNode.Err != nil {
-		log.Println(resultNode.Err)
-		c.JSON(http.StatusInternalServerError, common.Error{Error: resultNode.Err.Error()})
-		return
-	}
-
-	for _, tmpNode := range resultNode.Node {
-		log.Println("qemu+ssh://" + config.Conf.Node.User + "@" + tmpNode.IP + "/system")
-		//libvirt.NewConnectWithAuth()
-		conn, err := libvirt.NewConnect("qemu+ssh://" + config.Conf.Node.User + "@" + tmpNode.IP + "/system")
-		if err != nil {
-			log.Println("failed to connect to qemu: " + err.Error())
-			//return
-		}
-
-		defer conn.Close()
-
-		doms, err := conn.ListAllDomains(libvirt.CONNECT_LIST_DOMAINS_ACTIVE | libvirt.CONNECT_LIST_DOMAINS_INACTIVE)
-		log.Println(doms)
-		if err != nil {
-			log.Println(err)
-			c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
-		}
-
-		for _, dom := range doms {
-			t := libVirtXml.Domain{}
-			stat, _, _ := dom.GetState()
-			xmlString, _ := dom.GetXMLDesc(libvirt.DOMAIN_XML_SECURE)
-			xml.Unmarshal([]byte(xmlString), &t)
-
-			vms = append(vms, vm.Detail{
-				VM:   t,
-				Stat: uint(stat),
-			})
-		}
-	}
-
-	c.JSON(http.StatusOK, vm.ResultAdmin{VM: vms})
-}
-
-//func GetAllAdmin(c *gin.Context) {
-//	var allVMs []vm.Detail
-//
-//	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
-//	if resultAdmin.Err != nil {
-//		c.JSON(http.StatusUnauthorized, common.Error{ Error: resultAdmin.Err.Error()})
-//		return
-//	}
-//
-//	result := dbNode.GetAll()
-//	if result.Err != nil {
-//		c.JSON(http.StatusInternalServerError, common.Error{ Error: result.Err.Error()})
-//		return
-//	}
-//
-//	for _, node := range result.Node {
-//		var res nodeAllVMResponse
-//
-//		response, err := client.Get("http://"+node.IP+":"+strconv.Itoa(int(node.Port))+"/api/v1/vm", "")
-//		if err == nil {
-//			if json.Unmarshal([]byte(response), &res) != nil {
-//				c.JSON(http.StatusInternalServerError, common.Error{ Error: err.Error()})
-//				return
-//			}
-//
-//			for _, virtualMachine := range res.Data.VM {
-//				allVMs = append(allVMs, vm.Detail{VM: virtualMachine.VM, Status: virtualMachine.Status, Node: node.ID})
-//			}
-//		}
-//	}
-//
-//	c.JSON(http.StatusOK, vm.ResultAdmin{Status: 200, VM: allVMs})
-//}
 
 func (h *VMHandler) TestAdminGetAll() ([]vm.Detail, error) {
 	var vms []vm.Detail
