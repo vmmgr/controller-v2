@@ -33,13 +33,17 @@ var ClientBroadcast = make(chan WebSocketResult)
 
 // websocket用
 type WebSocketResult struct {
-	ID          uint      `json:"id"`
+	NodeID      uint      `json:"node_id"`
+	Name        string    `json:"name"`
 	Err         string    `json:"error"`
 	CreatedAt   time.Time `json:"created_at"`
 	UserToken   string    `json:"user_token"`
 	AccessToken string    `json:"access_token"`
 	UUID        string    `json:"uuid"`
-	Status      bool      `json:"status"`
+	UserUUID    string    `json:"user_uuid"`
+	VCPU        uint      `json:"vcpu"`
+	Memory      uint      `json:"memory"`
+	Status      int       `json:"status"`
 	Code        uint      `json:"code"`
 	GroupID     uint      `json:"group_id"`
 	FilePath    string    `json:"file_path"`
@@ -51,7 +55,9 @@ type WebSocketResult struct {
 type WebSocket struct {
 	GroupID uint
 	UserID  uint
+	UUID    string
 	Admin   bool
+	Error   error
 	Socket  *websocket.Conn
 }
 

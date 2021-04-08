@@ -1,12 +1,18 @@
 package v0
 
 import (
+	"encoding/xml"
 	"github.com/gin-gonic/gin"
 	websocket "github.com/gorilla/websocket"
+	"github.com/libvirt/libvirt-go"
+	libVirtXml "github.com/libvirt/libvirt-go-xml"
 	"github.com/vmmgr/controller/pkg/api/core"
 	auth "github.com/vmmgr/controller/pkg/api/core/auth/v0"
+	"github.com/vmmgr/controller/pkg/api/core/tool/gen"
 	"github.com/vmmgr/controller/pkg/api/core/vm"
+	dbNode "github.com/vmmgr/controller/pkg/api/store/node/v0"
 	"log"
+	"time"
 )
 
 func GetWebSocketAdmin(c *gin.Context) {
@@ -18,8 +24,21 @@ func GetWebSocketAdmin(c *gin.Context) {
 
 	defer conn.Close()
 
+	resultNode := dbNode.GetAll()
+	if resultNode.Err != nil {
+		log.Println(resultNode.Err)
+		delete(vm.Clients, &vm.WebSocket{Admin: true, GroupID: 0, Socket: conn, Error: resultNode.Err})
+		return
+	}
+
+	uuid := gen.GenerateUUID()
+
 	// WebSocket送信
-	vm.Clients[&vm.WebSocket{Admin: true, GroupID: 0, Socket: conn}] = true
+	vm.Clients[&vm.WebSocket{Admin: true, UUID: uuid, GroupID: 0, Socket: conn}] = true
+
+	for _, tmpNode := range resultNode.Node {
+		go GetWebSocketAdminVM(tmpNode, uuid)
+	}
 
 	//WebSocket受信
 	for {
@@ -89,6 +108,60 @@ func HandleMessages(admin bool) {
 					}
 				}
 			}
+		}
+	}
+}
+
+func GetWebSocketAdminVM(node core.Node, uuid string) {
+
+	log.Println("qemu+ssh://" + node.UserName + "@" + node.IP + "/system")
+	//libvirt.NewConnectWithAuth()
+	conn, err := libvirt.NewConnect("qemu+ssh://" + node.UserName + "@" + node.IP + "/system")
+	if err != nil {
+		log.Println("failed to connect to qemu: " + err.Error())
+		vm.ClientBroadcast <- vm.WebSocketResult{
+			NodeID: node.ID,
+			Err:    "failed to connect to qemu: " + err.Error(),
+		}
+		return
+	}
+
+	defer conn.Close()
+
+	doms, err := conn.ListAllDomains(libvirt.CONNECT_LIST_DOMAINS_ACTIVE | libvirt.CONNECT_LIST_DOMAINS_INACTIVE)
+	log.Println(doms)
+	if err != nil {
+		log.Println(err)
+		vm.ClientBroadcast <- vm.WebSocketResult{
+			NodeID: node.ID,
+			Err:    err.Error(),
+		}
+		return
+		//c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+	}
+
+	for _, dom := range doms {
+		t := libVirtXml.Domain{}
+		//stat, _, _ := dom.GetState()
+		xmlString, _ := dom.GetXMLDesc(libvirt.DOMAIN_XML_SECURE)
+		xml.Unmarshal([]byte(xmlString), &t)
+		vm.ClientBroadcast <- vm.WebSocketResult{
+			NodeID:      node.ID,
+			Name:        t.Name,
+			Err:         "",
+			CreatedAt:   time.Time{},
+			UserToken:   "",
+			AccessToken: "",
+			UUID:        t.UUID,
+			UserUUID:    uuid,
+			VCPU:        t.VCPU.Value,
+			Memory:      t.Memory.Value,
+			Code:        0,
+			GroupID:     0,
+			FilePath:    "",
+			Admin:       false,
+			Message:     "",
+			Progress:    0,
 		}
 	}
 }

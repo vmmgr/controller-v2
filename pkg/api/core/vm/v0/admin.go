@@ -209,6 +209,7 @@ func GetAdmin(c *gin.Context) {
 }
 
 func GetAllAdmin(c *gin.Context) {
+	// Todo: websocketで処理をするべきかも
 	var vms []vm.Detail
 
 	resultNode := dbNode.GetAll()
@@ -219,11 +220,14 @@ func GetAllAdmin(c *gin.Context) {
 	}
 
 	for _, tmpNode := range resultNode.Node {
+		log.Println("qemu+ssh://" + config.Conf.Node.User + "@" + tmpNode.IP + "/system")
+		//libvirt.NewConnectWithAuth()
 		conn, err := libvirt.NewConnect("qemu+ssh://" + config.Conf.Node.User + "@" + tmpNode.IP + "/system")
 		if err != nil {
 			log.Println("failed to connect to qemu: " + err.Error())
-			return
+			//return
 		}
+
 		defer conn.Close()
 
 		doms, err := conn.ListAllDomains(libvirt.CONNECT_LIST_DOMAINS_ACTIVE | libvirt.CONNECT_LIST_DOMAINS_INACTIVE)
