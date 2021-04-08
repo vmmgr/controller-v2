@@ -186,7 +186,7 @@ func GetAdmin(c *gin.Context) {
 		return
 	}
 
-	uuid := c.Param("uuid")
+	vmUUID := c.Param("vm_uuid")
 
 	resultNode := dbNode.Get(node.ID, &core.Node{Model: gorm.Model{ID: uint(nodeID)}})
 	if resultNode.Err != nil {
@@ -194,16 +194,36 @@ func GetAdmin(c *gin.Context) {
 		return
 	}
 
-	res, err := Get(resultNode.Node[0].IP, resultNode.Node[0].Port, uuid)
+	log.Println("qemu+ssh://" + resultNode.Node[0].UserName + "@" + resultNode.Node[0].IP + "/system")
+	conn, err := libvirt.NewConnect("qemu+ssh://" + resultNode.Node[0].UserName + "@" + resultNode.Node[0].IP + "/system")
+	if err != nil {
+		log.Println("failed to connect to qemu: " + err.Error())
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+		return
+	}
+
+	defer conn.Close()
+
+	dom, err := conn.LookupDomainByUUIDString(vmUUID)
+	log.Println(dom)
 	if err != nil {
 		log.Println(err)
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
 
+	// VM Status
+	stat, _, _ := dom.GetState()
+	// 初期定義
+	vmXML := libVirtXml.Domain{}
+
+	// XMLをStructに代入
+	tmpXml, _ := dom.GetXMLDesc(libvirt.DOMAIN_XML_SECURE)
+	xml.Unmarshal([]byte(tmpXml), &vmXML)
+
 	c.JSON(http.StatusOK, vm.ResultOneAdmin{Status: http.StatusOK, VM: vm.Detail{
-		VM:   res.Data.VM.VM,
-		Stat: res.Data.VM.Stat,
+		VM:   vmXML,
+		Stat: uint(stat),
 		Node: uint(nodeID),
 	}})
 }
@@ -279,7 +299,7 @@ func GetAllAdmin(c *gin.Context) {
 //			}
 //
 //			for _, virtualMachine := range res.Data.VM {
-//				allVMs = append(allVMs, vm.Detail{VM: virtualMachine.VM, Stat: virtualMachine.Stat, Node: node.ID})
+//				allVMs = append(allVMs, vm.Detail{VM: virtualMachine.VM, Status: virtualMachine.Status, Node: node.ID})
 //			}
 //		}
 //	}
