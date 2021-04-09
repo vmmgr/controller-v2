@@ -26,12 +26,12 @@ func AddAdmin(c *gin.Context) {
 
 	log.Println(input.StartTime)
 
-	if err := check(input); err != nil {
+	if err = check(input); err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 		return
 	}
 
-	if _, err := dbNotice.Create(&input); err != nil {
+	if _, err = dbNotice.Create(&input); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}

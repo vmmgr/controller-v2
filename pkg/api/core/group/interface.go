@@ -17,21 +17,15 @@ const (
 )
 
 type Result struct {
-	Status bool         `json:"status"`
-	Error  string       `json:"error"`
-	Group  []core.Group `json:"group"`
+	Group []core.Group `json:"group"`
 }
 
 type ResultOne struct {
-	Status bool       `json:"status"`
-	Error  string     `json:"error"`
-	Group  core.Group `json:"group"`
+	Group core.Group `json:"group"`
 }
 
 type ResultAll struct {
-	Status bool       `json:"status"`
-	Error  string     `json:"error"`
-	Group  core.Group `json:"group"`
+	Group core.Group `json:"group"`
 }
 
 type ResultDatabase struct {

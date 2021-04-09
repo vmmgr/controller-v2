@@ -14,15 +14,11 @@ const (
 )
 
 type Result struct {
-	Status bool        `json:"status"`
-	Error  string      `json:"error"`
-	Node   []core.Node `json:"node"`
+	Node []core.Node `json:"node"`
 }
 
 type ResultOne struct {
-	Status bool      `json:"status"`
-	Error  string    `json:"error"`
-	Node   core.Node `json:"node"`
+	Node core.Node `json:"node"`
 }
 
 type ResultDatabase struct {

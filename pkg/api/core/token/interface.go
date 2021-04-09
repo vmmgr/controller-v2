@@ -15,15 +15,11 @@ const (
 )
 
 type Result struct {
-	Status bool         `json:"status"`
-	Error  string       `json:"error"`
-	Token  []core.Token `json:"token"`
+	Token []core.Token `json:"token"`
 }
 
 type ResultTmpToken struct {
-	Status bool   `json:"status"`
-	Error  string `json:"error"`
-	Token  string `json:"token"`
+	Token string `json:"token"`
 }
 
 type ResultDatabase struct {

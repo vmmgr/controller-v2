@@ -71,7 +71,7 @@ func UpdateAdmin(c *gin.Context) {
 		return
 	}
 
-	if err := dbGroup.Update(group.UpdateAll, replace); err != nil {
+	if err = dbGroup.Update(group.UpdateAll, replace); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
@@ -92,7 +92,7 @@ func GetAdmin(c *gin.Context) {
 
 	result := dbGroup.Get(group.ID, &core.Group{Model: gorm.Model{ID: uint(id)}})
 	if result.Err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, group.Result{Group: result.Group})
