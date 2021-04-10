@@ -1,6 +1,7 @@
 package node
 
 import (
+	libvirtxml "github.com/libvirt/libvirt-go-xml"
 	"github.com/vmmgr/controller/pkg/api/core"
 )
 
@@ -15,6 +16,11 @@ const (
 
 type Result struct {
 	Node []core.Node `json:"node"`
+}
+
+type ResultDevice struct {
+	PCI []libvirtxml.NodeDevice `json:"pci"`
+	USB []libvirtxml.NodeDevice `json:"usb"`
 }
 
 type ResultOne struct {
