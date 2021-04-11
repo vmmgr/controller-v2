@@ -4,12 +4,11 @@ import (
 	"github.com/gin-gonic/gin"
 	controller "github.com/vmmgr/controller/pkg/api/core/controller/v0"
 	group "github.com/vmmgr/controller/pkg/api/core/group/v0"
-	cdrom "github.com/vmmgr/controller/pkg/api/core/node/cdrom/v0"
 	nodeNIC "github.com/vmmgr/controller/pkg/api/core/node/nic/v0"
-	pci "github.com/vmmgr/controller/pkg/api/core/node/pci/v0"
+	cdrom "github.com/vmmgr/controller/pkg/api/core/node/storage/cdrom/v0"
 	nodeStorage "github.com/vmmgr/controller/pkg/api/core/node/storage/v0"
 	storage "github.com/vmmgr/controller/pkg/api/core/node/storage/v0"
-	usb "github.com/vmmgr/controller/pkg/api/core/node/usb/v0"
+	vmImage "github.com/vmmgr/controller/pkg/api/core/node/storage/vmImage/v0"
 	node "github.com/vmmgr/controller/pkg/api/core/node/v0"
 	notice "github.com/vmmgr/controller/pkg/api/core/notice/v0"
 	region "github.com/vmmgr/controller/pkg/api/core/region/v0"
@@ -57,7 +56,7 @@ func AdminRestAPI() error {
 			v1.DELETE("/user", user.DeleteAdmin)
 			// User Update
 			v1.PUT("/user", user.UpdateAdmin)
-			v1.GET("/user", user.GetAdmin)
+			v1.GET("/user", user.GetAllAdmin)
 			v1.GET("/user/:id", user.GetAdmin)
 
 			//
@@ -119,11 +118,7 @@ func AdminRestAPI() error {
 			v1.DELETE("/node/:id", node.DeleteAdmin)
 			v1.GET("/node/:id", node.GetAdmin)
 			v1.PUT("/node/:id", node.UpdateAdmin)
-
-			// Node PCI
-			v1.GET("node/:id/pci", pci.Get)
-			// Node USB
-			v1.GET("node/:id/usb", usb.Get)
+			v1.GET("/node/:id/device", node.GetAllDeviceAdmin)
 
 			//
 			// Storage
@@ -150,11 +145,19 @@ func AdminRestAPI() error {
 			//v1.GET("/node/:id", image.GetAdmin)
 
 			//
+			// Storage VM DISK
+			//
+			//v1.POST("/storage/:id/disk", disk.AddAdmin)
+			//v1.DELETE("/storage/:id/disk/:image_id", disk.DeleteAdmin)
+			//v1.GET("/storage/:id/disk", disk.GetAllAdmin)
+			//v1.GET("/node/:id", image.GetAdmin)
+
+			//
 			// Storage VM
 			//
-			v1.POST("/storage/:id/vm", cdrom.AddAdmin)
-			v1.DELETE("/storage/:id/vm/:image_id", cdrom.DeleteAdmin)
-			v1.GET("/storage/:id/vm", cdrom.GetAllAdmin)
+			v1.POST("/storage/:id/vm", vmImage.AddAdmin)
+			v1.DELETE("/storage/:id/vm/:image_id", vmImage.DeleteAdmin)
+			v1.GET("/storage/:id/vm", vmImage.GetAllAdmin)
 			//v1.GET("/node/:id", image.GetAdmin)
 
 			//
@@ -196,6 +199,8 @@ func AdminRestAPI() error {
 			v1.GET("/support", ticket.GetAdminWebSocket)
 			v1.GET("/vm/list", vm.GetListWebSocketAdmin)
 			v1.GET("/storage/progress", storage.GetWebSocketProgressAdmin)
+			v1.GET("/storage/vm/list", vmImage.GetVMListWebSocketAdmin)
+			v1.GET("/storage/no_vm/list", cdrom.GetCDROMListWebSocketAdmin)
 			// noVNC
 			v1.GET("/vnc/:user_token/:access_token/:node", wsVNC.Get)
 		}
@@ -204,6 +209,8 @@ func AdminRestAPI() error {
 	go ticket.HandleMessagesAdmin()
 	go vm.ListHandleMessages(true)
 	go storage.HandleMessagesProgress(true)
+	go cdrom.CDROMListHandleMessages(true)
+	go vmImage.VMListHandleMessages(true)
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(config.Conf.Controller.Admin.Port), router))
 	return nil
 }
