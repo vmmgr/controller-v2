@@ -7,8 +7,8 @@ import (
 	"github.com/vmmgr/controller/pkg/api/core"
 	auth "github.com/vmmgr/controller/pkg/api/core/auth/v0"
 	"github.com/vmmgr/controller/pkg/api/core/common"
-	cdrom "github.com/vmmgr/controller/pkg/api/core/node/cdrom"
 	"github.com/vmmgr/controller/pkg/api/core/node/storage"
+	cdrom "github.com/vmmgr/controller/pkg/api/core/node/storage/cdrom"
 	"github.com/vmmgr/controller/pkg/api/core/tool/gen"
 	image "github.com/vmmgr/controller/pkg/api/core/tool/image"
 	"github.com/vmmgr/controller/pkg/api/core/tool/ssh"
@@ -67,7 +67,7 @@ func AddAdmin(c *gin.Context) {
 	}
 
 	// SSH接続
-	conn, err := ssh.ConnectSSH(resultStorage.Storage[0].NodeID)
+	conn, err := ssh.ConnectSSHNodeID(resultStorage.Storage[0].NodeID)
 	if err != nil {
 		log.Println(err)
 		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
@@ -116,7 +116,7 @@ func DeleteAdmin(c *gin.Context) {
 	}
 
 	// SSH接続
-	conn, err := ssh.ConnectSSH(resultStorage.Storage[0].NodeID)
+	conn, err := ssh.ConnectSSHNodeID(resultStorage.Storage[0].NodeID)
 	if err != nil {
 		log.Println(err)
 		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})

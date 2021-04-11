@@ -25,7 +25,7 @@ func TestConfigApply(t *testing.T) {
 
 func TestImageDownload(t *testing.T) {
 
-	conn, err := ssh.ConnectSSH(nodeID)
+	conn, err := ssh.ConnectSSHNodeID(nodeID)
 	if err != nil {
 		t.Fatal(err)
 	}

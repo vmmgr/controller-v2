@@ -89,6 +89,6 @@ func GetAll() node.ResultDatabase {
 	defer db.Close()
 
 	var nodes []core.Node
-	err = db.Find(&nodes).Error
+	err = db.Preload("Storage").Preload("VM").Find(&nodes).Error
 	return node.ResultDatabase{Node: nodes, Err: err}
 }
