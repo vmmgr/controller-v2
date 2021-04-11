@@ -122,6 +122,7 @@ type Node struct {
 
 // [Type] 1:HDD 2:SSD 3:NVMe
 // [VMImage] true: VMImage格納 false:ISO,Floppyデータ格納時
+// 保存用VMImage /Template/*　使用VMImage /[vm_uuid]/*
 type Storage struct {
 	gorm.Model
 	NodeID    uint   `json:"node_id"`
