@@ -101,15 +101,64 @@ type Zone struct {
 
 type Node struct {
 	gorm.Model
-	ZoneID    uint   `json:"zone_id"`
-	GroupID   uint   `json:"group_id"`
-	AdminOnly *bool  `json:"admin_only"`
-	Name      string `json:"name"`
-	IP        string `json:"ip"`
-	Port      uint   `json:"port"`
-	WsPort    uint   `json:"ws_port"`
-	ManageNet string `json:"manage_net"`
-	Comment   string `json:"comment"`
+	ZoneID    uint      `json:"zone_id"`
+	GroupID   uint      `json:"group_id"`
+	AdminOnly *bool     `json:"admin_only"`
+	Name      string    `json:"name"`
+	IP        string    `json:"ip"`
+	Port      uint      `json:"port"`
+	WsPort    uint      `json:"ws_port"`
+	ManageNet string    `json:"manage_net"`
+	Mac       string    `json:"mac"`
+	Machine   string    `json:"machine"`
+	Emulator  string    `json:"emulator"`
+	Comment   string    `json:"comment"`
+	Storage   []Storage `json:"storage"`
+	NIC       []NIC     `json:"nic"`
+}
+
+type ImaCon struct {
+	gorm.Model
+	ZoneID uint    `json:"zone_id"`
+	Name   string  `json:"name"`
+	IP     string  `json:"ip"`
+	Port   uint    `json:"port"`
+	Image  []Image `json:"image"`
+}
+
+type Image struct {
+	gorm.Model
+	ImaConID  uint       `json:"ima_con_id"`
+	GroupID   uint       `json:"group_id"` //0: All 1~: Only Group
+	Type      uint       `json:"type"`     //0: ISO 1:Image
+	Path      string     `json:"path"`     //node側のパス
+	UUID      string     `json:"uuid"`
+	Name      string     `json:"name"`
+	CloudInit *bool      `json:"cloud_init"` //cloud-init対応イメージであるか否か
+	MinCPU    uint       `json:"min_cpu"`
+	MinMem    uint       `json:"min_mem"`
+	OS        string     `json:"os"`
+	Admin     *bool      `json:"admin"` //管理者専用イメージであるか否か
+	Lock      *bool      `json:"lock"`  //削除保護
+	Template  []Template `json:"template"`
+}
+
+type Template struct {
+	gorm.Model
+	Name         string         `json:"name"`
+	Tag          string         `json:"tag"`
+	ImageID      string         `json:"image_id"`
+	Image        Image          `json:"image"`
+	TemplatePlan []TemplatePlan `json:"template_plan"`
+}
+
+type TemplatePlan struct {
+	gorm.Model
+	TemplateID uint  `json:"template_id"`
+	CPU        uint  `json:"cpu"`
+	Mem        uint  `json:"mem"`
+	Storage    uint  `json:"storage"`
+	Hide       *bool `json:"hide"` //管理者専用イメージであるか否か
 }
 
 type Storage struct {

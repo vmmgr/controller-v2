@@ -39,7 +39,12 @@ var initCmd = &cobra.Command{
 			&core.Node{},
 			&core.Storage{},
 			&core.NIC{},
-			&core.VM{})
+			&core.VM{},
+			&core.ImaCon{},
+			&core.Image{},
+			&core.Template{},
+			&core.TemplatePlan{},
+		)
 		log.Println(result.Error)
 		log.Println("end")
 	},
