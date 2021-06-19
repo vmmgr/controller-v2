@@ -46,7 +46,7 @@ func Update(data core.ImaCon) error {
 	return result.Error
 }
 
-func Get(data core.ImaCon) (*[]core.ImaCon, error) {
+func Get(data core.ImaCon) ([]core.ImaCon, error) {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -57,10 +57,10 @@ func Get(data core.ImaCon) (*[]core.ImaCon, error) {
 	var imaCons []core.ImaCon
 
 	err = db.First(&imaCons, data.ID).Error
-	return &imaCons, nil
+	return imaCons, nil
 }
 
-func GetAll() (*[]core.ImaCon, error) {
+func GetAll() ([]core.ImaCon, error) {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -70,5 +70,5 @@ func GetAll() (*[]core.ImaCon, error) {
 
 	var imaCons []core.ImaCon
 	err = db.Find(&imaCons).Error
-	return &imaCons, nil
+	return imaCons, nil
 }

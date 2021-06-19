@@ -46,7 +46,7 @@ func Update(data core.Image) error {
 	return result.Error
 }
 
-func Get(data core.Image) (*[]core.Image, error) {
+func Get(data core.Image) ([]core.Image, error) {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -57,10 +57,10 @@ func Get(data core.Image) (*[]core.Image, error) {
 	var images []core.Image
 
 	err = db.First(&images, data.ID).Error
-	return &images, nil
+	return images, nil
 }
 
-func GetAll() (*[]core.Image, error) {
+func GetAll() ([]core.Image, error) {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -70,5 +70,5 @@ func GetAll() (*[]core.Image, error) {
 
 	var images []core.Image
 	err = db.Find(&images).Error
-	return &images, nil
+	return images, nil
 }

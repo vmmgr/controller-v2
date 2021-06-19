@@ -46,7 +46,7 @@ func Update(data core.Template) error {
 	return result.Error
 }
 
-func Get(data core.Template) (*[]core.Template, error) {
+func Get(data core.Template) ([]core.Template, error) {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -57,10 +57,10 @@ func Get(data core.Template) (*[]core.Template, error) {
 	var templates []core.Template
 
 	err = db.First(&templates, data.ID).Error
-	return &templates, nil
+	return templates, nil
 }
 
-func GetAll() (*[]core.Template, error) {
+func GetAll() ([]core.Template, error) {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -70,5 +70,5 @@ func GetAll() (*[]core.Template, error) {
 
 	var templates []core.Template
 	err = db.Find(&templates).Error
-	return &templates, nil
+	return templates, nil
 }

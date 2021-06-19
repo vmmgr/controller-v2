@@ -46,7 +46,7 @@ func Update(data core.TemplatePlan) error {
 	return result.Error
 }
 
-func Get(data core.TemplatePlan) (*[]core.TemplatePlan, error) {
+func Get(data core.TemplatePlan) ([]core.TemplatePlan, error) {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -56,11 +56,15 @@ func Get(data core.TemplatePlan) (*[]core.TemplatePlan, error) {
 
 	var plans []core.TemplatePlan
 
-	err = db.First(&plans, data.ID).Error
-	return &plans, nil
+	err = db.First(&plans, data.ID).
+		Preload("Template").
+		Preload("Template.Image").
+		Preload("Template.Image.ImaCon").Error
+
+	return plans, err
 }
 
-func GetAll() (*[]core.TemplatePlan, error) {
+func GetAll() ([]core.TemplatePlan, error) {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -70,5 +74,5 @@ func GetAll() (*[]core.TemplatePlan, error) {
 
 	var plans []core.TemplatePlan
 	err = db.Find(&plans).Error
-	return &plans, nil
+	return plans, nil
 }
