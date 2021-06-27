@@ -4,9 +4,7 @@ import (
 	"github.com/gorilla/websocket"
 	libvirtxml "github.com/libvirt/libvirt-go-xml"
 	"github.com/vmmgr/controller/pkg/api/core"
-	imaConStorage "github.com/vmmgr/imacon/pkg/api/core/storage"
-	nodeCloudInit "github.com/vmmgr/node/pkg/api/core/tool/cloudinit"
-	nodeVM "github.com/vmmgr/node/pkg/api/core/vm"
+	nodeCloudInit "github.com/vmmgr/controller/pkg/api/core/vm/cloudinit"
 	"net/http"
 	"time"
 )
@@ -32,25 +30,39 @@ var Broadcast = make(chan WebSocketResult)
 var ClientBroadcast = make(chan WebSocketResult)
 
 // websocket用
+type WebSocketInput struct {
+	UserToken   string      `json:"user_token"`
+	AccessToken string      `json:"access_token"`
+	Type        uint        `json:"type"` //0: Get 1:GetAll 10:Create 11:Delete
+	ID          uint        `json:"id"`
+	Create      CreateAdmin `json:"create"`
+}
+
+// websocket用
 type WebSocketResult struct {
 	ID          uint      `json:"id"`
 	Err         string    `json:"error"`
 	CreatedAt   time.Time `json:"created_at"`
+	Processing  bool      `json:"processing"`
+	Type        uint      `json:"type"` //0: Get 1:GetAll 10:Create 11:Delete
 	UserToken   string    `json:"user_token"`
 	AccessToken string    `json:"access_token"`
 	UUID        string    `json:"uuid"`
 	Status      bool      `json:"status"`
 	Code        uint      `json:"code"`
+	VMDetail    []Detail  `json:"vm_detail"`
 	GroupID     uint      `json:"group_id"`
 	FilePath    string    `json:"file_path"`
 	Admin       bool      `json:"admin"`
 	Message     string    `json:"message"`
 	Progress    uint      `json:"progress"`
+	Finish      bool      `json:"finish"`
 }
 
 type WebSocket struct {
 	GroupID uint
 	UserID  uint
+	UUID    string
 	Admin   bool
 	Socket  *websocket.Conn
 }
@@ -70,10 +82,16 @@ type Input struct {
 }
 
 type CreateAdmin struct {
-	VM            nodeVM.VirtualMachine `json:"vm"`
-	NodeID        uint                  `json:"node_id"`
-	TemplateApply bool                  `json:"template_apply"`
-	Template      Template              `json:"template"`
+	VM            VirtualMachine `json:"vm"`
+	NodeID        uint           `json:"node_id"`
+	TemplateApply bool           `json:"template_apply"`
+	Template      Template       `json:"template"`
+}
+
+type Create struct {
+	NodeID        uint     `json:"node_id"`
+	TemplateApply bool     `json:"template_apply"`
+	Template      Template `json:"template"`
 }
 
 type DeleteAdmin struct {
@@ -81,11 +99,6 @@ type DeleteAdmin struct {
 }
 
 type UserInput struct {
-}
-
-type GetImaCon struct {
-	Status int               `json:"status"`
-	Data   imaConStorage.Get `json:"data"`
 }
 
 type VMAll struct {
@@ -104,7 +117,7 @@ type Template struct {
 	Name            string   `json:"name"`
 	Password        string   `json:"password"`
 	NodeID          uint     `json:"node_id"`
-	TemplateID      uint     `json:"template_id"`
+	StorageID       uint     `json:"storage_id"`
 	TemplatePlanID  uint     `json:"template_plan_id"`
 	StorageCapacity uint     `json:"storage_capacity"`
 	StoragePathType uint     `json:"storage_path_type"`

@@ -1,51 +1,44 @@
 package nic
 
-import (
-	"github.com/jinzhu/gorm"
-)
-
-const (
-	ID          = 0
-	NodeNICID   = 1
-	GroupID     = 2
-	Name        = 3
-	Type        = 4
-	Vlan        = 5
-	UpdateName  = 100
-	UpdateNodeN = 101
-	UpdateGroup = 102
-	UpdateMac   = 103
-	UpdateAll   = 110
-)
+//Type
+//0: Bridge 1: NAT 2:macvtap
+//Mode
+//0: Bridge 1: vpea 2: private 3: passthrough
 
 type NIC struct {
-	gorm.Model
-	VMID      uint   `json:"vm_id"`
-	NodeNICID uint   `json:"node_nic_id"`
-	GroupID   uint   `json:"group_id"`
-	Name      string `json:"name"`
-	Type      uint   `json:"type"`
-	Driver    uint   `json:"driver"`
-	Mode      uint   `json:"mode"`
-	Mac       string `json:"mac"`
-	Vlan      uint   `json:"vlan"`
-	Comment   string `json:"comment"`
-	Lock      *bool  `json:"lock"`
+	Type   uint   `json:"type"`
+	Driver uint   `json:"driver"`
+	Mode   uint   `json:"mode"`
+	MAC    string `json:"mac"`
+	Device string `json:"device"`
 }
 
-type Result struct {
-	Status bool   `json:"status"`
-	Error  string `json:"error"`
-	NIC    []NIC  `json:"nic"`
+type GenerateNICXml struct {
+	NIC           NIC
+	AddressNumber uint
 }
 
-type ResultOne struct {
-	Status bool   `json:"status"`
-	Error  string `json:"error"`
-	NIC    NIC    `json:"nic"`
+func GetDriverName(driver uint) string {
+	//デフォルトはvirtio
+
+	if driver == 1 {
+		return "e1000e"
+	} else if driver == 2 {
+		return "rtl8139"
+	}
+	return "virtio"
 }
 
-type ResultDatabase struct {
-	Err error
-	NIC []NIC
+//Mode
+func GetModeName(mode uint) string {
+	//デフォルトはBrdige
+
+	if mode == 1 {
+		return "vepa"
+	} else if mode == 2 {
+		return "private"
+	} else if mode == 3 {
+		return "passthrough"
+	}
+	return "bridge"
 }

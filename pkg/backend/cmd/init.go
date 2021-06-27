@@ -44,6 +44,7 @@ var initCmd = &cobra.Command{
 			&core.Image{},
 			&core.Template{},
 			&core.TemplatePlan{},
+			&core.IP{},
 		)
 		log.Println(result.Error)
 		log.Println("end")

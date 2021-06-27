@@ -87,6 +87,6 @@ func GetAll() storage.ResultDatabase {
 	defer db.Close()
 
 	var storages []core.Storage
-	err = db.Find(&storages).Error
+	err = db.Preload("Node").Find(&storages).Error
 	return storage.ResultDatabase{Storage: storages, Err: err}
 }

@@ -64,7 +64,9 @@ func Get(base int, data *core.Node) node.ResultDatabase {
 	var nodeStruct []core.Node
 
 	if base == node.ID { //ID
-		err = db.First(&nodeStruct, data.ID).Error
+		err = db.Preload("Storage").
+			Preload("NIC").
+			First(&nodeStruct, data.ID).Error
 	} else if base == node.ZoneID { //Zone内の全VM検索
 		err = db.Where("zone_id = ?", data.ZoneID).Find(&nodeStruct).Error
 	} else if base == node.GroupID { //GroupID
@@ -89,6 +91,8 @@ func GetAll() node.ResultDatabase {
 	defer db.Close()
 
 	var nodes []core.Node
-	err = db.Find(&nodes).Error
+	err = db.Preload("Storage").
+		Preload("NIC").
+		Find(&nodes).Error
 	return node.ResultDatabase{Node: nodes, Err: err}
 }

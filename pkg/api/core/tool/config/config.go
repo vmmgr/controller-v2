@@ -40,6 +40,7 @@ type User struct {
 }
 
 type Admin struct {
+	URL       string    `json:"url"`
 	IP        string    `json:"ip"`
 	Port      int       `json:"port"`
 	AdminAuth AdminAuth `json:"auth"`

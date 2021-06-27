@@ -2,6 +2,16 @@ package controller
 
 import "time"
 
+var ImaConBroadcast = make(chan WebSocketImaConResult)
+
+// websocket(imacon)用
+type WebSocketImaConResult struct {
+	CreatedAt time.Time `json:"created_at"`
+	UUID      string    `json:"id"`
+	Progress  uint      `json:"progress"`
+	Finish    bool      `json:"finish"`
+}
+
 type Controller struct {
 	Token1 string `json:"user_token"`
 	Token2 string `json:"tmp_token"` //Hash(Token2 + Token3)

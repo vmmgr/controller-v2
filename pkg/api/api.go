@@ -5,9 +5,7 @@ import (
 	controller "github.com/vmmgr/controller/pkg/api/core/controller/v0"
 	group "github.com/vmmgr/controller/pkg/api/core/group/v0"
 	nodeNIC "github.com/vmmgr/controller/pkg/api/core/node/nic/v0"
-	pci "github.com/vmmgr/controller/pkg/api/core/node/pci/v0"
 	nodeStorage "github.com/vmmgr/controller/pkg/api/core/node/storage/v0"
-	usb "github.com/vmmgr/controller/pkg/api/core/node/usb/v0"
 	node "github.com/vmmgr/controller/pkg/api/core/node/v0"
 	notice "github.com/vmmgr/controller/pkg/api/core/notice/v0"
 	region "github.com/vmmgr/controller/pkg/api/core/region/v0"
@@ -17,7 +15,7 @@ import (
 	"github.com/vmmgr/controller/pkg/api/core/tool/config"
 	user "github.com/vmmgr/controller/pkg/api/core/user/v0"
 	template "github.com/vmmgr/controller/pkg/api/core/vm/template/v0"
-	vm "github.com/vmmgr/controller/pkg/api/core/vm/v0"
+	vmV2 "github.com/vmmgr/controller/pkg/api/core/vm/v2"
 	wsVNC "github.com/vmmgr/controller/pkg/api/core/wsvnc/v0"
 	"log"
 	"net/http"
@@ -25,7 +23,6 @@ import (
 )
 
 func AdminRestAPI() error {
-
 	router := gin.Default()
 	router.Use(cors)
 
@@ -36,7 +33,7 @@ func AdminRestAPI() error {
 			// Controller
 			//
 			v1.POST("/controller/chat", controller.ReceiveChatAdmin)
-			//v1.POST("/controller/node", controller.ReceiveNode)
+			v1.POST("/controller/imacon", controller.ReceiveImaConAdmin)
 
 			// Notice
 			//
@@ -63,7 +60,7 @@ func AdminRestAPI() error {
 			//
 			v1.POST("/token/generate", token.GenerateAdmin)
 
-			v1.POST("/token", token.GenerateAdmin)
+			v1.POST("/login", token.GenerateAdmin)
 			// Token Delete
 			v1.DELETE("/token", token.Delete)
 			v1.DELETE("/token/:id", token.DeleteAdmin)
@@ -119,9 +116,9 @@ func AdminRestAPI() error {
 			v1.PUT("/node/:id", node.UpdateAdmin)
 
 			// Node PCI
-			v1.GET("node/:id/pci", pci.Get)
-			// Node USB
-			v1.GET("node/:id/usb", usb.Get)
+			//v1.GET("node/:id/pci", pci.Get)
+			//Node USB
+			//v1.GET("node/:id/usb", usb.Get)
 
 			//
 			// Node Storage
@@ -142,25 +139,52 @@ func AdminRestAPI() error {
 			v1.PUT("/nic/:node_id/:nic_id", nodeNIC.UpdateAdmin)
 
 			//
-			//VM
+			//VM(v1)
 			//
-			v1.POST("/vm", vm.AddAdmin)
-			v1.DELETE("/vm/:node_id/:uuid", vm.DeleteAdmin)
-			v1.PUT("/vm/:node_id/:uuid", vm.UpdateAdmin)
-			v1.GET("/vm/:node_id/:uuid", vm.GetAdmin)
-			v1.GET("/vm", vm.GetAllAdmin)
+			//v1.POST("/vm", vm.AddAdmin)
+			//v1.DELETE("/vm/:node_id/:uuid", vm.DeleteAdmin)
+			//v1.PUT("/vm/:node_id/:uuid", vm.UpdateAdmin)
+			//v1.GET("/vm/:node_id/:uuid", vm.GetAdmin)
+			//v1.GET("/vm", vm.GetAllAdmin)
 
 			//
-			//VM
+			//VM(v1)
 			//
-			v1.PUT("/vm/:node_id/:uuid/power", vm.StartupAdmin)
-			v1.DELETE("/vm/:node_id/:uuid/power", vm.ShutdownAdmin)
-			v1.PUT("/vm/:node_id/:uuid/reset", vm.ResetAdmin)
+			//v1.PUT("/vm/:node_id/:uuid/power", vm.StartupAdmin)
+			//v1.DELETE("/vm/:node_id/:uuid/power", vm.ShutdownAdmin)
+			//v1.PUT("/vm/:node_id/:uuid/reset", vm.ResetAdmin)
+
+			//
+			//VM(v2)
+			//
+			//v2.POST("/vm", vm.AddAdmin)
+			v1.DELETE("/vm/:node_id/:uuid", vmV2.DeleteAdmin)
+			//v2.PUT("/vm/:node_id/:uuid", vm.UpdateAdmin)
+			v1.GET("/vm/:node_id/:uuid", vmV2.GetAdmin)
+			v1.GET("/vm", vmV2.GetAllAdmin)
 
 			//
 			//Template
 			//
-			v1.GET("/template", template.Get)
+			v1.GET("/template", template.GetByAdmin)
+		}
+		v2 := api.Group("/v2")
+		{
+			//
+			//VM(v2)
+			//
+			//v2.POST("/vm", vm.AddAdmin)
+			v2.DELETE("/vm/:node_id/:uuid", vmV2.DeleteAdmin)
+			//v2.PUT("/vm/:node_id/:uuid", vm.UpdateAdmin)
+			v2.GET("/vm/:node_id/:uuid", vmV2.GetAdmin)
+			v2.GET("/vm", vmV2.GetAllAdmin)
+
+			//
+			//VM(v2)
+			//
+			//v2.PUT("/vm/:node_id/:uuid/power", vm.StartupAdmin)
+			//v2.DELETE("/vm/:node_id/:uuid/power", vm.ShutdownAdmin)
+			//v2.PUT("/vm/:node_id/:uuid/reset", vm.ResetAdmin)
 		}
 	}
 	ws := router.Group("/ws")
@@ -168,14 +192,16 @@ func AdminRestAPI() error {
 		v1 := ws.Group("/v1")
 		{
 			v1.GET("/support", ticket.GetAdminWebSocket)
-			v1.GET("/vm", vm.GetWebSocketAdmin)
+			//v1.GET("/vm", vm.GetWebSocketAdmin)
+			v1.GET("/vm", vmV2.GetWebSocketAdmin)
 			// noVNC
 			v1.GET("/vnc/:user_token/:access_token/:node", wsVNC.Get)
 		}
 	}
 
 	go ticket.HandleMessagesAdmin()
-	go vm.HandleMessages(true)
+	go vmV2.HandleMessages(true)
+	go controller.HandleMessages()
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(config.Conf.Controller.Admin.Port), router))
 	return nil
 }
@@ -195,6 +221,9 @@ func UserRestAPI() {
 			//
 			v1.POST("/controller/chat", controller.ReceiveChatUser)
 			//v1.POST("/controller/node", controller.ReceiveNode)
+
+			v1.GET("/login", token.GenerateInit)
+			v1.POST("/login", token.Generate)
 
 			//
 			// User
@@ -244,8 +273,14 @@ func UserRestAPI() {
 			//
 			// VM
 			//
-			v1.POST("/vm", vm.UserCreate)
-			v1.DELETE("/vm/:id", vm.UserDelete)
+			//v1.POST("/vm", vm.UserCreate)
+			//v1.DELETE("/vm/:id", vm.UserDelete)
+
+			//
+			//Template
+			//
+			v1.GET("/template", template.Get)
+
 		}
 	}
 
@@ -254,13 +289,13 @@ func UserRestAPI() {
 		v1 := ws.Group("/v1")
 		{
 			v1.GET("/support", ticket.GetWebSocket)
-			v1.GET("/vm", vm.GetWebSocket)
+			v1.GET("/vm", vmV2.GetWebSocket)
 		}
 	}
 
 	go ticket.HandleMessages()
-	go vm.HandleMessages(false)
-
+	go vmV2.HandleMessages(false)
+	go controller.HandleMessages()
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(config.Conf.Controller.User.Port), router))
 }
 

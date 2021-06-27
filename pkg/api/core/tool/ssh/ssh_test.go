@@ -32,8 +32,8 @@ func TestSSHClient(t *testing.T) {
 
 	ip := resultNode.Node[0].IP
 	port := strconv.Itoa(int(resultNode.Node[0].Port))
-	user := resultNode.Node[0].UserName
-	pass := resultNode.Node[0].Password
+	user := resultNode.Node[0].User
+	pass := resultNode.Node[0].Pass
 
 	// 鍵認証
 	if *resultNode.Node[0].UseKey {

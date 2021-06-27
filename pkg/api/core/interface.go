@@ -22,7 +22,7 @@ type User struct {
 
 type Group struct {
 	gorm.Model
-	Users     []User `json:"users"`
+	VMs       []*VM  `json:"vms"`
 	Org       string `json:"org"`
 	Status    uint   `json:"status"`
 	Comment   string `json:"comment"`
@@ -101,66 +101,80 @@ type Zone struct {
 
 type Node struct {
 	gorm.Model
-	ZoneID    uint      `json:"zone_id"`
-	GroupID   uint      `json:"group_id"`
-	AdminOnly *bool     `json:"admin_only"`
-	Name      string    `json:"name"`
-	IP        string    `json:"ip"`
-	Port      uint      `json:"port"`
-	WsPort    uint      `json:"ws_port"`
-	ManageNet string    `json:"manage_net"`
-	Mac       string    `json:"mac"`
-	Machine   string    `json:"machine"`
-	Emulator  string    `json:"emulator"`
-	Comment   string    `json:"comment"`
-	Storage   []Storage `json:"storage"`
-	NIC       []NIC     `json:"nic"`
+	ZoneID     uint      `json:"zone_id"`
+	GroupID    uint      `json:"group_id"`
+	AdminOnly  *bool     `json:"admin_only"`
+	Name       string    `json:"name"`
+	HostName   string    `json:"host_name"`
+	IP         string    `json:"ip"`
+	Port       uint      `json:"port"`
+	User       string    `json:"user"`
+	Pass       string    `json:"pass"`
+	WsPort     uint      `json:"ws_port"`
+	ManageNet  string    `json:"manage_net"`
+	Mac        string    `json:"mac"`
+	Machine    string    `json:"machine"`
+	Emulator   string    `json:"emulator"`
+	Comment    string    `json:"comment"`
+	Enable     *bool     `json:"enable"`
+	PrimaryNIC string    `json:"primary_nic"`
+	Storage    []Storage `json:"storage"`
+	NIC        []NIC     `json:"nic"`
 }
 
 type ImaCon struct {
 	gorm.Model
-	ZoneID uint    `json:"zone_id"`
-	Name   string  `json:"name"`
-	IP     string  `json:"ip"`
-	Port   uint    `json:"port"`
-	Image  []Image `json:"image"`
+	ZoneID     uint    `json:"zone_id"`
+	Name       string  `json:"name"`
+	HostName   string  `json:"host_name"`
+	IP         string  `json:"ip"`
+	User       string  `json:"user"`
+	Pass       string  `json:"pass"`
+	Port       uint    `json:"port"`
+	Enable     *bool   `json:"enable"`
+	AppPath    string  `json:"app_path"`
+	ConfigPath string  `json:"config_path"`
+	Image      []Image `json:"image"`
 }
 
 type Image struct {
 	gorm.Model
-	ImaConID  uint       `json:"ima_con_id"`
-	GroupID   uint       `json:"group_id"` //0: All 1~: Only Group
-	Type      uint       `json:"type"`     //0: ISO 1:Image
-	Path      string     `json:"path"`     //node側のパス
-	UUID      string     `json:"uuid"`
-	Name      string     `json:"name"`
-	CloudInit *bool      `json:"cloud_init"` //cloud-init対応イメージであるか否か
-	MinCPU    uint       `json:"min_cpu"`
-	MinMem    uint       `json:"min_mem"`
-	OS        string     `json:"os"`
-	Admin     *bool      `json:"admin"` //管理者専用イメージであるか否か
-	Lock      *bool      `json:"lock"`  //削除保護
-	Template  []Template `json:"template"`
+	ImaConID  uint        `json:"ima_con_id"`
+	GroupID   uint        `json:"group_id"` //0: All 1~: Only Group
+	Type      uint        `json:"type"`     //0: ISO 1:Image
+	Path      string      `json:"path"`     //node側のパス
+	UUID      string      `json:"uuid"`
+	Name      string      `json:"name"`
+	CloudInit *bool       `json:"cloud_init"` //cloud-init対応イメージであるか否か
+	MinCPU    uint        `json:"min_cpu"`
+	MinMem    uint        `json:"min_mem"`
+	OS        string      `json:"os"`
+	Admin     *bool       `json:"admin"` //管理者専用イメージであるか否か
+	Lock      *bool       `json:"lock"`  //削除保護
+	ImaCon    *ImaCon     `json:"imacon"`
+	Template  *[]Template `json:"template"`
 }
 
 type Template struct {
 	gorm.Model
-	Name         string         `json:"name"`
-	Tag          string         `json:"tag"`
-	ImageID      string         `json:"image_id"`
-	Image        Image          `json:"image"`
-	TemplatePlan []TemplatePlan `json:"template_plan"`
+	Name         string          `json:"name"`
+	Tag          string          `json:"tag"`
+	ImageID      string          `json:"image_id"`
+	Image        *Image          `json:"image"`
+	TemplatePlan []*TemplatePlan `json:"template_plan"`
 }
 
 type TemplatePlan struct {
 	gorm.Model
-	TemplateID uint  `json:"template_id"`
-	CPU        uint  `json:"cpu"`
-	Mem        uint  `json:"mem"`
-	Storage    uint  `json:"storage"`
-	Hide       *bool `json:"hide"` //管理者専用イメージであるか否か
+	TemplateID uint      `json:"template_id"`
+	CPU        uint      `json:"cpu"`
+	Mem        uint      `json:"mem"`
+	Storage    uint      `json:"storage"`
+	Hide       *bool     `json:"hide"` //管理者専用イメージであるか否か
+	Template   *Template `json:"template"`
 }
 
+// Type:  1:SSD 2:HDD 3:NVMe 11:SSD(iSCSI) 12:HDD(iSCSI) 13:NVme(iSCSI)
 type Storage struct {
 	gorm.Model
 	NodeID      uint   `json:"node_id"`
@@ -170,6 +184,7 @@ type Storage struct {
 	Path        string `json:"path"`
 	MaxCapacity uint   `json:"max_capacity"`
 	Comment     string `json:"comment"`
+	Node        Node   `json:"node"`
 }
 
 type NIC struct {
@@ -180,7 +195,7 @@ type NIC struct {
 	Name      string `json:"name"`
 	Enable    *bool  `json:"enable"`
 	Virtual   *bool  `json:"virtual"`
-	Type      uint   `json:"type"`
+	Type      uint   `json:"type"` //0-9: Global 10-19: Private
 	Vlan      uint   `json:"vlan"`
 	Speed     uint   `json:"speed"`
 	MAC       string `json:"mac"`
@@ -189,10 +204,23 @@ type NIC struct {
 
 type VM struct {
 	gorm.Model
-	NodeID  uint   `json:"node_id"`
-	GroupID uint   `json:"group_id"`
-	Name    string `json:"name"`
-	UUID    string `json:"uuid"`
-	VNCPort uint   `json:"vnc_port"`
-	Lock    *bool  `json:"lock"`
+	Node          Node   `json:"node"`
+	IP            IP     `json:"ip"`
+	NodeID        uint   `json:"node_id"`
+	GroupID       uint   `json:"group_id"`
+	Name          string `json:"name"`
+	UUID          string `json:"uuid"`
+	VNCPort       uint   `json:"vnc_port"`
+	WebSocketPort uint   `json:"web_socket_port"`
+	Lock          *bool  `json:"lock"`
+}
+
+type IP struct {
+	gorm.Model
+	VMID     uint   `json:"vm_id"`
+	IP       string `json:"ip"`
+	Subnet   string `json:"subnet"`
+	Gateway  string `json:"gateway"`
+	DNS      string `json:"dns"`
+	Reserved *bool  `json:"reserved"`
 }

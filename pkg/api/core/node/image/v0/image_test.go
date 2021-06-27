@@ -4,7 +4,7 @@ import (
 	"github.com/pkg/sftp"
 	"github.com/schollz/progressbar"
 	"github.com/vmmgr/controller/pkg/api/core/tool/config"
-	"github.com/vmmgr/controller/pkg/api/core/tool/ssh"
+	"golang.org/x/crypto/ssh"
 	"io"
 	"log"
 	"net/http"

@@ -32,16 +32,15 @@ func UserAuthentication(data core.Token) auth.UserResult {
 // errorType 0: 未審査の場合でもエラーを返す　1: 未審査の場合エラーを返さない
 func GroupAuthentication(errorType uint, data core.Token) auth.GroupResult {
 	resultToken := dbToken.Get(token.UserTokenAndAccessToken, &data)
-	if len(resultToken.Token) == 0 {
-		return auth.GroupResult{Err: fmt.Errorf("auth failed")}
-	}
 	if resultToken.Err != nil {
 		return auth.GroupResult{Err: fmt.Errorf("error: no token")}
 	}
-
-	if 0 < *resultToken.Token[0].User.ExpiredStatus {
-		return auth.GroupResult{Err: fmt.Errorf("deleted this user")}
+	if len(resultToken.Token) == 0 {
+		return auth.GroupResult{Err: fmt.Errorf("auth failed")}
 	}
+	//if 0 < *resultToken.Token[0].User.ExpiredStatus {
+	//	return auth.GroupResult{Err: fmt.Errorf("deleted this user")}
+	//}1
 
 	if resultToken.Token[0].User.GroupID == 0 {
 		return auth.GroupResult{Err: fmt.Errorf("no group")}

@@ -1,14 +1,12 @@
 package v0
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"github.com/koding/websocketproxy"
 	"github.com/vmmgr/controller/pkg/api/core"
 	"github.com/vmmgr/controller/pkg/api/core/node"
 	"github.com/vmmgr/controller/pkg/api/core/token"
-	vm "github.com/vmmgr/controller/pkg/api/core/vm/v0"
 	dbNode "github.com/vmmgr/controller/pkg/api/store/node/v0"
 	dbToken "github.com/vmmgr/controller/pkg/api/store/token/v0"
 	"log"
@@ -28,7 +26,7 @@ func Get(c *gin.Context) {
 	userToken := c.Param("user_token")
 	accessToken := c.Param("access_token")
 	nodeID, _ := strconv.Atoi(c.Param("node"))
-	vmUUID := c.Query("uuid")
+	//vmUUID := c.Query("uuid")
 
 	var tokenResult token.ResultDatabase
 
@@ -59,23 +57,23 @@ func Get(c *gin.Context) {
 		return
 	}
 
-	res, err := vm.Get(nodeResult.Node[0].IP, nodeResult.Node[0].Port, vmUUID)
-	if err != nil {
-		log.Println(err)
-		return
-	}
+	//res, err := vm.Get(nodeResult.Node[0].IP, nodeResult.Node[0].Port, vmUUID)
+	//if err != nil {
+	//	log.Println(err)
+	//	return
+	//}
 
-	if len(res.Data.VM.VM.Devices.Graphics) < 1 {
-		log.Println("Error: No Graphics...")
-		return
-	}
+	//if len(res.Data.VM.VM.Devices.Graphics) < 1 {
+	//	log.Println("Error: No Graphics...")
+	//	return
+	//}
 
-	webSocketPort := res.Data.VM.VM.Devices.Graphics[0].VNC.WebSocket
+	//webSocketPort := res.Data.VM.VM.Devices.Graphics[0].VNC.WebSocket
 
 	u := &url.URL{
 		Scheme: "ws",
-		Host:   fmt.Sprintf("%s:%d", nodeResult.Node[0].IP, webSocketPort),
-		Path:   "/",
+		//Host:   fmt.Sprintf("%s:%d", nodeResult.Node[0].IP, webSocketPort),
+		Path: "/",
 	}
 	log.Println(u)
 

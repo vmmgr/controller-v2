@@ -79,7 +79,7 @@ func Get(base int, data *core.Group) group.ResultDatabase {
 	var groupStruct []core.Group
 
 	if base == group.ID { //ID
-		err = db.First(&groupStruct, data.ID).Error
+		err = db.Preload("VMs").Preload("VMs.Node").First(&groupStruct, data.ID).Error
 	} else if base == group.Org { //Org
 		err = db.Where("org = ?", data.Org).Find(&groupStruct).Error
 	} else {

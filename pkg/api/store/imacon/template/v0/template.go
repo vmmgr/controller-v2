@@ -69,6 +69,9 @@ func GetAll() ([]core.Template, error) {
 	defer db.Close()
 
 	var templates []core.Template
-	err = db.Find(&templates).Error
+	err = db.Preload("Image").
+		Preload("Image.ImaCon").
+		Preload("TemplatePlan").
+		Find(&templates).Error
 	return templates, nil
 }

@@ -56,10 +56,11 @@ func Get(data core.TemplatePlan) ([]core.TemplatePlan, error) {
 
 	var plans []core.TemplatePlan
 
-	err = db.First(&plans, data.ID).
+	err = db.
 		Preload("Template").
 		Preload("Template.Image").
-		Preload("Template.Image.ImaCon").Error
+		Preload("Template.Image.ImaCon").
+		First(&plans, data.ID).Error
 
 	return plans, err
 }
