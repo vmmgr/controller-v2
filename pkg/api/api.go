@@ -195,7 +195,7 @@ func AdminRestAPI() error {
 			//v1.GET("/vm", vm.GetWebSocketAdmin)
 			v1.GET("/vm", vmV2.GetWebSocketAdmin)
 			// noVNC
-			v1.GET("/vnc/:user_token/:access_token/:node", wsVNC.Get)
+			v1.GET("/vnc/:access_token/:node/:uuid", wsVNC.GetByAdmin)
 		}
 	}
 
@@ -220,7 +220,7 @@ func UserRestAPI() {
 			// Controller
 			//
 			v1.POST("/controller/chat", controller.ReceiveChatUser)
-			//v1.POST("/controller/node", controller.ReceiveNode)
+			v1.POST("/controller/imacon", controller.ReceiveImaConAdmin)
 
 			v1.GET("/login", token.GenerateInit)
 			v1.POST("/login", token.Generate)
@@ -290,6 +290,7 @@ func UserRestAPI() {
 		{
 			v1.GET("/support", ticket.GetWebSocket)
 			v1.GET("/vm", vmV2.GetWebSocket)
+			v1.GET("/vnc/:user_token/:access_token/:vm", wsVNC.Get)
 		}
 	}
 

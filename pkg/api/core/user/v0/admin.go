@@ -99,7 +99,7 @@ func AddAdmin(c *gin.Context) {
 				ToMail:  data.Email,
 				Subject: "本人確認のメールにつきまして",
 				Content: " " + input.Name + "様\n\n" + "以下のリンクから本人確認を完了してください。\n" +
-					config.Conf.Controller.User.Url + "/api/v1/user/verify/" + mailToken + "\n" +
+					config.Conf.Controller.User.URL + "/api/v1/user/verify/" + mailToken + "\n" +
 					"本人確認が完了次第、ログイン可能になります。\n",
 			})
 		} else {
@@ -107,7 +107,7 @@ func AddAdmin(c *gin.Context) {
 				ToMail:  data.Email,
 				Subject: "本人確認メールにつきまして",
 				Content: " " + input.Name + "様\n\n" + "以下のリンクから本人確認を完了してください。\n" +
-					config.Conf.Controller.User.Url + "/api/v1/user/verify/" + mailToken + "\n" +
+					config.Conf.Controller.User.URL + "/api/v1/user/verify/" + mailToken + "\n" +
 					"本人確認が完了次第、ログイン可能になります。\n" + "仮パスワード: " + pass,
 			})
 		}

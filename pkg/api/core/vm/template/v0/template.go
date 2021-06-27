@@ -4,10 +4,10 @@ import (
 	"github.com/gin-gonic/gin"
 	auth "github.com/vmmgr/controller/pkg/api/core/auth/v0"
 	"github.com/vmmgr/controller/pkg/api/core/common"
+	"github.com/vmmgr/controller/pkg/api/core/tool/config"
 	"github.com/vmmgr/controller/pkg/api/core/vm/template"
 	dbTemplate "github.com/vmmgr/controller/pkg/api/store/imacon/template/v0"
 	dbStorage "github.com/vmmgr/controller/pkg/api/store/node/storage/v0"
-	dbNode "github.com/vmmgr/controller/pkg/api/store/node/v0"
 	"net/http"
 )
 
@@ -30,7 +30,11 @@ func GetByAdmin(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, template.TemplateByAdmin{Template: resultTemplate, Storage: resultStorage.Storage})
+	c.JSON(http.StatusOK, template.TemplateByAdmin{
+		Template: resultTemplate,
+		Storage:  resultStorage.Storage,
+		NoVNCURL: config.Conf.Controller.Admin.NoVNCURL,
+	})
 }
 
 func Get(c *gin.Context) {
@@ -46,13 +50,17 @@ func Get(c *gin.Context) {
 		return
 	}
 
-	resultNode := dbNode.GetAll()
-	if resultNode.Err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: resultNode.Err.Error()})
+	resultStorage := dbStorage.GetAll()
+	if resultStorage.Err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: resultStorage.Err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, template.Template{Template: resultTemplate, Node: resultNode.Node})
+	c.JSON(http.StatusOK, template.Template{
+		Template: resultTemplate,
+		Storage:  resultStorage.Storage,
+		NoVNCURL: config.Conf.Controller.User.NoVNCURL,
+	})
 }
 
 //func GetTemplate(id, planID uint) (template.Template, template.Plan, error) {

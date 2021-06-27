@@ -6,12 +6,14 @@ type TemplateByAdmin struct {
 	Template []core.Template `json:"template"`
 	Storage  []core.Storage  `json:"storage"`
 	Node     []core.Node     `json:"node"`
+	NoVNCURL string          `json:"novnc_url"`
 }
 
 type Template struct {
 	Template []core.Template `json:"template"`
 	Storage  []core.Storage  `json:"storage"`
 	Node     []core.Node     `json:"node"`
+	NoVNCURL string          `json:"novnc_url"`
 }
 
 type Image struct {

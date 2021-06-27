@@ -2,11 +2,13 @@
   "controller": {
     "user": {
       "ip": "127.0.0.1",
+      "novnc_url": "https://novnc.com/noVNC/vnc.html?host=127.0.0.1&port=8080&path=ws/v1/vnc/",
       "url": "http://localhost:8080",
       "port": 8080
     },
     "admin": {
       "url": "http://192.168.22.1:8081/api/v1/controller/imacon",
+      "novnc_url": "https://novnc.com/noVNC/vnc.html?host=127.0.0.1&port=8081&path=ws/v1/vnc/",
       "ip": "127.0.0.1",
       "port": 8081,
       "auth": {

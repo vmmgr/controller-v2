@@ -35,15 +35,17 @@ type ImaCon struct {
 }
 
 type User struct {
-	IP   string `json:"ip"`
-	Url  string `json:"url"`
-	Port int    `json:"port"`
+	IP       string `json:"ip"`
+	Port     int    `json:"port"`
+	URL      string `json:"url"`
+	NoVNCURL string `json:"novnc_url"`
 }
 
 type Admin struct {
-	URL       string    `json:"url"`
 	IP        string    `json:"ip"`
 	Port      int       `json:"port"`
+	URL       string    `json:"url"`
+	NoVNCURL  string    `json:"novnc_url"`
 	AdminAuth AdminAuth `json:"auth"`
 }
 
