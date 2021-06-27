@@ -20,6 +20,7 @@ type Controller struct {
 	User             User   `json:"user"`
 	Admin            Admin  `json:"admin"`
 	Auth             Auth   `json:"auth"`
+	PublicKeyPath    string `json:"public_key_path"`
 }
 
 type Node struct {

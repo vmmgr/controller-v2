@@ -2,6 +2,7 @@ package ssh
 
 import (
 	"bytes"
+	"github.com/vmmgr/controller/pkg/api/core/tool/config"
 	"golang.org/x/crypto/ssh"
 	"io/ioutil"
 	"log"
@@ -16,14 +17,14 @@ type Auth struct {
 }
 
 func (h *Auth) SSHClientExecCmd(command string) (string, error) {
-	config := &ssh.ClientConfig{
+	sshConfig := &ssh.ClientConfig{
 		User:            h.User,
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 		//Auth:            []ssh.AuthMethod{ssh.Password(h.Pass)},
-		Auth: []ssh.AuthMethod{PublicKeyFile("/home/yonedayuto/.ssh/id_rsa")},
+		Auth: []ssh.AuthMethod{PublicKeyFile(config.Conf.Controller.PublicKeyPath)},
 	}
 
-	conn, err := ssh.Dial("tcp", h.IP+":"+strconv.Itoa(int(h.Port)), config)
+	conn, err := ssh.Dial("tcp", h.IP+":"+strconv.Itoa(int(h.Port)), sshConfig)
 	if err != nil {
 		log.Println(err)
 		return "", err
@@ -49,14 +50,14 @@ func (h *Auth) SSHClientExecCmd(command string) (string, error) {
 }
 
 func (h *Auth) SSHClient() (*ssh.Client, error) {
-	config := &ssh.ClientConfig{
+	sshConfig := &ssh.ClientConfig{
 		User:            h.User,
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 		//Auth:            []ssh.AuthMethod{ssh.Password(h.Pass)},
-		Auth: []ssh.AuthMethod{PublicKeyFile("/home/yonedayuto/.ssh/id_rsa")},
+		Auth: []ssh.AuthMethod{PublicKeyFile(config.Conf.Controller.PublicKeyPath)},
 	}
 
-	conn, err := ssh.Dial("tcp", h.IP+":"+strconv.Itoa(int(h.Port)), config)
+	conn, err := ssh.Dial("tcp", h.IP+":"+strconv.Itoa(int(h.Port)), sshConfig)
 	if err != nil {
 		log.Println(err)
 		return nil, err
