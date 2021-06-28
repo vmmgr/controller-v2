@@ -33,7 +33,7 @@ var ClientBroadcast = make(chan WebSocketResult)
 type WebSocketInput struct {
 	UserToken   string      `json:"user_token"`
 	AccessToken string      `json:"access_token"`
-	Type        uint        `json:"type"` //0: Get 1:GetAll 10:Create 11:Delete
+	Type        uint        `json:"type"` //0: Get 1:GetAll 10:Create 11:Delete 20:Start 21:Shutdown 22:Reset
 	ID          uint        `json:"id"`
 	Create      CreateAdmin `json:"create"`
 }
@@ -108,6 +108,7 @@ type VMAll struct {
 }
 
 type Detail struct {
+	ID   uint              `json:"id"`
 	VM   libvirtxml.Domain `json:"vm"`
 	Stat uint              `json:"stat"`
 	Node uint              `json:"node"`

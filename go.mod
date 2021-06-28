@@ -26,7 +26,7 @@ require (
 	github.com/ugorji/go v1.2.6 // indirect
 	github.com/valyala/fasttemplate v1.2.1 // indirect
 	github.com/vmmgr/imacon v0.0.0-20210623173131-a5fc479fd4c3
-	github.com/vmmgr/node v0.0.0-20210125074214-ca70e68aa044
+	github.com/vmmgr/node v0.0.0-20210125074214-ca70e68aa044 // indirect
 	golang.org/x/crypto v0.0.0-20210616213533-5ff15b29337e
 	golang.org/x/net v0.0.0-20210614182718-04defd469f4e // indirect
 	golang.org/x/sys v0.0.0-20210616094352-59db8d763f22 // indirect

@@ -29,6 +29,7 @@ type VMTemplateHandler struct {
 	admin    bool
 	groupID  uint
 	ipID     uint
+	ctrlType uint // 1:Admin 2:User
 }
 
 func NewVMAdminTemplateHandler(input VMTemplateHandler) *VMTemplateHandler {
@@ -39,6 +40,7 @@ func NewVMAdminTemplateHandler(input VMTemplateHandler) *VMTemplateHandler {
 		storage:  input.storage,
 		admin:    true,
 		conn:     input.conn,
+		ctrlType: 1,
 	}
 }
 
@@ -52,6 +54,7 @@ func NewVMUserTemplateHandler(input VMTemplateHandler) *VMTemplateHandler {
 		conn:     input.conn,
 		groupID:  input.groupID,
 		ipID:     input.ipID,
+		ctrlType: 2,
 	}
 }
 
@@ -90,8 +93,9 @@ func (t *VMTemplateHandler) templateApply() error {
 			IP:   t.node.IP,
 			Port: t.node.Port,
 		},
-		SrcPath: resultTemplatePlan[0].Template.Image.Path,
-		DstPath: path,
+		SrcPath:  resultTemplatePlan[0].Template.Image.Path,
+		DstPath:  path,
+		CtrlType: t.ctrlType,
 	})
 
 	//VM作成用のデータ

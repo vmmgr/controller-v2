@@ -2,6 +2,7 @@ package v2
 
 import (
 	"fmt"
+	"github.com/jinzhu/gorm"
 	"github.com/vmmgr/controller/pkg/api/core"
 	"github.com/vmmgr/controller/pkg/api/store/ip"
 	dbIP "github.com/vmmgr/controller/pkg/api/store/ip/v0"
@@ -59,7 +60,7 @@ func (h *VMHandler) CreateVM() error {
 		if err != nil {
 			log.Println(err)
 		}
-		err = dbIP.Update(ip.UpdateVMID, core.IP{VMID: vm.ID})
+		err = dbIP.Update(ip.UpdateVMID, core.IP{Model: gorm.Model{ID: h.IPID}, VMID: vm.ID})
 		if err != nil {
 			log.Println(err)
 		}

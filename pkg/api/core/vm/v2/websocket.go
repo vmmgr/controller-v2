@@ -9,17 +9,16 @@ import (
 	libVirtXml "github.com/libvirt/libvirt-go-xml"
 	"github.com/vmmgr/controller/pkg/api/core"
 	auth "github.com/vmmgr/controller/pkg/api/core/auth/v0"
-	"github.com/vmmgr/controller/pkg/api/core/group"
 	"github.com/vmmgr/controller/pkg/api/core/tool/gen"
 	"github.com/vmmgr/controller/pkg/api/core/vm"
 	"github.com/vmmgr/controller/pkg/api/core/vm/storage"
-	dbGroup "github.com/vmmgr/controller/pkg/api/store/group/v0"
 	"github.com/vmmgr/controller/pkg/api/store/ip"
 	dbIP "github.com/vmmgr/controller/pkg/api/store/ip/v0"
 	dbStorage "github.com/vmmgr/controller/pkg/api/store/node/storage/v0"
 	dbNode "github.com/vmmgr/controller/pkg/api/store/node/v0"
 	dbVM "github.com/vmmgr/controller/pkg/api/store/vm/v0"
 	"log"
+	"strconv"
 	"time"
 )
 
@@ -36,7 +35,7 @@ func GetWebSocketAdmin(c *gin.Context) {
 	result := auth.AdminAuthentication(accessToken)
 	if result.Err != nil {
 		log.Println("ws:// support error:Auth error")
-		conn.WriteMessage(websocket.TextMessage, []byte("error: auth error"))
+		conn.WriteMessage(websocket.ClosePolicyViolation, []byte("error: auth error"))
 		return
 	}
 
@@ -64,25 +63,25 @@ func GetWebSocketAdmin(c *gin.Context) {
 			// Get
 		} else if msg.Type == 1 {
 			// Get All
-			log.Println("WebSocket VM Get")
-			resultNode := dbNode.GetAll()
-			if resultNode.Err != nil {
-				log.Println(resultNode.Err)
-				vm.ClientBroadcast <- vm.WebSocketResult{
-					UUID:      uuid,
-					Type:      1,
-					Err:       resultNode.Err.Error(),
-					CreatedAt: time.Now(),
-					Status:    false,
-					Code:      0,
+			for {
+				log.Println("WebSocket VM Get")
+				resultNode := dbNode.GetAll()
+				if resultNode.Err != nil {
+					log.Println(resultNode.Err)
+					vm.ClientBroadcast <- vm.WebSocketResult{
+						UUID:      uuid,
+						Type:      1,
+						Err:       resultNode.Err.Error(),
+						CreatedAt: time.Now(),
+						Status:    false,
+						Code:      0,
+					}
+					break
 				}
-			}
 
-			var vms []vm.Detail
+				var vms []vm.Detail
 
-			for _, tmpNode := range resultNode.Node {
-				for {
-
+				for _, tmpNode := range resultNode.Node {
 					conn, err := libvirt.NewConnect("qemu+ssh://" + tmpNode.User + "@" + tmpNode.IP + "/system")
 					if err != nil {
 						log.Println("failed to connect to qemu: " + err.Error())
@@ -94,55 +93,57 @@ func GetWebSocketAdmin(c *gin.Context) {
 							Status:    false,
 							Code:      0,
 						}
-						return
 					}
 					defer conn.Close()
 
-					doms, err := conn.ListAllDomains(libvirt.CONNECT_LIST_DOMAINS_ACTIVE | libvirt.CONNECT_LIST_DOMAINS_INACTIVE)
-					if err != nil {
-						log.Printf("ListAllDomains error: %s", err)
-						vm.ClientBroadcast <- vm.WebSocketResult{
-							UUID:      uuid,
-							Type:      1,
-							Err:       err.Error(),
-							CreatedAt: time.Now(),
-							Status:    false,
-							Code:      0,
+					if err == nil {
+						doms, err := conn.ListAllDomains(libvirt.CONNECT_LIST_DOMAINS_ACTIVE | libvirt.CONNECT_LIST_DOMAINS_INACTIVE)
+						if err != nil {
+							log.Printf("ListAllDomains error: %s", err)
+							vm.ClientBroadcast <- vm.WebSocketResult{
+								UUID:      uuid,
+								Type:      1,
+								Err:       err.Error(),
+								CreatedAt: time.Now(),
+								Status:    false,
+								Code:      0,
+							}
+							break
 						}
-						return
-					}
 
-					for _, dom := range doms {
-						t := libVirtXml.Domain{}
-						stat, _, _ := dom.GetState()
-						xmlString, _ := dom.GetXMLDesc(libvirt.DOMAIN_XML_SECURE)
-						xml.Unmarshal([]byte(xmlString), &t)
+						for _, dom := range doms {
+							t := libVirtXml.Domain{}
+							stat, _, _ := dom.GetState()
+							xmlString, _ := dom.GetXMLDesc(libvirt.DOMAIN_XML_SECURE)
+							xml.Unmarshal([]byte(xmlString), &t)
 
-						checkSame := false
-						for _, vm := range vms {
-							vmUUID, _ := dom.GetUUIDString()
-							if vm.VM.UUID == vmUUID {
-								checkSame = true
+							checkSame := false
+							for _, vm := range vms {
+								vmUUID, _ := dom.GetUUIDString()
+								if vm.VM.UUID == vmUUID {
+									checkSame = true
+								}
+							}
+
+							if !checkSame {
+								vms = append(vms, vm.Detail{
+									VM:   t,
+									Stat: uint(stat),
+								})
 							}
 						}
 
-						if !checkSame {
-							vms = append(vms, vm.Detail{
-								VM:   t,
-								Stat: uint(stat),
-							})
+						vm.ClientBroadcast <- vm.WebSocketResult{
+							UUID:      uuid,
+							Type:      1,
+							CreatedAt: time.Now(),
+							Status:    true,
+							Code:      0,
+							VMDetail:  vms,
 						}
 					}
-
-					vm.ClientBroadcast <- vm.WebSocketResult{
-						UUID:      uuid,
-						Type:      1,
-						CreatedAt: time.Now(),
-						Status:    true,
-						Code:      0,
-						VMDetail:  vms,
-					}
 				}
+				break
 			}
 		} else if msg.Type == 10 {
 			// Create
@@ -216,6 +217,7 @@ func GetWebSocketAdmin(c *gin.Context) {
 					node:     *node,
 					storage:  resultStorage.Storage[0],
 					conn:     conn,
+					groupID:  0,
 				})
 
 				log.Println("start template apply")
@@ -237,6 +239,15 @@ func GetWebSocketAdmin(c *gin.Context) {
 
 		} else if msg.Type == 11 {
 			// Delete
+		} else if msg.Type == 20 {
+			// Start
+
+		} else if msg.Type == 21 {
+			// Shutdown
+
+		} else if msg.Type == 22 {
+			// Reset
+
 		}
 	}
 }
@@ -261,7 +272,7 @@ func GetWebSocket(c *gin.Context) {
 	result := auth.GroupAuthentication(0, core.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		log.Printf("ws:// Auth error: %v\n", result.Err)
-		conn.WriteMessage(websocket.TextMessage, []byte("error: auth error"))
+		conn.WriteMessage(websocket.ClosePolicyViolation, []byte("error: auth error"))
 		return
 	}
 
@@ -288,49 +299,41 @@ func GetWebSocket(c *gin.Context) {
 
 		if msg.Type == 0 {
 			// Get
-		} else if msg.Type == 1 {
-			// Get All
-			log.Println("WebSocket VM Get")
-			resultGroup := dbGroup.Get(group.ID, &core.Group{Model: gorm.Model{ID: result.User.GroupID}})
-			if resultGroup.Err != nil {
-				log.Println(resultGroup.Err)
-				vm.ClientBroadcast <- vm.WebSocketResult{
-					UUID:      uuid,
-					Type:      1,
-					Err:       resultGroup.Err.Error(),
-					CreatedAt: time.Now(),
-					Status:    false,
-					Code:      0,
-				}
-			}
+			for {
+				log.Println("WebSocket VM " + strconv.Itoa(int(msg.ID)) + " Get")
 
-			var vms []vm.Detail
-			var nodes []core.Node
-			for _, tmpVM := range resultGroup.Group[0].VMs {
-				find := false
-				for _, tmpNode := range nodes {
-					if tmpNode.ID == tmpVM.NodeID {
-						find = true
+				var vmData *core.VM = nil
+				for _, tmpVM := range result.User.Group.VMs {
+					if tmpVM.ID == msg.ID {
+						vmData = tmpVM
 						break
 					}
 				}
-				if !find {
-					nodes = append(nodes, tmpVM.Node)
-				}
-			}
-
-			for _, tmpNode := range nodes {
-				conn, err := libvirt.NewConnect("qemu+ssh://" + tmpNode.User + "@" + tmpNode.IP + "/system")
-				if err != nil {
-					log.Println("failed to connect to qemu: " + err.Error())
+				if vmData == nil {
+					log.Printf("VM ID mismatch: %s", err)
 					vm.ClientBroadcast <- vm.WebSocketResult{
 						UUID:      uuid,
-						Type:      1,
+						Type:      0,
 						Err:       err.Error(),
 						CreatedAt: time.Now(),
 						Status:    false,
 						Code:      0,
 					}
+					break
+				}
+
+				conn, err := libvirt.NewConnect("qemu+ssh://" + vmData.Node.User + "@" + vmData.Node.IP + "/system")
+				if err != nil {
+					log.Println("failed to connect to qemu: " + err.Error())
+					vm.ClientBroadcast <- vm.WebSocketResult{
+						UUID:      uuid,
+						Type:      0,
+						Err:       err.Error(),
+						CreatedAt: time.Now(),
+						Status:    false,
+						Code:      0,
+					}
+					break
 				}
 				defer conn.Close()
 
@@ -339,7 +342,7 @@ func GetWebSocket(c *gin.Context) {
 					log.Printf("ListAllDomains error: %s", err)
 					vm.ClientBroadcast <- vm.WebSocketResult{
 						UUID:      uuid,
-						Type:      1,
+						Type:      0,
 						Err:       err.Error(),
 						CreatedAt: time.Now(),
 						Status:    false,
@@ -353,37 +356,96 @@ func GetWebSocket(c *gin.Context) {
 					xmlString, _ := dom.GetXMLDesc(libvirt.DOMAIN_XML_SECURE)
 					xml.Unmarshal([]byte(xmlString), &t)
 
-					checkSame := false
-					groupVM := false
-
-					for _, vm := range vms {
-						vmUUID, _ := dom.GetUUIDString()
-						if vm.VM.UUID == vmUUID {
-							checkSame = true
+					vmUUID, _ := dom.GetUUIDString()
+					if vmData.UUID == vmUUID {
+						vm.ClientBroadcast <- vm.WebSocketResult{
+							UUID:      uuid,
+							Type:      0,
+							CreatedAt: time.Now(),
+							Status:    true,
+							Code:      0,
+							VMDetail:  []vm.Detail{{VM: t, Stat: uint(stat)}},
 						}
-						for _, tmpVM := range resultGroup.Group[0].VMs {
+					}
+				}
+				break
+			}
+		} else if msg.Type == 1 {
+			// Get All
+			for {
+				log.Println("WebSocket VM Get")
+
+				var vms []vm.Detail
+				var nodes []core.Node
+				for _, tmpVM := range result.User.Group.VMs {
+					find := false
+					for _, tmpNode := range nodes {
+						if tmpNode.ID == tmpVM.NodeID {
+							find = true
+							break
+						}
+					}
+					if !find {
+						nodes = append(nodes, tmpVM.Node)
+					}
+				}
+
+				for _, tmpNode := range nodes {
+					conn, err := libvirt.NewConnect("qemu+ssh://" + tmpNode.User + "@" + tmpNode.IP + "/system")
+					if err != nil {
+						log.Println("failed to connect to qemu: " + err.Error())
+						vm.ClientBroadcast <- vm.WebSocketResult{
+							UUID:      uuid,
+							Type:      1,
+							Err:       err.Error(),
+							CreatedAt: time.Now(),
+							Status:    false,
+							Code:      0,
+						}
+					}
+					defer conn.Close()
+
+					doms, err := conn.ListAllDomains(libvirt.CONNECT_LIST_DOMAINS_ACTIVE | libvirt.CONNECT_LIST_DOMAINS_INACTIVE)
+					if err != nil {
+						log.Printf("ListAllDomains error: %s", err)
+						vm.ClientBroadcast <- vm.WebSocketResult{
+							UUID:      uuid,
+							Type:      1,
+							Err:       err.Error(),
+							CreatedAt: time.Now(),
+							Status:    false,
+							Code:      0,
+						}
+					}
+
+					for _, dom := range doms {
+						t := libVirtXml.Domain{}
+						stat, _, _ := dom.GetState()
+						xmlString, _ := dom.GetXMLDesc(libvirt.DOMAIN_XML_SECURE)
+						xml.Unmarshal([]byte(xmlString), &t)
+
+						for _, tmpVM := range result.User.Group.VMs {
+							vmUUID, _ := dom.GetUUIDString()
 							if tmpVM.UUID == vmUUID {
-								groupVM = true
+								vms = append(vms, vm.Detail{
+									ID:   tmpVM.ID,
+									VM:   t,
+									Stat: uint(stat),
+								})
 							}
 						}
 					}
 
-					if !checkSame && groupVM {
-						vms = append(vms, vm.Detail{
-							VM:   t,
-							Stat: uint(stat),
-						})
+					vm.ClientBroadcast <- vm.WebSocketResult{
+						UUID:      uuid,
+						Type:      1,
+						CreatedAt: time.Now(),
+						Status:    true,
+						Code:      0,
+						VMDetail:  vms,
 					}
 				}
-
-				vm.ClientBroadcast <- vm.WebSocketResult{
-					UUID:      uuid,
-					Type:      1,
-					CreatedAt: time.Now(),
-					Status:    true,
-					Code:      0,
-					VMDetail:  vms,
-				}
+				break
 			}
 		} else if msg.Type == 10 {
 			for {
@@ -433,7 +495,7 @@ func GetWebSocket(c *gin.Context) {
 
 				node.Storage = []core.Storage{vmBasePath}
 
-				resultIP, err := dbIP.Get(ip.GetUsed, &core.IP{})
+				resultIP, err := dbIP.Get(ip.GetUnused, &core.IP{})
 				if err != nil {
 					log.Println(err)
 					vm.ClientBroadcast <- vm.WebSocketResult{
@@ -446,7 +508,24 @@ func GetWebSocket(c *gin.Context) {
 					}
 					break
 				}
-				err = dbIP.Update(ip.UpdateReserved, core.IP{Model: gorm.Model{ID: resultIP[0].ID}})
+
+				if len(resultIP) == 0 {
+					log.Println("ip data is not found...")
+					vm.ClientBroadcast <- vm.WebSocketResult{
+						UUID:      uuid,
+						Type:      10,
+						Err:       "ip data is not found...",
+						CreatedAt: time.Now(),
+						Status:    false,
+						Code:      0,
+					}
+					break
+				}
+
+				err = dbIP.Update(ip.UpdateReserved, core.IP{
+					Model:    gorm.Model{ID: resultIP[0].ID},
+					Reserved: &[]bool{true}[0],
+				})
 				if err != nil {
 					log.Println(err)
 					vm.ClientBroadcast <- vm.WebSocketResult{
@@ -459,6 +538,11 @@ func GetWebSocket(c *gin.Context) {
 					}
 					break
 				}
+
+				msg.Create.Template.IP = resultIP[0].IP
+				msg.Create.Template.NetMask = resultIP[0].Subnet
+				msg.Create.Template.Gateway = resultIP[0].Gateway
+				msg.Create.Template.DNS = resultIP[0].DNS
 
 				//----ベースイメージコピー処理----
 				h := NewVMUserTemplateHandler(VMTemplateHandler{
@@ -468,14 +552,9 @@ func GetWebSocket(c *gin.Context) {
 					node:     *node,
 					storage:  resultStorage.Storage[0],
 					conn:     conn,
-					groupID:  result.Group.ID,
+					groupID:  result.User.GroupID,
 					ipID:     resultIP[0].ID,
 				})
-
-				msg.Create.Template.IP = resultIP[0].IP
-				msg.Create.Template.NetMask = resultIP[0].Subnet
-				msg.Create.Template.Gateway = resultIP[0].Gateway
-				msg.Create.Template.DNS = resultIP[0].DNS
 
 				log.Println("start template apply")
 
@@ -493,15 +572,6 @@ func GetWebSocket(c *gin.Context) {
 					break
 				}
 
-				dbVM.Create(&core.VM{
-					NodeID:        node.ID,
-					GroupID:       result.Group.ID,
-					Name:          "",
-					UUID:          "",
-					VNCPort:       0,
-					WebSocketPort: 0,
-					Lock:          nil,
-				})
 				break
 			}
 		} else if msg.Type == 11 {

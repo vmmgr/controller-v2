@@ -94,6 +94,7 @@ func Get(base int, input *core.Token) token.ResultDatabase {
 			Preload("User.Group").
 			Preload("User.Group.VMs").
 			Preload("User.Group.VMs.Node").
+			Preload("User.Group.VMs.IP").
 			Where("user_token = ? AND access_token = ? AND admin = ? AND expired_at > ?",
 				input.UserToken, input.AccessToken, false, time.Now()).Find(&tokenStruct).Error
 	} else if base == token.AdminToken {

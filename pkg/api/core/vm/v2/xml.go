@@ -10,7 +10,6 @@ import (
 	nic "github.com/vmmgr/controller/pkg/api/core/vm/nic/v0"
 	storageInterface "github.com/vmmgr/controller/pkg/api/core/vm/storage"
 	storage "github.com/vmmgr/controller/pkg/api/core/vm/storage/v0"
-	//"github.com/vmmgr/node/pkg/api/core/tool/file"
 	"log"
 	"strconv"
 )

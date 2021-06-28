@@ -43,7 +43,9 @@ func Update(base int, data core.IP) error {
 
 	var result *gorm.DB
 	if ip2.UpdateVMID == base {
-		result = db.Model(&core.IP{Model: gorm.Model{ID: data.ID}}).Update(core.IP{VMID: data.VMID})
+		result = db.Model(&core.IP{Model: gorm.Model{ID: data.ID}}).Update(&core.IP{VMID: data.VMID})
+	} else if ip2.UpdateReserved == base {
+		result = db.Model(&core.IP{Model: gorm.Model{ID: data.ID}}).Update(&core.IP{Reserved: data.Reserved})
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
@@ -64,7 +66,7 @@ func Get(base int, data *core.IP) ([]core.IP, error) {
 	if base == ip2.GetID { //ID
 		err = db.First(&ips, data.ID).Error
 	} else if base == ip2.GetUnused { //Zone内の全VM検索
-		err = db.Where("vmid = ? AND reserved = ?", 0, false).Find(&ips).Error
+		err = db.Where("vm_id = ? AND reserved = ?", 0, false).Find(&ips).Error
 	} else {
 		log.Println("base select error")
 		return ips, fmt.Errorf("(%s)error: base select\n", time.Now())
