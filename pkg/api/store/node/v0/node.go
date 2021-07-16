@@ -2,10 +2,10 @@ package v0
 
 import (
 	"fmt"
-	"github.com/jinzhu/gorm"
 	"github.com/vmmgr/controller/pkg/api/core"
 	node "github.com/vmmgr/controller/pkg/api/core/node"
 	"github.com/vmmgr/controller/pkg/api/store"
+	"gorm.io/gorm"
 	"log"
 	"time"
 )
@@ -16,7 +16,12 @@ func Create(node *core.Node) (*core.Node, error) {
 		log.Println("database connection error")
 		return node, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return node, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	err = db.Create(&node).Error
 	return node, err
@@ -28,7 +33,12 @@ func Delete(node *core.Node) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	return db.Delete(node).Error
 }
@@ -39,13 +49,26 @@ func Update(base int, data core.Node) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	var result *gorm.DB
 	if node.UpdateAll == base {
-		result = db.Model(&core.Node{Model: gorm.Model{ID: data.ID}}).Update(core.Node{
-			ZoneID: data.ZoneID, GroupID: data.GroupID, AdminOnly: data.AdminOnly, Name: data.Name, IP: data.IP,
-			Port: data.Port, WsPort: data.WsPort, ManageNet: data.ManageNet, Comment: data.Comment})
+		result = db.Model(&core.Node{Model: gorm.Model{ID: data.ID}}).Updates(core.Node{
+			ZoneID:    data.ZoneID,
+			GroupID:   data.GroupID,
+			AdminOnly: data.AdminOnly,
+			Name:      data.Name,
+			IP:        data.IP,
+			Port:      data.Port,
+			WsPort:    data.WsPort,
+			ManageNet: data.ManageNet,
+			Comment:   data.Comment,
+		})
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
@@ -59,7 +82,12 @@ func Get(base int, data *core.Node) node.ResultDatabase {
 		log.Println("database connection error")
 		return node.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return node.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+	}
+	defer dbSQL.Close()
 
 	var nodeStruct []core.Node
 
@@ -88,7 +116,12 @@ func GetAll() node.ResultDatabase {
 		log.Println("database connection error")
 		return node.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return node.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+	}
+	defer dbSQL.Close()
 
 	var nodes []core.Node
 	err = db.Preload("Storage").

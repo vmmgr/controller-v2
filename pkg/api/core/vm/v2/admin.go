@@ -3,7 +3,6 @@ package v2
 import (
 	"encoding/xml"
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	"github.com/libvirt/libvirt-go"
 	libVirtXml "github.com/libvirt/libvirt-go-xml"
 	"github.com/vmmgr/controller/pkg/api/core"
@@ -14,6 +13,7 @@ import (
 	"github.com/vmmgr/controller/pkg/api/core/vm"
 	dbNode "github.com/vmmgr/controller/pkg/api/store/node/v0"
 	dbVM "github.com/vmmgr/controller/pkg/api/store/vm/v0"
+	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"strconv"

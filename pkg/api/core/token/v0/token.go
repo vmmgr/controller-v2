@@ -3,7 +3,6 @@ package v0
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	"github.com/vmmgr/controller/pkg/api/core"
 	"github.com/vmmgr/controller/pkg/api/core/common"
 	"github.com/vmmgr/controller/pkg/api/core/token"
@@ -13,6 +12,7 @@ import (
 	"github.com/vmmgr/controller/pkg/api/core/user"
 	dbToken "github.com/vmmgr/controller/pkg/api/store/token/v0"
 	dbUser "github.com/vmmgr/controller/pkg/api/store/user/v0"
+	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"strings"

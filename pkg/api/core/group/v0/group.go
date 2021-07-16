@@ -2,7 +2,6 @@ package v0
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	"github.com/vmmgr/controller/pkg/api/core"
 	auth "github.com/vmmgr/controller/pkg/api/core/auth/v0"
 	"github.com/vmmgr/controller/pkg/api/core/common"
@@ -10,6 +9,7 @@ import (
 	"github.com/vmmgr/controller/pkg/api/core/user"
 	dbGroup "github.com/vmmgr/controller/pkg/api/store/group/v0"
 	dbUser "github.com/vmmgr/controller/pkg/api/store/user/v0"
+	"gorm.io/gorm"
 	"net/http"
 )
 

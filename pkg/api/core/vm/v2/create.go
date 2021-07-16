@@ -2,11 +2,11 @@ package v2
 
 import (
 	"fmt"
-	"github.com/jinzhu/gorm"
 	"github.com/vmmgr/controller/pkg/api/core"
 	"github.com/vmmgr/controller/pkg/api/store/ip"
 	dbIP "github.com/vmmgr/controller/pkg/api/store/ip/v0"
 	dbVM "github.com/vmmgr/controller/pkg/api/store/vm/v0"
+	"gorm.io/gorm"
 	"log"
 	"strconv"
 )

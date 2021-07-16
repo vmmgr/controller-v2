@@ -2,11 +2,11 @@ package v0
 
 import (
 	"fmt"
-	"github.com/jinzhu/gorm"
 	"github.com/vmmgr/controller/pkg/api/core"
 	"github.com/vmmgr/controller/pkg/api/core/auth"
 	"github.com/vmmgr/controller/pkg/api/core/token"
 	dbToken "github.com/vmmgr/controller/pkg/api/store/token/v0"
+	"gorm.io/gorm"
 	"log"
 	"time"
 )

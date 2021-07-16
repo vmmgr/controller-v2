@@ -2,10 +2,10 @@ package v0
 
 import (
 	"fmt"
-	"github.com/jinzhu/gorm"
 	"github.com/vmmgr/controller/pkg/api/core"
 	zone "github.com/vmmgr/controller/pkg/api/core/region/zone"
 	"github.com/vmmgr/controller/pkg/api/store"
+	"gorm.io/gorm"
 	"log"
 	"time"
 )
@@ -16,7 +16,12 @@ func Create(zone *core.Zone) (*core.Zone, error) {
 		log.Println("database connection error")
 		return zone, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return zone, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	err = db.Create(&zone).Error
 	return zone, err
@@ -28,7 +33,12 @@ func Delete(zone *core.Zone) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	return db.Delete(zone).Error
 }
@@ -39,12 +49,20 @@ func Update(base int, data core.Zone) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	var result *gorm.DB
 	if zone.UpdateAll == base {
-		result = db.Model(&core.Zone{Model: gorm.Model{ID: data.ID}}).Update(core.Zone{
-			Name: data.Name, Comment: data.Comment, Lock: data.Lock})
+		result = db.Model(&core.Zone{Model: gorm.Model{ID: data.ID}}).Updates(core.Zone{
+			Name:    data.Name,
+			Comment: data.Comment,
+			Lock:    data.Lock,
+		})
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
@@ -58,7 +76,12 @@ func Get(base int, data *core.Zone) zone.ResultDatabase {
 		log.Println("database connection error")
 		return zone.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return zone.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+	}
+	defer dbSQL.Close()
 
 	var zoneStruct []core.Zone
 
@@ -81,7 +104,12 @@ func GetAll() zone.ResultDatabase {
 		log.Println("database connection error")
 		return zone.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return zone.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+	}
+	defer dbSQL.Close()
 
 	var zones []core.Zone
 	err = db.Find(&zones).Error

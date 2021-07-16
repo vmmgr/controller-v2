@@ -2,7 +2,6 @@ package v0
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	"github.com/vmmgr/controller/pkg/api/core"
 	authInterface "github.com/vmmgr/controller/pkg/api/core/auth"
 	auth "github.com/vmmgr/controller/pkg/api/core/auth/v0"
@@ -10,6 +9,7 @@ import (
 	"github.com/vmmgr/controller/pkg/api/core/token"
 	toolToken "github.com/vmmgr/controller/pkg/api/core/tool/token"
 	dbToken "github.com/vmmgr/controller/pkg/api/store/token/v0"
+	"gorm.io/gorm"
 	"net/http"
 	"strconv"
 	"time"

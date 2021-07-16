@@ -2,10 +2,10 @@ package v0
 
 import (
 	"fmt"
-	"github.com/jinzhu/gorm"
 	"github.com/vmmgr/controller/pkg/api/core"
 	"github.com/vmmgr/controller/pkg/api/core/node/nic"
 	"github.com/vmmgr/controller/pkg/api/store"
+	"gorm.io/gorm"
 	"log"
 	"time"
 )
@@ -16,7 +16,12 @@ func Create(nic *core.NIC) (*core.NIC, error) {
 		log.Println("database connection error")
 		return nic, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return nic, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	err = db.Create(&nic).Error
 	return nic, err
@@ -28,7 +33,12 @@ func Delete(nic *core.NIC) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	return db.Delete(nic).Error
 }
@@ -39,14 +49,28 @@ func Update(base int, data core.NIC) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	var result *gorm.DB
 	if nic.UpdateAll == base {
-		result = db.Model(&core.NIC{Model: gorm.Model{ID: data.ID}}).Update(core.NIC{
-			NodeID: data.NodeID, GroupID: data.GroupID, AdminOnly: data.AdminOnly, Name: data.Name, Enable: data.Enable,
-			Virtual: data.Virtual, Type: data.Type, Vlan: data.Vlan, Speed: data.Speed, MAC: data.MAC,
-			Comment: data.Comment})
+		result = db.Model(&core.NIC{Model: gorm.Model{ID: data.ID}}).Updates(core.NIC{
+			NodeID:    data.NodeID,
+			GroupID:   data.GroupID,
+			AdminOnly: data.AdminOnly,
+			Name:      data.Name,
+			Enable:    data.Enable,
+			Virtual:   data.Virtual,
+			Type:      data.Type,
+			Vlan:      data.Vlan,
+			Speed:     data.Speed,
+			MAC:       data.MAC,
+			Comment:   data.Comment,
+		})
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
@@ -60,7 +84,12 @@ func Get(base int, data *core.NIC) nic.ResultDatabase {
 		log.Println("database connection error")
 		return nic.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return nic.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+	}
+	defer dbSQL.Close()
 
 	var nicStruct []core.NIC
 
@@ -91,7 +120,12 @@ func GetAll() nic.ResultDatabase {
 		log.Println("database connection error")
 		return nic.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return nic.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+	}
+	defer dbSQL.Close()
 
 	var nics []core.NIC
 	err = db.Find(&nics).Error

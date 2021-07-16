@@ -1,12 +1,11 @@
 package cmd
 
 import (
-	"github.com/jinzhu/gorm"
 	"github.com/spf13/cobra"
 	"github.com/vmmgr/controller/pkg/api/core"
 	"github.com/vmmgr/controller/pkg/api/core/tool/config"
+	"github.com/vmmgr/controller/pkg/api/store"
 	"log"
-	"strconv"
 )
 
 var initCmd = &cobra.Command{
@@ -22,11 +21,7 @@ var initCmd = &cobra.Command{
 			log.Fatalf("error config process |%v", err)
 		}
 
-		db, err := gorm.Open("mysql", config.Conf.DB.User+":"+config.Conf.DB.Pass+"@"+
-			"tcp("+config.Conf.DB.IP+":"+strconv.Itoa(config.Conf.DB.Port)+")"+"/"+config.Conf.DB.DBName+"?parseTime=true")
-		if err != nil {
-			panic(err)
-		}
+		db, _ := store.ConnectDB()
 		result := db.AutoMigrate(
 			&core.User{},
 			&core.Group{},
@@ -46,7 +41,7 @@ var initCmd = &cobra.Command{
 			&core.TemplatePlan{},
 			&core.IP{},
 		)
-		log.Println(result.Error)
+		log.Println(result)
 		log.Println("end")
 	},
 }

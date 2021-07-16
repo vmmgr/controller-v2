@@ -2,8 +2,8 @@ package support
 
 import (
 	"github.com/gorilla/websocket"
-	"github.com/jinzhu/gorm"
 	"github.com/vmmgr/controller/pkg/api/core"
+	"gorm.io/gorm"
 	"time"
 )
 

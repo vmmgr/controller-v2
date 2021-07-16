@@ -2,35 +2,45 @@ package v0
 
 import (
 	"fmt"
-	"github.com/jinzhu/gorm"
 	"github.com/vmmgr/controller/pkg/api/core"
 	"github.com/vmmgr/controller/pkg/api/store"
 	ip2 "github.com/vmmgr/controller/pkg/api/store/ip"
+	"gorm.io/gorm"
 	"log"
 	"time"
 )
 
-func Create(nic *core.IP) (*core.IP, error) {
+func Create(ip *core.IP) (*core.IP, error) {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
-		return nic, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+		return ip, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return ip, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
-	err = db.Create(&nic).Error
-	return nic, err
+	err = db.Create(&ip).Error
+	return ip, err
 }
 
-func Delete(nic *core.IP) error {
+func Delete(ip *core.IP) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
-	return db.Delete(nic).Error
+	return db.Delete(ip).Error
 }
 
 func Update(base int, data core.IP) error {
@@ -39,13 +49,18 @@ func Update(base int, data core.IP) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	var result *gorm.DB
 	if ip2.UpdateVMID == base {
-		result = db.Model(&core.IP{Model: gorm.Model{ID: data.ID}}).Update(&core.IP{VMID: data.VMID})
+		result = db.Model(&core.IP{Model: gorm.Model{ID: data.ID}}).Updates(&core.IP{VMID: data.VMID})
 	} else if ip2.UpdateReserved == base {
-		result = db.Model(&core.IP{Model: gorm.Model{ID: data.ID}}).Update(&core.IP{Reserved: data.Reserved})
+		result = db.Model(&core.IP{Model: gorm.Model{ID: data.ID}}).Updates(&core.IP{Reserved: data.Reserved})
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
@@ -61,7 +76,12 @@ func Get(base int, data *core.IP) ([]core.IP, error) {
 		log.Println("database connection error")
 		return ips, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return ips, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	if base == ip2.GetID { //ID
 		err = db.First(&ips, data.ID).Error
@@ -82,7 +102,12 @@ func GetAll() ([]core.IP, error) {
 		log.Println("database connection error")
 		return ips, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return ips, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	err = db.Find(&ips).Error
 	return ips, err

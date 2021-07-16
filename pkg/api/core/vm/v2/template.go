@@ -1,7 +1,6 @@
 package v2
 
 import (
-	"github.com/jinzhu/gorm"
 	"github.com/libvirt/libvirt-go"
 	"github.com/vmmgr/controller/pkg/api/core"
 	"github.com/vmmgr/controller/pkg/api/core/vm"
@@ -11,6 +10,7 @@ import (
 	storageInt "github.com/vmmgr/controller/pkg/api/core/vm/storage"
 	storage "github.com/vmmgr/controller/pkg/api/core/vm/storage/v0"
 	dbTemplatePlan "github.com/vmmgr/controller/pkg/api/store/imacon/template_plan/v0"
+	"gorm.io/gorm"
 	"log"
 	"strconv"
 	"strings"

@@ -2,10 +2,10 @@ package v0
 
 import (
 	"fmt"
-	"github.com/jinzhu/gorm"
 	"github.com/vmmgr/controller/pkg/api/core"
 	"github.com/vmmgr/controller/pkg/api/core/group"
 	"github.com/vmmgr/controller/pkg/api/store"
+	"gorm.io/gorm"
 	"log"
 	"time"
 )
@@ -23,9 +23,14 @@ func Create(g *core.Group) (*core.Group, error) {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
-		return g, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+		return nil, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return nil, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	err = db.Create(&g).Error
 	return g, err
@@ -37,7 +42,12 @@ func Delete(group *core.Group) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	return db.Delete(group).Error
 }
@@ -48,19 +58,28 @@ func Update(base int, g core.Group) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	var result *gorm.DB
 
 	if group.UpdateOrg == base {
-		result = db.Model(&core.Group{Model: gorm.Model{ID: g.ID}}).Update("org", g.Org)
+		result = db.Model(&core.Group{Model: gorm.Model{ID: g.ID}}).Updates(core.Group{Org: g.Org})
 	} else if group.UpdateStatus == base {
-		result = db.Model(&core.Group{Model: gorm.Model{ID: g.ID}}).Update("status", g.Status)
+		result = db.Model(&core.Group{Model: gorm.Model{ID: g.ID}}).Updates(core.Group{Status: g.Status})
 	} else if group.UpdateInfo == base {
-		result = db.Model(&core.Group{Model: gorm.Model{ID: g.ID}}).Update(core.Group{Org: g.Org})
+		result = db.Model(&core.Group{Model: gorm.Model{ID: g.ID}}).Updates(core.Group{Org: g.Org})
 	} else if group.UpdateAll == base {
-		result = db.Model(&core.Group{Model: gorm.Model{ID: g.ID}}).Update(core.Group{
-			Org: g.Org, Status: g.Status, Comment: g.Comment, Lock: g.Lock})
+		result = db.Model(&core.Group{Model: gorm.Model{ID: g.ID}}).Updates(core.Group{
+			Org:     g.Org,
+			Status:  g.Status,
+			Comment: g.Comment,
+			Lock:    g.Lock,
+		})
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
@@ -74,7 +93,12 @@ func Get(base int, data *core.Group) group.ResultDatabase {
 		log.Println("database connection error")
 		return group.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return group.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+	}
+	defer dbSQL.Close()
 
 	var groupStruct []core.Group
 
@@ -95,7 +119,12 @@ func GetAll() group.ResultDatabase {
 		log.Println("database connection error")
 		return group.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return group.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+	}
+	defer dbSQL.Close()
 
 	var groups []core.Group
 	err = db.Find(&groups).Error

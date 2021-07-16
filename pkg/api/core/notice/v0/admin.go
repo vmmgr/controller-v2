@@ -2,12 +2,12 @@ package v0
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	"github.com/vmmgr/controller/pkg/api/core"
 	auth "github.com/vmmgr/controller/pkg/api/core/auth/v0"
 	"github.com/vmmgr/controller/pkg/api/core/common"
 	"github.com/vmmgr/controller/pkg/api/core/notice"
 	dbNotice "github.com/vmmgr/controller/pkg/api/store/notice/v0"
+	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"strconv"
