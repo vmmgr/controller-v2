@@ -45,8 +45,8 @@ func CreateAdmin(c *gin.Context) {
 
 	// Tickets DBに登録
 	ticketResult, err := dbTicket.Create(&core.Ticket{
-		GroupID: input.GroupID,
-		UserID:  0,
+		GroupID: &input.GroupID,
+		UserID:  nil,
 		Solved:  &[]bool{false}[0],
 		Title:   input.Title,
 	})
@@ -57,7 +57,7 @@ func CreateAdmin(c *gin.Context) {
 
 	// Chat DBに登録
 	chatResult, err := dbChat.Create(&core.Chat{
-		UserID:   0,
+		UserID:   nil,
 		Admin:    true,
 		Data:     input.Data,
 		TicketID: ticketResult.ID,
@@ -199,7 +199,7 @@ func GetAdminWebSocket(c *gin.Context) {
 		TicketID: uint(id),
 		UserID:   resultAdmin.AdminID,
 		UserName: "HomeNOC",
-		GroupID:  ticketResult.Tickets[0].GroupID,
+		GroupID:  *ticketResult.Tickets[0].GroupID,
 		Socket:   conn,
 	}] = true
 
@@ -213,7 +213,7 @@ func GetAdminWebSocket(c *gin.Context) {
 				TicketID: uint(id),
 				UserID:   resultAdmin.AdminID,
 				UserName: "HomeNOC(運営)",
-				GroupID:  ticketResult.Tickets[0].GroupID,
+				GroupID:  *ticketResult.Tickets[0].GroupID,
 				Socket:   conn,
 			})
 			break
@@ -221,7 +221,7 @@ func GetAdminWebSocket(c *gin.Context) {
 
 		_, err = dbChat.Create(&core.Chat{
 			TicketID: ticketResult.Tickets[0].ID,
-			UserID:   resultAdmin.AdminID,
+			UserID:   &resultAdmin.AdminID,
 			Admin:    true,
 			Data:     msg.Message,
 		})
@@ -229,7 +229,7 @@ func GetAdminWebSocket(c *gin.Context) {
 			conn.WriteJSON(&support.WebSocketResult{Err: "db write error"})
 		} else {
 			msg.UserID = resultAdmin.AdminID
-			msg.GroupID = ticketResult.Tickets[0].GroupID
+			msg.GroupID = *ticketResult.Tickets[0].GroupID
 			msg.UserName = "HomeNOC(運営)"
 			msg.Admin = true
 			// Token関連の初期化
@@ -242,7 +242,7 @@ func GetAdminWebSocket(c *gin.Context) {
 				Admin:     msg.Admin,
 				UserID:    resultAdmin.AdminID,
 				UserName:  msg.UserName,
-				GroupID:   ticketResult.Tickets[0].GroupID,
+				GroupID:   *ticketResult.Tickets[0].GroupID,
 				Message:   msg.Message,
 			})
 

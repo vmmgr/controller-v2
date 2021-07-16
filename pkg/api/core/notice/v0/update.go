@@ -16,21 +16,9 @@ func updateAdminUser(input, replace core.Notice) (core.Notice, error) {
 	}
 
 	// uint boolean
-	//UserID
-	if input.UserID != replace.UserID {
-		replace.UserID = input.UserID
-	}
-	//GroupID
-	if input.GroupID != replace.GroupID {
-		replace.GroupID = input.GroupID
-	}
 	//StartTime
 	if input.StartTime != replace.StartTime {
 		replace.StartTime = input.StartTime
-	}
-	//EndTime
-	if input.EndingTime != replace.EndingTime {
-		replace.EndingTime = input.EndingTime
 	}
 	//Everyone
 	if input.Everyone != replace.Everyone {

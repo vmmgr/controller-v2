@@ -38,8 +38,8 @@ func AddAdmin(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, common.Error{Error: "This zone is not found..."})
 		return
 	}
-	if input.GroupID != 0 {
-		if resultGroup := dbGroup.Get(group.ID, &core.Group{Model: gorm.Model{ID: input.GroupID}}); resultGroup.Err != nil {
+	if input.GroupID != nil {
+		if resultGroup := dbGroup.Get(group.ID, &core.Group{Model: gorm.Model{ID: *input.GroupID}}); resultGroup.Err != nil {
 			c.JSON(http.StatusBadRequest, common.Error{Error: "This group is not found..."})
 			return
 		}

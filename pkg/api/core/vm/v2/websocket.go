@@ -456,7 +456,7 @@ func GetWebSocket(c *gin.Context) {
 					break
 				}
 
-				resultVM := dbVM.Get(vm.GroupID, &core.VM{GroupID: result.Group.ID})
+				resultVM := dbVM.Get(vm.GroupID, &core.VM{GroupID: &result.Group.ID})
 				if resultVM.Err != nil {
 					log.Printf("error vm: %s\n", resultVM.Err)
 					break
@@ -552,7 +552,7 @@ func GetWebSocket(c *gin.Context) {
 					node:     *node,
 					storage:  resultStorage.Storage[0],
 					conn:     conn,
-					groupID:  result.User.GroupID,
+					groupID:  *result.User.GroupID,
 					ipID:     resultIP[0].ID,
 				})
 

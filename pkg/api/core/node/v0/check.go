@@ -13,7 +13,7 @@ func check(input core.Node) error {
 	if input.Name == "" {
 		return fmt.Errorf("no data: name")
 	}
-	if input.GroupID == 0 {
+	if input.GroupID == nil {
 		return fmt.Errorf("no data: groupID")
 	}
 	if input.IP == "" {

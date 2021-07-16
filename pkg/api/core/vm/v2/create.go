@@ -51,11 +51,11 @@ func (h *VMHandler) CreateVM() error {
 		uuid, _ := dom.GetUUIDString()
 		vm, err := dbVM.Create(&core.VM{
 			NodeID:        h.Node.ID,
-			GroupID:       h.GroupID,
+			GroupID:       &[]uint{h.GroupID}[0],
 			Name:          strconv.Itoa(int(h.GroupID)) + "-" + h.VM.Name,
 			UUID:          uuid,
-			VNCPort:       h.VM.VNCPort,
-			WebSocketPort: h.VM.WebSocketPort,
+			VNCPort:       &[]uint{h.VM.VNCPort}[0],
+			WebSocketPort: &[]uint{h.VM.WebSocketPort}[0],
 		})
 		if err != nil {
 			log.Println(err)

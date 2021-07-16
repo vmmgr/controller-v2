@@ -7,17 +7,18 @@ import (
 
 type User struct {
 	gorm.Model
-	Tokens        []*Token `json:"tokens"`
-	Group         *Group   `json:"group"`
-	GroupID       uint     `json:"group_id"`
-	Name          string   `json:"name"`
-	NameEn        string   `json:"name_en"`
-	Email         string   `json:"email"`
-	Pass          string   `json:"pass"`
-	ExpiredStatus *uint    `json:"expired_status"`
-	Level         uint     `json:"level"`
-	MailVerify    *bool    `json:"mail_verify"`
-	MailToken     string   `json:"mail_token"`
+	Notice        []*Notice `json:"notice" gorm:"many2many:user_notice;"`
+	Tokens        []*Token  `json:"tokens"`
+	Group         *Group    `json:"group"`
+	GroupID       *uint     `json:"group_id"`
+	Name          string    `json:"name"`
+	NameEn        string    `json:"name_en"`
+	Email         string    `json:"email"`
+	Pass          string    `json:"pass"`
+	ExpiredStatus *uint     `json:"expired_status"`
+	Level         uint      `json:"level"`
+	MailVerify    *bool     `json:"mail_verify"`
+	MailToken     string    `json:"mail_token"`
 }
 
 type Group struct {
@@ -36,7 +37,7 @@ type Group struct {
 type Token struct {
 	gorm.Model
 	ExpiredAt   time.Time `json:"expired_at"`
-	UserID      uint      `json:"user_id"`
+	UserID      *uint     `json:"user_id"`
 	User        User      `json:"user"`
 	Status      uint      `json:"status"` //0: initToken(30m) 1: 30m 2:6h 3: 12h 10: 30d 11:180d
 	Admin       *bool     `json:"admin"`
@@ -48,35 +49,37 @@ type Token struct {
 
 type Notice struct {
 	gorm.Model
-	UserID     uint   `json:"user_id"`
-	GroupID    uint   `json:"group_id"`
-	Everyone   *bool  `json:"everyone"`
-	StartTime  uint   `json:"start_time"`
-	EndingTime uint   `json:"ending_time"`
-	Important  *bool  `json:"important"`
-	Fault      *bool  `json:"fault"`
-	Info       *bool  `json:"info"`
-	Title      string `json:"title"`
-	Data       string `json:"data"`
+	User      []User    `json:"user" gorm:"many2many:notice_user;"`
+	Everyone  *bool     `json:"everyone"`
+	StartTime time.Time `json:"start_time"`
+	EndTime   time.Time `json:"end_time"`
+	Important *bool     `json:"important"`
+	Fault     *bool     `json:"fault"`
+	Info      *bool     `json:"info"`
+	Title     string    `json:"title"`
+	Data      string    `json:"data" gorm:"size:15000"`
 }
 
 type Ticket struct {
 	gorm.Model
-	GroupID uint   `json:"group_id"`
-	UserID  uint   `json:"user_id"`
-	Chat    []Chat `json:"chat"`
-	Solved  *bool  `json:"solved"`
-	Title   string `json:"title"`
-	Group   Group  `json:"group"`
-	User    User   `json:"user"`
+	GroupID       *uint  `json:"group_id"`
+	UserID        *uint  `json:"user_id"`
+	Chat          []Chat `json:"chat"`
+	Request       *bool  `json:"request"`
+	RequestReject *bool  `json:"request_reject"`
+	Solved        *bool  `json:"solved"`
+	Admin         *bool  `json:"admin"`
+	Title         string `json:"title"`
+	Group         Group  `json:"group"`
+	User          User   `json:"user"`
 }
 
 type Chat struct {
 	gorm.Model
 	TicketID uint   `json:"ticket_id"`
-	UserID   uint   `json:"user_id"`
+	UserID   *uint  `json:"user_id"`
 	Admin    bool   `json:"admin"`
-	Data     string `json:"data" gorm:"size:15000"`
+	Data     string `json:"data" gorm:"size:10000"`
 	User     User   `json:"user"`
 }
 
@@ -102,7 +105,7 @@ type Zone struct {
 type Node struct {
 	gorm.Model
 	ZoneID     uint      `json:"zone_id"`
-	GroupID    uint      `json:"group_id"`
+	GroupID    *uint     `json:"group_id"`
 	AdminOnly  *bool     `json:"admin_only"`
 	Name       string    `json:"name"`
 	HostName   string    `json:"host_name"`
@@ -207,11 +210,11 @@ type VM struct {
 	Node          Node   `json:"node"`
 	IP            IP     `json:"ip"`
 	NodeID        uint   `json:"node_id"`
-	GroupID       uint   `json:"group_id"`
+	GroupID       *uint  `json:"group_id"`
 	Name          string `json:"name"`
 	UUID          string `json:"uuid"`
-	VNCPort       uint   `json:"vnc_port"`
-	WebSocketPort uint   `json:"web_socket_port"`
+	VNCPort       *uint  `json:"vnc_port"`
+	WebSocketPort *uint  `json:"web_socket_port"`
 	Lock          *bool  `json:"lock"`
 }
 

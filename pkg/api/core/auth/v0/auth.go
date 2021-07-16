@@ -42,7 +42,7 @@ func GroupAuthentication(errorType uint, data core.Token) auth.GroupResult {
 	//	return auth.GroupResult{Err: fmt.Errorf("deleted this user")}
 	//}1
 
-	if resultToken.Token[0].User.GroupID == 0 {
+	if resultToken.Token[0].User.GroupID == nil {
 		return auth.GroupResult{Err: fmt.Errorf("no group")}
 	}
 

@@ -33,7 +33,7 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	if userResult.User.GroupID != 0 {
+	if userResult.User.GroupID != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: "error: You can't create new group"})
 		return
 	}
@@ -50,7 +50,7 @@ func Add(c *gin.Context) {
 	}
 	if err = dbUser.Update(user.UpdateGroupID, &core.User{
 		Model:   gorm.Model{ID: userResult.User.ID},
-		GroupID: result.Model.ID,
+		GroupID: &result.Model.ID,
 	}); err != nil {
 		dbGroup.Delete(&core.Group{Model: gorm.Model{ID: result.ID}})
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})

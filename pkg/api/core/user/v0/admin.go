@@ -52,12 +52,13 @@ func AddAdmin(c *gin.Context) {
 	pass := ""
 
 	// 新規ユーザ
-	if input.GroupID == 0 { //new user
+	if input.GroupID == nil { //new user
 		if input.Pass == "" {
 			c.JSON(http.StatusInternalServerError, common.Error{Error: fmt.Sprintf("wrong pass")})
 			return
 		}
-		data = core.User{GroupID: 0,
+		data = core.User{
+			GroupID:    nil,
 			Name:       input.Name,
 			Email:      input.Email,
 			Pass:       input.Pass,
@@ -89,7 +90,7 @@ func AddAdmin(c *gin.Context) {
 	} else {
 		attachment := slack.Attachment{}
 		attachment.AddField(slack.Field{Title: "E-Mail", Value: input.Email}).
-			AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(input.GroupID))}).
+			AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(*input.GroupID))}).
 			AddField(slack.Field{Title: "Name", Value: input.Name})
 
 		notification.SendSlack(notification.Slack{Attachment: attachment, Channel: "user"})

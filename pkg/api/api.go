@@ -266,11 +266,6 @@ func UserRestAPI() {
 			v1.GET("/support/:id", ticket.Get)
 
 			//
-			// Notice
-			//
-			v1.GET("/notice", notice.Get)
-
-			//
 			// VM
 			//
 			//v1.POST("/vm", vm.UserCreate)

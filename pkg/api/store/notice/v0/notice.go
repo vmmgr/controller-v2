@@ -60,15 +60,12 @@ func Update(base int, data core.Notice) error {
 
 	if notice.UpdateAll == base {
 		result = db.Model(&core.Notice{Model: gorm.Model{ID: data.ID}}).Updates(core.Notice{
-			UserID:     data.UserID,
-			GroupID:    data.GroupID,
-			StartTime:  data.StartTime,
-			EndingTime: data.EndingTime,
-			Important:  data.Important,
-			Fault:      data.Fault,
-			Info:       data.Info,
-			Title:      data.Title,
-			Data:       data.Data,
+			StartTime: data.StartTime,
+			Important: data.Important,
+			Fault:     data.Fault,
+			Info:      data.Info,
+			Title:     data.Title,
+			Data:      data.Data,
 		})
 	} else {
 		log.Println("base select error")
@@ -92,21 +89,8 @@ func Get(base int, data *core.Notice) notice.ResultDatabase {
 
 	var noticeStruct []core.Notice
 
-	dateTime := time.Now().Unix()
-
 	if base == notice.ID { //ID
 		err = db.First(&noticeStruct, data.ID).Error
-	} else if base == notice.UserID { //UserID
-		err = db.Where("user_id = ?", data.UserID).Find(&noticeStruct).Error
-	} else if base == notice.GroupID { //GroupID
-		err = db.Where("group_id = ?", data.GroupID).Find(&noticeStruct).Error
-	} else if base == notice.UserIDAndGroupID { //UserID And GroupID
-		err = db.Where("user_id = ? AND group_id = ?", data.UserID, data.GroupID).Find(&noticeStruct).Error
-	} else if base == notice.Data { //Data
-		err = db.Where("everyone = ? AND start_time < ? AND ? < ending_time ", data.Everyone, dateTime, dateTime).
-			Or("user_id = ? AND group_id = ? AND start_time < ? AND ? < ending_time", data.UserID, data.GroupID, dateTime, dateTime).
-			Or("group_id = ? AND start_time < ? AND ? < ending_time", data.GroupID, dateTime, dateTime).
-			Order("id asc").Find(&noticeStruct).Error
 	} else if base == notice.Everyone { //Everyone
 		err = db.Where("everyone = ?", data.Everyone).Find(&noticeStruct).Error
 	} else if base == notice.Important { //Important

@@ -26,7 +26,8 @@ func GenerateInit(c *gin.Context) {
 	tmpToken, _ := toolToken.Generate(2)
 	err := dbToken.Create(&core.Token{
 		ExpiredAt: time.Now().Add(30 * time.Minute),
-		UserID:    0, Status: 0,
+		UserID:    nil,
+		Status:    0,
 		UserToken: userToken,
 		TmpToken:  tmpToken,
 		Debug:     ip,
@@ -71,7 +72,7 @@ func Generate(c *gin.Context) {
 	}
 	accessToken, _ := toolToken.Generate(2)
 	err := dbToken.Update(token.AddToken, &core.Token{Model: gorm.Model{ID: tokenResult.Token[0].Model.ID},
-		ExpiredAt: time.Now().Add(30 * time.Minute), UserID: userResult.User[0].ID, Status: 1, AccessToken: accessToken})
+		ExpiredAt: time.Now().Add(30 * time.Minute), UserID: &userResult.User[0].ID, Status: 1, AccessToken: accessToken})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 	} else {

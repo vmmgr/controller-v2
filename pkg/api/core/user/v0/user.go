@@ -48,13 +48,13 @@ func Add(c *gin.Context) {
 	pass := ""
 
 	// 新規ユーザ
-	if input.GroupID == 0 { //new user
+	if input.GroupID == nil { //new user
 		if input.Pass == "" {
 			c.JSON(http.StatusInternalServerError, common.Error{Error: fmt.Sprintf("wrong pass")})
 			return
 		}
 		data = core.User{
-			GroupID:    0,
+			GroupID:    nil,
 			Name:       input.Name,
 			Email:      input.Email,
 			Pass:       input.Pass,
@@ -74,7 +74,7 @@ func Add(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, common.Error{Error: authResult.Err.Error()})
 			return
 		}
-		if authResult.User.GroupID != input.GroupID && authResult.User.GroupID > 0 {
+		if authResult.User.GroupID != input.GroupID || authResult.User.GroupID == nil {
 			c.JSON(http.StatusInternalServerError, common.Error{Error: "GroupID mismatch"})
 			return
 		}
@@ -100,7 +100,7 @@ func Add(c *gin.Context) {
 	} else {
 		attachment := slack.Attachment{}
 		attachment.AddField(slack.Field{Title: "E-Mail", Value: input.Email}).
-			AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(input.GroupID))}).
+			AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(*input.GroupID))}).
 			AddField(slack.Field{Title: "Name", Value: input.Name})
 
 		notification.SendSlack(notification.Slack{Attachment: attachment, Channel: "user"})
@@ -185,7 +185,7 @@ func Update(c *gin.Context) {
 		serverData = authResult.User
 		u.Model.ID = authResult.User.ID
 	} else {
-		if authResult.User.GroupID == 0 {
+		if authResult.User.GroupID == nil {
 			c.JSON(http.StatusInternalServerError, common.Error{Error: "error: Group ID = 0"})
 			return
 		}
@@ -238,7 +238,7 @@ func GetGroup(c *gin.Context) {
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
 	authResult := auth.GroupAuthentication(0, core.Token{UserToken: userToken, AccessToken: accessToken})
-	result := dbUser.Get(user.GID, &core.User{GroupID: authResult.Group.ID})
+	result := dbUser.Get(user.GID, &core.User{GroupID: &authResult.Group.ID})
 	if result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return

@@ -52,7 +52,7 @@ func Create(c *gin.Context) {
 	// Tickets DBに登録
 	ticketResult, err := dbTicket.Create(&core.Ticket{
 		GroupID: result.User.GroupID,
-		UserID:  result.User.ID,
+		UserID:  &result.User.ID,
 		Solved:  &[]bool{false}[0],
 		Title:   input.Title,
 	})
@@ -63,7 +63,7 @@ func Create(c *gin.Context) {
 
 	// Chat DBに登録
 	_, err = dbChat.Create(&core.Chat{
-		UserID:   result.User.ID,
+		UserID:   &result.User.ID,
 		Admin:    false,
 		Data:     input.Data,
 		TicketID: ticketResult.ID,
@@ -77,7 +77,7 @@ func Create(c *gin.Context) {
 	attachment := slack.Attachment{}
 	attachment.AddField(slack.Field{Title: "Title", Value: "新規チケット作成"}).
 		AddField(slack.Field{Title: "発行者", Value: strconv.Itoa(int(result.User.ID))}).
-		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(result.User.GroupID)) + "-" + result.User.Group.Org}).
+		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(*result.User.GroupID)) + "-" + result.User.Group.Org}).
 		AddField(slack.Field{Title: "Title", Value: input.Title}).
 		AddField(slack.Field{Title: "Message", Value: input.Data})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
@@ -121,7 +121,7 @@ func Get(c *gin.Context) {
 	for _, tmpChat := range resultTicket.Tickets[0].Chat {
 		resultChat = append(resultChat, ticket.Chat{
 			Time:     tmpChat.CreatedAt.Add(9 * time.Hour).Format(timeLayout),
-			UserID:   tmpChat.UserID,
+			UserID:   *tmpChat.UserID,
 			UserName: tmpChat.User.Name,
 			Admin:    tmpChat.Admin,
 			Data:     tmpChat.Data,
@@ -131,8 +131,8 @@ func Get(c *gin.Context) {
 	response = ticket.Ticket{
 		ID:       resultTicket.Tickets[0].ID,
 		Time:     resultTicket.Tickets[0].CreatedAt.Add(9 * time.Hour).Format(timeLayout),
-		GroupID:  resultTicket.Tickets[0].GroupID,
-		UserID:   resultTicket.Tickets[0].UserID,
+		GroupID:  *resultTicket.Tickets[0].GroupID,
+		UserID:   *resultTicket.Tickets[0].UserID,
 		Solved:   resultTicket.Tickets[0].Solved,
 		Chat:     resultChat,
 		Title:    resultTicket.Tickets[0].Title,
@@ -166,7 +166,7 @@ func GetAll(c *gin.Context) {
 		for _, tmpChat := range tmp.Chat {
 			resultChat = append(resultChat, ticket.Chat{
 				Time:     tmpChat.CreatedAt.Add(9 * time.Hour).Format(timeLayout),
-				UserID:   tmpChat.UserID,
+				UserID:   *tmpChat.UserID,
 				UserName: tmpChat.User.Name,
 				Admin:    tmpChat.Admin,
 				Data:     tmpChat.Data,
@@ -176,8 +176,8 @@ func GetAll(c *gin.Context) {
 		response = append(response, ticket.Ticket{
 			ID:       tmp.ID,
 			Time:     tmp.CreatedAt.Add(9 * time.Hour).Format(timeLayout),
-			GroupID:  tmp.GroupID,
-			UserID:   tmp.UserID,
+			GroupID:  *tmp.GroupID,
+			UserID:   *tmp.UserID,
 			Solved:   tmp.Solved,
 			Chat:     resultChat,
 			Title:    tmp.Title,
@@ -234,7 +234,7 @@ func GetWebSocket(c *gin.Context) {
 		Admin:    false,
 		UserID:   result.User.ID,
 		UserName: result.User.Name,
-		GroupID:  result.User.GroupID,
+		GroupID:  *result.User.GroupID,
 		Socket:   conn,
 	}] = true
 
@@ -249,7 +249,7 @@ func GetWebSocket(c *gin.Context) {
 				Admin:    false,
 				UserID:   result.User.ID,
 				UserName: result.User.Name,
-				GroupID:  result.User.GroupID,
+				GroupID:  *result.User.GroupID,
 				Socket:   conn,
 			})
 			break
@@ -267,7 +267,7 @@ func GetWebSocket(c *gin.Context) {
 		if !*ticketResult.Tickets[0].Solved {
 			_, err = dbChat.Create(&core.Chat{
 				TicketID: ticketResult.Tickets[0].ID,
-				UserID:   result.User.ID,
+				UserID:   &result.User.ID,
 				Admin:    false,
 				Data:     msg.Message,
 			})
@@ -276,7 +276,7 @@ func GetWebSocket(c *gin.Context) {
 			} else {
 
 				msg.UserID = result.User.ID
-				msg.GroupID = resultGroup.User.GroupID
+				msg.GroupID = *resultGroup.User.GroupID
 				msg.Admin = false
 				msg.UserName = result.User.Name
 				// Token関連の初期化
@@ -288,7 +288,7 @@ func GetWebSocket(c *gin.Context) {
 					CreatedAt: msg.CreatedAt,
 					UserID:    result.User.ID,
 					UserName:  result.User.Name,
-					GroupID:   resultGroup.User.GroupID,
+					GroupID:   *resultGroup.User.GroupID,
 					Admin:     msg.Admin,
 					Message:   msg.Message,
 				})
@@ -297,7 +297,7 @@ func GetWebSocket(c *gin.Context) {
 				attachment := slack.Attachment{}
 				attachment.AddField(slack.Field{Title: "Title", Value: "Support(新規メッセージ)"}).
 					AddField(slack.Field{Title: "発行者", Value: strconv.Itoa(int(result.User.ID)) + "-" + result.User.Name}).
-					AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(result.User.GroupID)) + "-" + result.User.Group.Org}).
+					AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(*result.User.GroupID)) + "-" + result.User.Group.Org}).
 					AddField(slack.Field{Title: "Title", Value: ticketResult.Tickets[0].Title}).
 					AddField(slack.Field{Title: "Message", Value: msg.Message})
 				notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
