@@ -59,7 +59,7 @@ func AddAdmin(c *gin.Context) {
 			Pass:          input.Pass,
 			ExpiredStatus: &[]uint{0}[0],
 			Level:         1,
-			MailVerify:    &[]bool{false}[0],
+			MailVerify:    &[]bool{input.MailVerify}[0],
 			MailToken:     mailToken,
 		}
 
