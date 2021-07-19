@@ -52,7 +52,7 @@ func AdminRestAPI() error {
 			v1.DELETE("/user", user.DeleteAdmin)
 			// User Update
 			v1.PUT("/user", user.UpdateAdmin)
-			v1.GET("/user", user.GetAdmin)
+			v1.GET("/user", user.GetAllAdmin)
 			v1.GET("/user/:id", user.GetAdmin)
 
 			//

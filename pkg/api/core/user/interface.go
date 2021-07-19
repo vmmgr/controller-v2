@@ -15,6 +15,16 @@ const (
 	UpdateAll        = 110
 )
 
+type CreateAdmin struct {
+	GroupID    uint   `json:"group_id"`
+	Name       string `json:"name"`
+	NameEn     string `json:"name_en"`
+	Mail       string `json:"mail"`
+	Pass       string `json:"pass"`
+	Level      uint   `json:"level"`
+	MailVerify bool   `json:"mail_verify"`
+}
+
 type ResultOne struct {
 	Status bool      `json:"status"`
 	Error  string    `json:"error"`

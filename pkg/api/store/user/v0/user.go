@@ -12,10 +12,9 @@ import (
 
 func Create(u *core.User) error {
 	result := Get(user.Email, &core.User{Email: u.Email})
-	if result.Err != nil {
-		return result.Err
-	}
-	if len(result.User) != 0 {
+
+	if len(result.User) != 0 && result.Err == nil {
+		log.Println(result.Err)
 		log.Println("error: this email is already registered: " + u.Email)
 		return fmt.Errorf("error: this email is already registered")
 	}
@@ -33,7 +32,9 @@ func Create(u *core.User) error {
 	}
 	defer dbSQL.Close()
 
-	return db.Create(&u).Error
+	resultDB := db.Create(&u)
+
+	return resultDB.Error
 }
 
 func Delete(u *core.User) error {
@@ -119,7 +120,7 @@ func Get(base int, u *core.User) user.ResultDatabase {
 	} else if base == user.GID { //GroupID
 		err = db.Where("group_id = ?", u.GroupID).Find(&userStruct).Error
 	} else if base == user.Email { //Mail
-		err = db.Where("email = ?", u.Email).First(&userStruct).Error
+		err = db.Where("email = ?", u.Email).Find(&userStruct).Error
 	} else if base == user.MailToken { //Token
 		err = db.Where("mail_token = ?", u.MailToken).Find(&userStruct).Error
 	} else {

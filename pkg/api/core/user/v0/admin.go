@@ -14,6 +14,7 @@ import (
 	"github.com/vmmgr/controller/pkg/api/core/tool/notification"
 	toolToken "github.com/vmmgr/controller/pkg/api/core/tool/token"
 	"github.com/vmmgr/controller/pkg/api/core/user"
+	dbGroup "github.com/vmmgr/controller/pkg/api/store/group/v0"
 	dbUser "github.com/vmmgr/controller/pkg/api/store/user/v0"
 	"gorm.io/gorm"
 	"log"
@@ -23,7 +24,8 @@ import (
 )
 
 func AddAdmin(c *gin.Context) {
-	var input, data core.User
+	var data core.User
+	var input user.CreateAdmin
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
@@ -32,17 +34,9 @@ func AddAdmin(c *gin.Context) {
 	}
 
 	c.BindJSON(&input)
+	log.Println(input)
 
-	if !strings.Contains(input.Email, "@") {
-		c.JSON(http.StatusBadRequest, common.Error{Error: fmt.Sprintf("wrong email address")})
-		return
-	}
-	if input.Name == "" {
-		c.JSON(http.StatusBadRequest, common.Error{Error: fmt.Sprintf("wrong name")})
-		return
-	}
-
-	if err := check(input); err != nil {
+	if err := checkAdmin(input); err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 		return
 	}
@@ -52,69 +46,109 @@ func AddAdmin(c *gin.Context) {
 	pass := ""
 
 	// 新規ユーザ
-	if input.GroupID == nil { //new user
+	if input.GroupID == 0 { //new user
 		if input.Pass == "" {
 			c.JSON(http.StatusInternalServerError, common.Error{Error: fmt.Sprintf("wrong pass")})
 			return
 		}
 		data = core.User{
-			GroupID:    nil,
-			Name:       input.Name,
-			Email:      input.Email,
-			Pass:       input.Pass,
-			Level:      1,
-			MailVerify: &[]bool{false}[0],
-			MailToken:  mailToken,
+			GroupID:       nil,
+			Name:          input.Name,
+			NameEn:        input.NameEn,
+			Email:         input.Mail,
+			Pass:          input.Pass,
+			ExpiredStatus: &[]uint{0}[0],
+			Level:         1,
+			MailVerify:    &[]bool{false}[0],
+			MailToken:     mailToken,
 		}
 
 		// グループ所属ユーザの登録
 	} else {
 		pass = gen.GenerateUUID()
-		log.Println("Email: " + input.Email)
+		log.Println("Email: " + input.Mail)
 		log.Println("tmp_Pass: " + pass)
 
 		data = core.User{
-			GroupID:    input.GroupID,
-			Name:       input.Name,
-			Email:      input.Email,
-			Level:      input.Level,
-			Pass:       strings.ToLower(hash.Generate(pass)),
-			MailVerify: &[]bool{false}[0],
-			MailToken:  mailToken,
+			GroupID:       &[]uint{input.GroupID}[0],
+			Name:          input.Name,
+			NameEn:        input.NameEn,
+			Email:         input.Mail,
+			Level:         input.Level,
+			Pass:          strings.ToLower(hash.Generate(pass)),
+			ExpiredStatus: &[]uint{0}[0],
+			MailVerify:    &[]bool{false}[0],
+			MailToken:     mailToken,
 		}
 	}
 
 	//check exist for database
 	if err := dbUser.Create(&data); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
-	} else {
+		return
+	}
+
+	// added auto group
+	if input.GroupID == 0 {
+		groupData := core.Group{
+			Org:       input.Name,
+			Status:    0,
+			Comment:   "",
+			Vlan:      0,
+			Enable:    &[]bool{true}[0],
+			MaxVM:     1,
+			MaxCPU:    2,
+			MaxMemory: 2048,
+		}
+		_, err := dbGroup.Create(&groupData)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+			return
+		}
+
+		data.GroupID = &[]uint{groupData.ID}[0]
+
+		err = dbUser.Update(user.UpdateAll, &data)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+			return
+		}
+	}
+
+	go func() {
 		attachment := slack.Attachment{}
-		attachment.AddField(slack.Field{Title: "E-Mail", Value: input.Email}).
-			AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(*input.GroupID))}).
+		attachment.AddField(slack.Field{Title: "E-Mail", Value: input.Mail}).
+			AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(input.GroupID))}).
 			AddField(slack.Field{Title: "Name", Value: input.Name})
 
 		notification.SendSlack(notification.Slack{Attachment: attachment, Channel: "user"})
+	}()
 
+	if !input.MailVerify {
 		if pass == "" {
-			mail.SendMail(mail.Mail{
-				ToMail:  data.Email,
-				Subject: "本人確認のメールにつきまして",
-				Content: " " + input.Name + "様\n\n" + "以下のリンクから本人確認を完了してください。\n" +
-					config.Conf.Controller.User.URL + "/api/v1/user/verify/" + mailToken + "\n" +
-					"本人確認が完了次第、ログイン可能になります。\n",
-			})
+			go func() {
+				mail.SendMail(mail.Mail{
+					ToMail:  data.Email,
+					Subject: "本人確認のメールにつきまして",
+					Content: " " + input.Name + "様\n\n" + "以下のリンクから本人確認を完了してください。\n" +
+						config.Conf.Controller.User.URL + "/api/v1/user/verify/" + mailToken + "\n" +
+						"本人確認が完了次第、ログイン可能になります。\n",
+				})
+			}()
 		} else {
-			mail.SendMail(mail.Mail{
-				ToMail:  data.Email,
-				Subject: "本人確認メールにつきまして",
-				Content: " " + input.Name + "様\n\n" + "以下のリンクから本人確認を完了してください。\n" +
-					config.Conf.Controller.User.URL + "/api/v1/user/verify/" + mailToken + "\n" +
-					"本人確認が完了次第、ログイン可能になります。\n" + "仮パスワード: " + pass,
-			})
+			go func() {
+				mail.SendMail(mail.Mail{
+					ToMail:  data.Email,
+					Subject: "本人確認メールにつきまして",
+					Content: " " + input.Name + "様\n\n" + "以下のリンクから本人確認を完了してください。\n" +
+						config.Conf.Controller.User.URL + "/api/v1/user/verify/" + mailToken + "\n" +
+						"本人確認が完了次第、ログイン可能になります。\n" + "仮パスワード: " + pass,
+				})
+			}()
 		}
-
-		c.JSON(http.StatusOK, user.Result{})
 	}
+	log.Println(data)
+	c.JSON(http.StatusOK, user.Result{})
 }
 
 func GenerateAdmin(c *gin.Context) {
@@ -197,10 +231,10 @@ func GetAdmin(c *gin.Context) {
 
 	result := dbUser.Get(user.ID, &core.User{Model: gorm.Model{ID: uint(id)}})
 	if result.Err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, user.Result{User: result.User})
+	c.JSON(http.StatusOK, result.User)
 }
 
 func GetAllAdmin(c *gin.Context) {
@@ -213,6 +247,6 @@ func GetAllAdmin(c *gin.Context) {
 	if result := dbUser.GetAll(); result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 	} else {
-		c.JSON(http.StatusOK, user.Result{User: result.User})
+		c.JSON(http.StatusOK, result.User)
 	}
 }
