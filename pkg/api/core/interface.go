@@ -24,11 +24,12 @@ type User struct {
 type Group struct {
 	gorm.Model
 	VMs       []*VM  `json:"vms"`
+	Users     []User `json:"users"`
 	Org       string `json:"org"`
 	Status    uint   `json:"status"`
 	Comment   string `json:"comment"`
 	Vlan      uint   `json:"vlan"`
-	Lock      bool   `json:"lock"`
+	Enable    *bool  `json:"enable"`
 	MaxVM     uint   `json:"max_VM"`
 	MaxCPU    uint   `json:"max_cpu"`
 	MaxMemory uint   `json:"max_memory"`
@@ -76,6 +77,7 @@ type Ticket struct {
 
 type Chat struct {
 	gorm.Model
+	Ticket   Ticket `json:"ticket"`
 	TicketID uint   `json:"ticket_id"`
 	UserID   *uint  `json:"user_id"`
 	Admin    bool   `json:"admin"`
@@ -92,6 +94,7 @@ type Region struct {
 
 type Zone struct {
 	gorm.Model
+	Region   Region `json:"region"`
 	RegionID uint   `json:"region_id"`
 	Name     string `json:"name"`
 	Postcode string `json:"postcode"`
@@ -104,6 +107,8 @@ type Zone struct {
 
 type Node struct {
 	gorm.Model
+	Zone       Zone      `json:"zone"`
+	Group      Group     `json:"group"`
 	ZoneID     uint      `json:"zone_id"`
 	GroupID    *uint     `json:"group_id"`
 	AdminOnly  *bool     `json:"admin_only"`
@@ -127,6 +132,7 @@ type Node struct {
 
 type ImaCon struct {
 	gorm.Model
+	Zone       Zone    `json:"zone"`
 	ZoneID     uint    `json:"zone_id"`
 	Name       string  `json:"name"`
 	HostName   string  `json:"host_name"`
@@ -143,7 +149,7 @@ type ImaCon struct {
 type Image struct {
 	gorm.Model
 	ImaConID  uint        `json:"ima_con_id"`
-	GroupID   uint        `json:"group_id"` //0: All 1~: Only Group
+	GroupID   *uint       `json:"group_id"` //nil: All 1~: Only Group
 	Type      uint        `json:"type"`     //0: ISO 1:Image
 	Path      string      `json:"path"`     //node側のパス
 	UUID      string      `json:"uuid"`
@@ -155,6 +161,7 @@ type Image struct {
 	Admin     *bool       `json:"admin"` //管理者専用イメージであるか否か
 	Lock      *bool       `json:"lock"`  //削除保護
 	ImaCon    *ImaCon     `json:"imacon"`
+	Group     *Group      `json:"group"`
 	Template  *[]Template `json:"template"`
 }
 

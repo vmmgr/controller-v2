@@ -77,7 +77,7 @@ func Update(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: "error: failed user level"})
 		return
 	}
-	if authResult.Group.Lock {
+	if !*authResult.Group.Enable {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: "error: This group is locked"})
 		return
 	}

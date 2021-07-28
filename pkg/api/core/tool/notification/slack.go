@@ -3,7 +3,7 @@ package notification
 import (
 	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/vmmgr/controller/pkg/api/core/tool/config"
-	"os"
+	"log"
 )
 
 var (
@@ -34,7 +34,7 @@ func SendSlack(data Slack) {
 			}
 			err := slack.Send(tmp.WebHookUrl, "", payload)
 			if err != nil {
-				os.Exit(1)
+				log.Println(err)
 			}
 		}
 	}

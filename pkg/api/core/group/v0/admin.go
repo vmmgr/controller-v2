@@ -65,13 +65,13 @@ func UpdateAdmin(c *gin.Context) {
 		return
 	}
 
-	replace, err := updateAdminUser(input, tmp.Group[0])
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: "error: this email is already registered"})
-		return
-	}
+	//replace, err := updateAdminUser(input, tmp.Group[0])
+	//if err != nil {
+	//	c.JSON(http.StatusInternalServerError, common.Error{Error: "error: this email is already registered"})
+	//	return
+	//}
 
-	if err := dbGroup.Update(group.UpdateAll, replace); err != nil {
+	if err := dbGroup.Update(group.UpdateAll, input); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}

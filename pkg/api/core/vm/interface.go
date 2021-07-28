@@ -30,6 +30,15 @@ var Broadcast = make(chan WebSocketResult)
 var ClientBroadcast = make(chan WebSocketResult)
 
 // websocket用
+type WebSocketAdminInput struct {
+	UserToken   string      `json:"user_token"`
+	AccessToken string      `json:"access_token"`
+	Type        uint        `json:"type"` //0: Get 1:GetAll 10:Create 11:Delete 20:Start 21:Shutdown 22:Reset
+	NodeID      uint        `json:"node_id"`
+	UUID        string      `json:"uuid"`
+	Create      CreateAdmin `json:"create"`
+}
+
 type WebSocketInput struct {
 	UserToken   string      `json:"user_token"`
 	AccessToken string      `json:"access_token"`

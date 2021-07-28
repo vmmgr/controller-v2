@@ -2,12 +2,12 @@ package ssh
 
 import (
 	"bytes"
-	"github.com/jinzhu/gorm"
 	"github.com/vmmgr/controller/pkg/api/core"
 	"github.com/vmmgr/controller/pkg/api/core/node"
 	"github.com/vmmgr/controller/pkg/api/core/tool/config"
 	dbNode "github.com/vmmgr/controller/pkg/api/store/node/v0"
 	"golang.org/x/crypto/ssh"
+	"gorm.io/gorm"
 	"strconv"
 	"testing"
 )
