@@ -60,7 +60,7 @@ func (h *VMHandler) CreateVM() error {
 		if err != nil {
 			log.Println(err)
 		}
-		err = dbIP.Update(ip.UpdateVMID, core.IP{Model: gorm.Model{ID: h.IPID}, VMID: vm.ID})
+		err = dbIP.Update(ip.UpdateVMID, core.IP{Model: gorm.Model{ID: h.IPID}, VMID: &vm.ID})
 		if err != nil {
 			log.Println(err)
 		}

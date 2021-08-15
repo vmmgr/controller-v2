@@ -24,10 +24,11 @@ import (
 //http://localhost/noVNC/vnc.html?host=127.0.0.1&port=8081&path=ws/v1/vnc/ws/v1/vnc/[access_token]/[node]/[uuid]
 
 func GetByAdmin(c *gin.Context) {
-	//tokenData := c.Param("request")
 	accessToken := c.Param("access_token")
 	nodeID, _ := strconv.Atoi(c.Param("node"))
-	vmUUID := c.Query("uuid")
+	vmUUID := c.Param("vm_uuid")
+
+	log.Println("NoVNC: " + c.Param("node") + "/" + vmUUID)
 
 	var tokenResult token.ResultDatabase
 
@@ -102,8 +103,10 @@ func Get(c *gin.Context) {
 	//tokenData := c.Param("request")
 	userToken := c.Param("user_token")
 	accessToken := c.Param("access_token")
-	vmID, _ := strconv.Atoi(c.Param("vm"))
+	vmID, _ := strconv.Atoi(c.Param("vm_id"))
 	//vmUUID := c.Query("uuid")
+
+	log.Println("NoVNC")
 
 	resultToken := dbToken.Get(token.UserTokenAndAccessToken, &core.Token{UserToken: userToken, AccessToken: accessToken})
 	if resultToken.Err != nil {
@@ -121,7 +124,7 @@ func Get(c *gin.Context) {
 		}
 	}
 	if vmData == nil {
-		log.Printf("VM ID mismatch")
+		log.Printf("VM ID mismatch\n")
 		return
 	}
 

@@ -195,7 +195,7 @@ func AdminRestAPI() error {
 			//v1.GET("/vm", vm.GetWebSocketAdmin)
 			v1.GET("/vm", vmV2.GetWebSocketAdmin)
 			// noVNC
-			v1.GET("/vnc/:access_token/:node/:uuid", wsVNC.GetByAdmin)
+			v1.GET("/vnc/:access_token/:node/:vm_uuid", wsVNC.GetByAdmin)
 		}
 	}
 
@@ -285,7 +285,7 @@ func UserRestAPI() {
 		{
 			v1.GET("/support", ticket.GetWebSocket)
 			v1.GET("/vm", vmV2.GetWebSocket)
-			v1.GET("/vnc/:user_token/:access_token/:vm", wsVNC.Get)
+			v1.GET("/vnc/:user_token/:access_token/:vm_id", wsVNC.Get)
 		}
 	}
 

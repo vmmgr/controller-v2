@@ -227,7 +227,7 @@ type VM struct {
 
 type IP struct {
 	gorm.Model
-	VMID     uint   `json:"vm_id"`
+	VMID     *uint  `json:"vm_id"`
 	IP       string `json:"ip"`
 	Subnet   string `json:"subnet"`
 	Gateway  string `json:"gateway"`

@@ -86,7 +86,7 @@ func Get(base int, data *core.IP) ([]core.IP, error) {
 	if base == ip2.GetID { //ID
 		err = db.First(&ips, data.ID).Error
 	} else if base == ip2.GetUnused { //Zone内の全VM検索
-		err = db.Where("vm_id = ? AND reserved = ?", 0, false).Find(&ips).Error
+		err = db.Where("reserved = ?", false).Find(&ips).Error
 	} else {
 		log.Println("base select error")
 		return ips, fmt.Errorf("(%s)error: base select\n", time.Now())

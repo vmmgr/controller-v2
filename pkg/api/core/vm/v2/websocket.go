@@ -515,128 +515,126 @@ func GetWebSocket(c *gin.Context) {
 				}
 			}
 		} else if msg.Type == 10 {
-			for {
-				// Create
-				resultStorage := dbStorage.Get(storage.ID, &core.Storage{Model: gorm.Model{ID: msg.Create.Template.StorageID}})
-				if resultStorage.Err != nil {
-					log.Println(resultStorage.Err)
-					continue
+			log.Println("VM Create")
+			// Create
+			resultStorage := dbStorage.Get(storage.ID, &core.Storage{Model: gorm.Model{ID: msg.Create.Template.StorageID}})
+			if resultStorage.Err != nil {
+				log.Println(resultStorage.Err)
+				continue
+			}
+
+			resultVM := dbVM.Get(vm.GroupID, &core.VM{GroupID: &result.Group.ID})
+			if resultVM.Err != nil {
+				log.Printf("error vm: %s\n", resultVM.Err)
+				continue
+			}
+
+			// nodeIDが存在するか確認
+			node, conn, err := connectLibvirt(resultStorage.Storage[0].NodeID)
+			if err != nil {
+				log.Println(err)
+				vm.ClientBroadcast <- vm.WebSocketResult{
+					UUID:      uuid,
+					Type:      10,
+					Err:       err.Error(),
+					CreatedAt: time.Now(),
+					Status:    false,
+					Code:      0,
 				}
+				continue
+			}
 
-				resultVM := dbVM.Get(vm.GroupID, &core.VM{GroupID: &result.Group.ID})
-				if resultVM.Err != nil {
-					log.Printf("error vm: %s\n", resultVM.Err)
-					continue
+			log.Println("Template Apply")
+			// storage
+			vmBasePath := resultStorage.Storage[0]
+			if vmBasePath.ID == 0 {
+				log.Println("vmBasePath ID === 0")
+				vm.ClientBroadcast <- vm.WebSocketResult{
+					UUID:      uuid,
+					Type:      10,
+					Err:       "ID BasePath invalid...",
+					CreatedAt: time.Now(),
+					Status:    false,
+					Code:      0,
 				}
+				continue
+			}
 
-				// nodeIDが存在するか確認
-				node, conn, err := connectLibvirt(resultStorage.Storage[0].NodeID)
-				if err != nil {
-					log.Println(err)
-					vm.ClientBroadcast <- vm.WebSocketResult{
-						UUID:      uuid,
-						Type:      10,
-						Err:       err.Error(),
-						CreatedAt: time.Now(),
-						Status:    false,
-						Code:      0,
-					}
-					continue
+			node.Storage = []core.Storage{vmBasePath}
+
+			resultIP, err := dbIP.Get(ip.GetUnused, &core.IP{})
+			if err != nil {
+				log.Println(err)
+				vm.ClientBroadcast <- vm.WebSocketResult{
+					UUID:      uuid,
+					Type:      10,
+					Err:       err.Error(),
+					CreatedAt: time.Now(),
+					Status:    false,
+					Code:      0,
 				}
+				continue
+			}
 
-				log.Println("Template Apply")
-				// storage
-				vmBasePath := resultStorage.Storage[0]
-				if vmBasePath.ID == 0 {
-					log.Println("vmBasePath ID === 0")
-					vm.ClientBroadcast <- vm.WebSocketResult{
-						UUID:      uuid,
-						Type:      10,
-						Err:       "ID BasePath invalid...",
-						CreatedAt: time.Now(),
-						Status:    false,
-						Code:      0,
-					}
-					continue
+			if len(resultIP) == 0 {
+				log.Println("ip data is not found...")
+				vm.ClientBroadcast <- vm.WebSocketResult{
+					UUID:      uuid,
+					Type:      10,
+					Err:       "ip data is not found...",
+					CreatedAt: time.Now(),
+					Status:    false,
+					Code:      0,
 				}
+				continue
+			}
 
-				node.Storage = []core.Storage{vmBasePath}
-
-				resultIP, err := dbIP.Get(ip.GetUnused, &core.IP{})
-				if err != nil {
-					log.Println(err)
-					vm.ClientBroadcast <- vm.WebSocketResult{
-						UUID:      uuid,
-						Type:      10,
-						Err:       err.Error(),
-						CreatedAt: time.Now(),
-						Status:    false,
-						Code:      0,
-					}
-					continue
+			err = dbIP.Update(ip.UpdateReserved, core.IP{
+				Model:    gorm.Model{ID: resultIP[0].ID},
+				Reserved: &[]bool{true}[0],
+			})
+			if err != nil {
+				log.Println(err)
+				vm.ClientBroadcast <- vm.WebSocketResult{
+					UUID:      uuid,
+					Type:      10,
+					Err:       err.Error(),
+					CreatedAt: time.Now(),
+					Status:    false,
+					Code:      0,
 				}
+				continue
+			}
 
-				if len(resultIP) == 0 {
-					log.Println("ip data is not found...")
-					vm.ClientBroadcast <- vm.WebSocketResult{
-						UUID:      uuid,
-						Type:      10,
-						Err:       "ip data is not found...",
-						CreatedAt: time.Now(),
-						Status:    false,
-						Code:      0,
-					}
-					continue
-				}
+			msg.Create.Template.IP = resultIP[0].IP
+			msg.Create.Template.NetMask = resultIP[0].Subnet
+			msg.Create.Template.Gateway = resultIP[0].Gateway
+			msg.Create.Template.DNS = resultIP[0].DNS
 
-				err = dbIP.Update(ip.UpdateReserved, core.IP{
-					Model:    gorm.Model{ID: resultIP[0].ID},
-					Reserved: &[]bool{true}[0],
-				})
-				if err != nil {
-					log.Println(err)
-					vm.ClientBroadcast <- vm.WebSocketResult{
-						UUID:      uuid,
-						Type:      10,
-						Err:       err.Error(),
-						CreatedAt: time.Now(),
-						Status:    false,
-						Code:      0,
-					}
-					continue
-				}
+			//----ベースイメージコピー処理----
+			h := NewVMUserTemplateHandler(VMTemplateHandler{
+				uuid:     uuid,
+				input:    msg.Create.VM,
+				template: msg.Create.Template,
+				node:     *node,
+				storage:  resultStorage.Storage[0],
+				conn:     conn,
+				groupID:  *result.User.GroupID,
+				ipID:     resultIP[0].ID,
+			})
 
-				msg.Create.Template.IP = resultIP[0].IP
-				msg.Create.Template.NetMask = resultIP[0].Subnet
-				msg.Create.Template.Gateway = resultIP[0].Gateway
-				msg.Create.Template.DNS = resultIP[0].DNS
+			log.Println("start template apply")
 
-				//----ベースイメージコピー処理----
-				h := NewVMUserTemplateHandler(VMTemplateHandler{
-					uuid:     uuid,
-					input:    msg.Create.VM,
-					template: msg.Create.Template,
-					node:     *node,
-					storage:  resultStorage.Storage[0],
-					conn:     conn,
-					groupID:  *result.User.GroupID,
-					ipID:     resultIP[0].ID,
-				})
-
-				log.Println("start template apply")
-
-				err = h.templateApply()
-				if err != nil {
-					log.Println(err)
-					vm.ClientBroadcast <- vm.WebSocketResult{
-						UUID:      uuid,
-						Type:      10,
-						Err:       err.Error(),
-						CreatedAt: time.Now(),
-						Status:    false,
-						Code:      0,
-					}
-					continue
+			err = h.templateApply()
+			if err != nil {
+				log.Println(err)
+				vm.ClientBroadcast <- vm.WebSocketResult{
+					UUID:      uuid,
+					Type:      10,
+					Err:       err.Error(),
+					CreatedAt: time.Now(),
+					Status:    false,
+					Code:      0,
 				}
 				continue
 			}
