@@ -15,7 +15,7 @@ func connectLibvirt(nodeID uint) (*core.Node, *libvirt.Connect, error) {
 		return nil, nil, resultNode.Err
 	}
 
-	conn, err := libvirt.NewConnect("qemu+ssh://" + resultNode.Node[0].User + "@" + resultNode.Node[0].IP + "/system")
+	conn, err := libvirt.NewConnect("qemu+ssh://" + resultNode.Node[0].User + "@" + resultNode.Node[0].HostName + "/system")
 	if err != nil {
 		log.Fatalf("failed to connect to qemu")
 		return nil, nil, err

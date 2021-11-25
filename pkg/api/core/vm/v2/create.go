@@ -11,6 +11,28 @@ import (
 	"strconv"
 )
 
+func (h *VMHandler) ManualCreateVM() error {
+	// diskのファイルチェック
+	//for _, disk := range h.VM.Storage {
+	//	if !storage.FileExistsCheck(disk.Path) {
+	//		return fmt.Errorf("[%s]Disk is not exists... ", disk.Path)
+	//	}
+	//}
+
+	// NIC check
+	//for _, disk := range h.VM.NIC {
+	//	if !storage.FileExistsCheck(disk.Path) {
+	//		return fmt.Errorf("[%s]Disk is not exists... ", disk.Path)
+	//	}
+	//}
+
+	err := h.CreateVM()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (h *VMHandler) CreateVM() error {
 
 	defer h.Conn.Close()

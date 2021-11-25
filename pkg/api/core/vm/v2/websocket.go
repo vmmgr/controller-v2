@@ -109,7 +109,7 @@ func GetWebSocketAdmin(c *gin.Context) {
 
 			for _, tmpNode := range resultNode.Node {
 				log.Printf("[%s] %s\n", tmpNode.IP, tmpNode.User)
-				conn, err := libvirt.NewConnect("qemu+ssh://" + tmpNode.User + "@" + tmpNode.IP + "/system")
+				conn, err := libvirt.NewConnect("qemu+ssh://" + tmpNode.User + "@" + tmpNode.HostName + "/system")
 				if err != nil {
 					log.Println("failed to connect to qemu: " + err.Error())
 					//vm.ClientBroadcast <- vm.WebSocketResult{
@@ -165,28 +165,24 @@ func GetWebSocketAdmin(c *gin.Context) {
 		} else if msg.Type == 10 {
 			// Create
 
-			resultStorage := dbStorage.Get(storage.ID, &core.Storage{Model: gorm.Model{ID: msg.Create.Template.StorageID}})
-			if resultStorage.Err != nil {
-				log.Println(resultStorage.Err)
-				continue
-			}
-
-			// nodeIDが存在するか確認
-			node, conn, err := connectLibvirt(resultStorage.Storage[0].NodeID)
-			if err != nil {
-				log.Println(err)
-				vm.ClientBroadcast <- vm.WebSocketResult{
-					UUID:      uuid,
-					Type:      10,
-					Err:       err.Error(),
-					CreatedAt: time.Now(),
-					Status:    false,
-					Code:      0,
-				}
-				continue
-			}
+			log.Println(msg.Create)
 
 			if !msg.Create.TemplateApply {
+				// nodeIDが存在するか確認
+				node, conn, err := connectLibvirt(msg.Create.NodeID)
+				if err != nil {
+					log.Println(err)
+					vm.ClientBroadcast <- vm.WebSocketResult{
+						UUID:      uuid,
+						Type:      10,
+						Err:       err.Error(),
+						CreatedAt: time.Now(),
+						Status:    false,
+						Code:      0,
+					}
+					continue
+				}
+
 				//手動作成時
 				//VM作成用のデータ
 				h := NewVMHandler(VMHandler{
@@ -195,7 +191,8 @@ func GetWebSocketAdmin(c *gin.Context) {
 					Node: *node,
 				})
 
-				err = h.CreateVM()
+				err = h.ManualCreateVM()
+
 				if err != nil {
 					log.Println(err)
 					vm.ClientBroadcast <- vm.WebSocketResult{
@@ -209,6 +206,27 @@ func GetWebSocketAdmin(c *gin.Context) {
 					continue
 				}
 			} else {
+				resultStorage := dbStorage.Get(storage.ID, &core.Storage{Model: gorm.Model{ID: msg.Create.Template.StorageID}})
+				if resultStorage.Err != nil {
+					log.Println(resultStorage.Err)
+					continue
+				}
+
+				// nodeIDが存在するか確認
+				node, conn, err := connectLibvirt(resultStorage.Storage[0].NodeID)
+				if err != nil {
+					log.Println(err)
+					vm.ClientBroadcast <- vm.WebSocketResult{
+						UUID:      uuid,
+						Type:      10,
+						Err:       err.Error(),
+						CreatedAt: time.Now(),
+						Status:    false,
+						Code:      0,
+					}
+					continue
+				}
+
 				log.Println("Template Apply")
 				// storage
 				vmBasePath := resultStorage.Storage[0]

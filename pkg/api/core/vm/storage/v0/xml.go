@@ -23,7 +23,7 @@ func (h *StorageHandler) XmlGenerate() ([]libVirtXml.DomainDisk, error) {
 		var AddressNumber uint
 
 		// VirtIOの場合はVirtIO Countに数字を代入＋加算する
-		if storageTmp.Type == 10 {
+		if storageTmp.Type == 0 {
 			Number = virtIOCount
 			AddressNumber = h.Address.PCICount
 			h.Address.PCICount++
@@ -39,6 +39,7 @@ func (h *StorageHandler) XmlGenerate() ([]libVirtXml.DomainDisk, error) {
 		disks = append(disks, *generateTemplate(storage.GenerateStorageXml{
 			Storage:       storageTmp,
 			Number:        Number,
+			PCISlot:       virtIOCount,
 			AddressNumber: AddressNumber,
 		}))
 	}
@@ -96,7 +97,7 @@ func generateTemplate(xmlStruct storage.GenerateStorageXml) *libVirtXml.DomainDi
 			PCI: &libVirtXml.DomainAddressPCI{
 				Domain:   &[]uint{0}[0],
 				Bus:      &[]uint{xmlStruct.AddressNumber}[0],
-				Slot:     &[]uint{0}[0],
+				Slot:     &[]uint{xmlStruct.PCISlot}[0],
 				Function: &[]uint{0}[0],
 			},
 		}

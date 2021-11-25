@@ -101,6 +101,7 @@ type Convert struct {
 type GenerateStorageXml struct {
 	Storage       VMStorage
 	Number        uint
+	PCISlot       uint
 	AddressNumber uint
 }
 

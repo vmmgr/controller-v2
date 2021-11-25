@@ -173,7 +173,7 @@ func AdminRestAPI() error {
 			//
 			//VM(v2)
 			//
-			//v2.POST("/vm", vm.AddAdmin)
+			//v2.POST("/vm", vmV2.AddAdmin)
 			v2.DELETE("/vm/:node_id/:uuid", vmV2.DeleteAdmin)
 			//v2.PUT("/vm/:node_id/:uuid", vm.UpdateAdmin)
 			v2.GET("/vm/:node_id/:uuid", vmV2.GetAdmin)

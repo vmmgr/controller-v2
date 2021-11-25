@@ -19,24 +19,6 @@ import (
 	"strconv"
 )
 
-type VMHandler struct {
-	Conn    *libvirt.Connect
-	VM      vm.VirtualMachine
-	Node    core.Node
-	GroupID uint
-	IPID    uint
-}
-
-func NewVMHandler(input VMHandler) *VMHandler {
-	return &VMHandler{
-		Conn:    input.Conn,
-		VM:      input.VM,
-		Node:    input.Node,
-		GroupID: input.GroupID,
-		IPID:    input.IPID,
-	}
-}
-
 // #12 Issue
 
 func AddAdmin(c *gin.Context) {
@@ -76,7 +58,7 @@ func AddAdmin(c *gin.Context) {
 		}
 	} else {
 		// storage
-		var vmBasePath core.Storage = core.Storage{}
+		var vmBasePath = core.Storage{}
 		for _, tmp := range node.Storage {
 			if tmp.ID == input.Template.StorageID {
 				vmBasePath = tmp
